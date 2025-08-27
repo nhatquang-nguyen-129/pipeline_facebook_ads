@@ -50,7 +50,7 @@ from google.cloud import bigquery
 from infrastructure.bigquery.schema import remove_string_accents
 
 # Add internal Facebook module for data handling
-from services.facebook.enrich import (
+from src.enrich import (
     enrich_campaign_fields,
     enrich_ad_fields
 )

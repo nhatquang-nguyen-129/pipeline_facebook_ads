@@ -49,11 +49,11 @@ from google.cloud import bigquery
 import uuid
 
 # Add internal Facebook module for data handling
-from services.facebook.enrich import (
+from src.enrich import (
     enrich_campaign_insights, 
     enrich_ad_insights   
 )
-from services.facebook.fetch import (
+from src.fetch import (
     fetch_account_name,
     fetch_campaign_metadata, 
     fetch_adset_metadata,
@@ -62,7 +62,7 @@ from services.facebook.fetch import (
     fetch_campaign_insights, 
     fetch_ad_insights,
 )
-from services.facebook.schema import ensure_table_schema
+from config.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 

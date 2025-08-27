@@ -59,9 +59,7 @@ from facebook_business.api import FacebookAdsApi
 
 # Add internal Facebook module for data handling
 from services.facebook.auth import init_sdk_session
-from services.facebook.config import get_facebook_dataset
-from services.facebook.config import MAPPING_FACEBOOK_SECRET
-from services.facebook.ingest import (
+from src.ingest import (
     ingest_campaign_metadata,
     ingest_adset_metadata,
     ingest_ad_metadata,
@@ -69,11 +67,11 @@ from services.facebook.ingest import (
     ingest_campaign_insights,
     ingest_ad_insights,
 )
-from services.facebook.staging import (
+from src.staging import (
     staging_campaign_insights,
     staging_ad_insights
 )
-from services.facebook.mart import (
+from src.mart import (
     mart_spend_all,
     mart_campaign_all,
     mart_creative_all,
@@ -118,7 +116,7 @@ def update_campaign_insights(start_date: str, end_date: str):
     except KeyError:
         raise ValueError("❌ [UPDATE] Invalid BRAND/PLATFORM/ACCOUNT in MAPPING_FACEBOOK_SECRET.")
 
-    # 2. Initialize Facebook SDK session once
+    # 1.1.3. Initialize Facebook SDK session onc
     try:
         secret_client = secretmanager.SecretManagerServiceClient()
         DEFAULT_SECRET_ID = f"{COMPANY}_secret_default_facebook_token_access_user"
@@ -130,7 +128,6 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(msg)
             logging.error(msg)
             raise RuntimeError(msg)
-
         FacebookAdsApi.init(access_token=access_token, timeout=180)
         print(f"✅ [AUTH] Successfully initialized Facebook SDK session with timeout 180s.")
         logging.info(f"✅ [AUTH] Successfully initialized Facebook SDK session with timeout 180s.")
@@ -138,6 +135,12 @@ def update_campaign_insights(start_date: str, end_date: str):
         print(f"❌ [AUTH] Failed to initialize Facebook SDK session due to {str(e)}.")
         logging.error(f"❌ [AUTH] Failed to initialize Facebook SDK session due to {str(e)}.")
         raise
+    
+    # 1.1.4. Initialize Google BigQuery session
+    try:
+        client = bigquery.Client(project=PROJECT)
+    except DefaultCredentialsError as e:
+        raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
 
     # 1.1.3. Prepare raw_table_id in BigQuery  
     raw_dataset = get_facebook_dataset("raw")
@@ -149,11 +152,6 @@ def update_campaign_insights(start_date: str, end_date: str):
     updated_months = set()
     updated_campaign_ids = set()
     updated_date = pd.DataFrame(columns=["date", "company", "platform", "department", "account", "row"])
-    init_sdk_session()
-    try:
-        client = bigquery.Client(project=PROJECT)
-    except DefaultCredentialsError as e:
-        raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
         y, m = date.year, date.month

@@ -1,4 +1,3 @@
-#services/facebook/fetch.py
 """
 ==================================================================
 FACEBOOK FETCHING MODULE
@@ -47,8 +46,28 @@ from facebook_business.exceptions import FacebookRequestError
 from google.cloud import secretmanager
 
 # Add internal Facebook module for data handling
-from services.facebook.auth import get_account_id
-from services.facebook.schema import ensure_table_schema
+from config.schema import ensure_table_schema
+
+# Get environment variable for Company
+COMPANY = os.getenv("COMPANY") 
+
+# Get environment variable for Google Cloud Project ID
+PROJECT = os.getenv("PROJECT")
+
+# Get environment variable for Platform
+PLATFORM = os.getenv("PLATFORM")
+
+# Get environmetn variable for Department
+DEPARTMENT = os.getenv("DEPARTMENT")
+
+# Get environment variable for Account
+ACCOUNT = os.getenv("ACCOUNT")
+
+# Get nvironment variable for Layer
+LAYER = os.getenv("LAYER")
+
+# Get environment variable for Mode
+MODE = os.getenv("MODE")
 
 # 1. FETCH FACEBOOK AD ACCOUNT INFOMATION
 
@@ -60,8 +79,16 @@ def fetch_account_name() -> str:
     try:
         # 1.1.1. Get Facebook Ad Account ID from Google Secret Manager
         print("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")
-        logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")        
-        account_id = get_account_id()        
+        logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")    
+        try: 
+            secret_client = secretmanager.SecretManagerServiceClient()
+            name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+            response = secret_client.access_secret_version(request={"name": name})
+            account_id = response.payload.data.decode("utf-8") 
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
 
@@ -115,7 +142,10 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
         # 2.1.3. Get Facebook ad account ad information
         print("🔍 [FETCH] Retrieving Facebook ad account information from Google Secret Manager...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account information from Google Secret Manager...")        
-        account_id = get_account_id()
+        secret_client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": name})
+        account_id = response.payload.data.decode("utf-8")
         account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
         account_name = account_info.get("name", "Unknown")
         print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
@@ -208,7 +238,10 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
         # 2.2.3. Get Facebook ad account ad information
         print("🔍 [FETCH] Retrieving Facebook ad account information...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account information...")        
-        account_id = get_account_id()
+        secret_client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": name})
+        account_id = response.payload.data.decode("utf-8")
         account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
         account_name = account_info.get("name", "Unknown")
         print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
@@ -293,7 +326,10 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
     print("🔍 [FETCH] Retrieving Facebook ad account information...")
     logging.info("🔍 [FETCH] Retrieving Facebook ad account information...")    
     try:
-        account_id = get_account_id()
+        secret_client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": name})
+        account_id = response.payload.data.decode("utf-8")
         account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
         account_name = account_info.get("name", "Unknown")
         print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
@@ -379,7 +415,10 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     # 2.4.3. Get Facebook ad account information
     print(f"🔍 [FETCH] Retrieving Facebook ad account information...")
     logging.info(f"🔍 [FETCH] Retrieving Facebook ad account information...")    
-    account_id = get_account_id()
+    secret_client = secretmanager.SecretManagerServiceClient()
+    name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+    response = secret_client.access_secret_version(request={"name": name})
+    account_id = response.payload.data.decode("utf-8")
     print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id}.")
     logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id}.")
 
@@ -453,7 +492,10 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     try:
         print("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")         
-        account_id = get_account_id()
+        secret_client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": name})
+        account_id = response.payload.data.decode("utf-8")
         account = AdAccount(f"act_{account_id}")     
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
@@ -522,7 +564,10 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     try:
         print("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")   
-        account_id = get_account_id()
+        secret_client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": name})
+        account_id = response.payload.data.decode("utf-8")
         account = AdAccount(f"act_{account_id}")
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
