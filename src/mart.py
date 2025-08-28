@@ -1,4 +1,3 @@
-#services/facebook/mart.py
 """
 ==================================================================
 FACEBOOK MATERIALIZATION MODULE
@@ -33,7 +32,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import bigquery
 
 # Get Google Cloud Project ID environment variable
-PROJECT = os.getenv("GCP_PROJECT_ID")
+PROJECT = os.getenv("PROJECT")
 
 # Get Facebook service environment variable for Brand
 COMPANY = os.getenv("COMPANY") 
@@ -56,12 +55,12 @@ def mart_spend_all() -> None:
 
     # 1.1.1. Prepare full table_id for raw layer in BigQuery  
     try:
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_staging"
-        staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [MART] Using staging table {staging_campaign_insights} to build materialized table for Facebook campaign spending...")
-        logging.info(f"🔍 [MART] Using staging table {staging_campaign_insights} to build materialized table for Facebook campaign spending...")
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_mart"
-        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_spend_all"    
+        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+        staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign spending...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign spending...")
+        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_allocation_spending"    
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
     
@@ -89,7 +88,7 @@ def mart_spend_all() -> None:
                     CAST(date AS DATE) AS ngay,
                     SAFE_CAST(spend AS FLOAT64) AS spend,
                     LOWER(SAFE_CAST(delivery_status AS STRING)) AS delivery_status
-                FROM `{staging_campaign_insights}`
+                FROM `{staging_table_campaign}`
                 WHERE date IS NOT NULL
             )
             SELECT
@@ -128,12 +127,12 @@ def mart_campaign_all() -> None:
 
     # 2.2.1. Prepare full table_id for raw layer in BigQuery
     try:
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_staging"
-        staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [MART] Using staging table {staging_campaign_insights} to build materialized table for Facebook campaign performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_campaign_insights} to build materialized table for Facebook campaign performance...")
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_mart"
-        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_all"
+        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+        staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
+        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
         print(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
         logging.info(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
 
@@ -171,7 +170,7 @@ def mart_campaign_all() -> None:
                     WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
                     ELSE "❓"
                 END AS trang_thai
-            FROM `{staging_table}`
+            FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
         client.query(query).result()
@@ -192,12 +191,12 @@ def mart_creative_all() -> None:
 
     # 3.1.1. Prepare full table_id for raw layer in BigQuery
     try:
-        staging_dataset = get_facebook_dataset("staging")
-        staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_ad_insights"
+        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+        staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
         print(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook creative performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook creative performance...")
-        mart_dataset = get_facebook_dataset("mart")
-        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_creative_all"
+        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
     

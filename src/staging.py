@@ -1,4 +1,3 @@
-#services/facebook/staging.py
 """
 ==================================================================
 FACEBOOK STAGING MODULE
@@ -34,9 +33,6 @@ import pandas as pd
 # Add Python "re" library for expression matching
 import re
 
-# Add internal Google Secret Manager module for configuration
-from infrastructure.secret.config import get_resolved_project
-
 # Add Google Authentication libraries for integration
 from google.auth.exceptions import DefaultCredentialsError
 
@@ -46,15 +42,15 @@ from google.api_core.exceptions import NotFound
 # Add Google CLoud libraries for integration
 from google.cloud import bigquery
 
-# Add internal Google BigQuery module for data handling
-from infrastructure.bigquery.schema import remove_string_accents
-
+# Add internal Facebook module for configuration
+from config.utils import remove_string_accents
+from config.schema import ensure_table_schema
+ 
 # Add internal Facebook module for data handling
 from src.enrich import (
     enrich_campaign_fields,
     enrich_ad_fields
 )
-from services.facebook.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -86,11 +82,11 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
 
     # 1.1.1. Prepare Facebook ingested data to process staging phase
     try: 
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
         print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook campaign insights...")
         logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook campaign insights...")
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_staging"
+        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         print(f"🔍 [INGEST] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
         logging.info(f"🔍 [INGEST] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
@@ -115,7 +111,7 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully found {len(raw_tables)} raw Facebook campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully found {len(raw_tables)} raw Facebook campaign insights table(s).")
 
-    # 1.1.3. Query and join all Facebook campaign insights tables (optimized by month)
+    # 1.1.3. Query, join và enrich tất cả các bảng raw Facebook campaign insights (theo tháng)
         all_dfs = []
         updated_date["date"] = pd.to_datetime(updated_date["date"])
         updated_months = updated_date["date"].dt.to_period("M").unique()
@@ -123,11 +119,14 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
             f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{d.month:02d}{d.year}"
             for d in updated_months.to_timestamp()
         ]
+
         for raw_table, month_period in zip(raw_tables, updated_months):
+            # Lấy danh sách ngày trong tháng này cần xử lý
             month_days = updated_date[updated_date["date"].dt.to_period("M") == month_period]["date"]
             target_days_str = ",".join([f"DATE('{d.strftime('%Y-%m-%d')}')" for d in month_days])
             print(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table} for {len(month_days)} day(s)...")
             logging.info(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table} for {len(month_days)} day(s)...")
+
             query = f"""
                 SELECT
                     raw.*,
@@ -137,38 +136,32 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
                 FROM `{raw_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
                 ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
-                AND CAST(raw.account_id AS STRING) = CAST(metadata.account_id AS STRING)
-                WHERE raw.date IN ({target_days_str})
+                AND CAST(raw.account_id  AS STRING) = CAST(metadata.account_id  AS STRING)
+                WHERE DATE(raw.date) IN ({target_days_str})
             """
             try:
-                df = client.query(query).to_dataframe()
-                if not df.empty:
-                    all_dfs.append(df)
+                df_month = client.query(query).to_dataframe()
+                if not df_month.empty:
+    # 1.1.4. Enrich Facebook staging campaigns insights fields
+                    print(f"🔄 [STAGING] Enriching fields for {len(df_month)} row(s) from {raw_table}...")
+                    logging.info(f"🔄 [STAGING] Enriching fields for {len(df_month)} row(s) from {raw_table}...")
+                    df_month = enrich_campaign_fields(df_month, table_id=raw_table)
+                    if "nhan_su" in df_month.columns:
+                        df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
+                    all_dfs.append(df_month)
             except Exception as e:
-                print(f"❌ [STAGING] Failed to query raw Facebook campaign insights table {raw_table} due to {e}.")
-                logging.warning(f"❌ [STAGING] Failed to query raw Facebook campaign insights table {raw_table} due to {e}.")
+                print(f"❌ [STAGING] Failed to query or enrich {raw_table} due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to query or enrich {raw_table} due to {e}.")
                 continue
+
         if not all_dfs:
             print("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             return
-        df_all = pd.concat(all_dfs, ignore_index=True)
-        print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
-        logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
 
-    # 1.1.4. Enrich Facebook staging campaigns insights fields
-        try:
-            print(f"🔄 [STAGING] Enriching fields for {len(df_all)} row(s) of staging Facebook campaign insights field(s)...")
-            logging.info(f"🔄 [STAGING] Enriching fields for {len(df_all)} row(s) of staging Facebook campaign insights field(s)...")
-            df_all = enrich_campaign_fields(df_all)
-            if "nhan_su" in df_all.columns:
-                df_all["nhan_su"] = df_all["nhan_su"].apply(remove_string_accents)
-            print(f"✅ [STAGING] Successfully enriched {len(df_all)} row(s) of staging Facebook campaign insights.")
-            logging.info(f"✅ [STAGING] Successfully enriched {len(df_all)} row(s) of staging Facebook campaign insights.")  
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to enrich fields for {len(df_all)} row(s) of Facebook campaign insights due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to enrich fields for {len(df_all)} row(s) of Facebook campaign insights due to {e}.")
-            raise          
+        df_all = pd.concat(all_dfs, ignore_index=True)
+        print(f"✅ [STAGING] Successfully combined & enriched {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully combined & enriched {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
 
     # 1.1.5. Enforce schema for Facebook staging campaign insights
         try:
@@ -217,15 +210,17 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
                         type_=bigquery.TimePartitioningType.DAY,
                         field="date"
                     )
+                    if clustering_fields:  
+                        table.clustering_fields = clustering_fields  
                     print(f"🔍 [STAGING] Creating staging table {staging_campaign_insights} with partition on 'date'...")
                     logging.info(f"🔍 [STAGING] Creating staging table {staging_campaign_insights} with partition on 'date'...")
                 table = client.create_table(table)
                 print(f"✅ [STAGING] Successfully created table {staging_campaign_insights}.")
                 logging.info(f"✅ [STAGING] Successfully created table {staging_campaign_insights}.")
             else:
-                new_dates = df_all["date"].dropna().dt.strftime("%Y-%m-%d").unique().tolist()
-                query_existing = f"SELECT DISTINCT date FROM `{staging_campaign_insights}`"
-                existing_dates = [row.date for row in client.query(query_existing).result()]
+                new_dates = df_all["date"].dropna().dt.date.unique().tolist()
+                query_existing = f"SELECT DISTINCT DATE(date) AS d FROM `{staging_campaign_insights}`"
+                existing_dates = [row.d for row in client.query(query_existing).result()]
                 overlap = set(new_dates) & set(existing_dates)
                 if overlap:
                     print(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap}, deleting them before upload...")
@@ -233,10 +228,10 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
                     for date_val in overlap:
                         query = f"""
                             DELETE FROM `{staging_campaign_insights}`
-                            WHERE date = @date_value
+                            WHERE DATE(date) = @date_value
                         """
                         job_config = bigquery.QueryJobConfig(
-                            query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", date_val)]
+                            query_parameters=[bigquery.ScalarQueryParameter("date_value", "DATE", date_val)]
                         )
                         try:
                             result = client.query(query, job_config=job_config).result()

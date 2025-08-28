@@ -1,4 +1,3 @@
-#services/facebook/schema.py
 """
 ===================================================================
 FACEBOOK SCHEMA MODULE

@@ -58,7 +58,6 @@ from google.cloud import secretmanager
 from facebook_business.api import FacebookAdsApi
 
 # Add internal Facebook module for data handling
-from services.facebook.auth import init_sdk_session
 from src.ingest import (
     ingest_campaign_metadata,
     ingest_adset_metadata,
@@ -108,18 +107,10 @@ def update_campaign_insights(start_date: str, end_date: str):
     # 1.1.1. Start timing the update process to measure total execution duration
     start_time = time.time()
 
-    # 1.1.2. Validate environment variables
-    if not all([COMPANY, PLATFORM, DEPARTMENT, ACCOUNT]):
-        raise ValueError("❌ [UPDATE] Missing Facebook Ads BRAND/PLATFORM/ACCOUNT in environment variables.")
-    try:
-        config_account_confirmation = MAPPING_FACEBOOK_SECRET[COMPANY][PLATFORM]["account"][ACCOUNT]
-    except KeyError:
-        raise ValueError("❌ [UPDATE] Invalid BRAND/PLATFORM/ACCOUNT in MAPPING_FACEBOOK_SECRET.")
-
-    # 1.1.3. Initialize Facebook SDK session onc
+    # 1.1.2. Initialize Facebook SDK session
     try:
         secret_client = secretmanager.SecretManagerServiceClient()
-        DEFAULT_SECRET_ID = f"{COMPANY}_secret_default_facebook_token_access_user"
+        DEFAULT_SECRET_ID = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
         name = f"projects/{PROJECT}/secrets/{DEFAULT_SECRET_ID}/versions/latest"
         response = secret_client.access_secret_version(name=name)
         access_token = response.payload.data.decode("utf-8") if response.payload.data else None
@@ -143,7 +134,7 @@ def update_campaign_insights(start_date: str, end_date: str):
         raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
 
     # 1.1.3. Prepare raw_table_id in BigQuery  
-    raw_dataset = get_facebook_dataset("raw")
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     print(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
 
@@ -155,7 +146,7 @@ def update_campaign_insights(start_date: str, end_date: str):
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
         y, m = date.year, date.month
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_campaign_m{m:02d}{y}"
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
         print(f"🔎 [UPDATE] Evaluating {day_str} in Facebook campaign insights table {table_id}...")
         logging.info(f"🔎 [UPDATE] Evaluating {day_str} in Facebook campaign insights table {table_id}...")     
         should_ingest = False
@@ -222,6 +213,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             except Exception as e:
                 print(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
+    
     # 1.1.7. Ingest Facebook campaign metadata from Facebook API to Google BigQuery raw tables
     if updated_campaign_ids:
         print(f"🔄 [UPDATE] Triggering Facebook campaign metadata ingestion for {len(updated_campaign_ids)} campaign_id(s)...")

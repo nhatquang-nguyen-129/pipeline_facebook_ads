@@ -1,4 +1,3 @@
-#services/facebook/ingest.py
 """
 ==================================================================
 FACEBOOK INGESTION MODULE
@@ -115,7 +114,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         return pd.DataFrame()
 
     # 1.1.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) with table_id {table_id}...")
@@ -183,7 +182,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
             logging.info(f"🔄 [INGEST] Facebook campaign metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
             unique_keys = df[["campaign_id", "account_id"]].dropna().drop_duplicates()
             if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_delete_keys_{uuid.uuid4().hex[:8]}"
+                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                 job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                 client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                 join_condition = " AND ".join([
@@ -252,7 +251,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
         return pd.DataFrame()
 
     # 1.2.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook adset metadata for {len(adset_id_list)} adset_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook adset metadata for {len(adset_id_list)} adset_id(s) with table_id {table_id}...")
@@ -320,7 +319,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
             logging.info(f"🔄 [INGEST] Facebook adset metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
             unique_keys = df[["adset_id", "account_id"]].dropna().drop_duplicates()
             if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_delete_keys_{uuid.uuid4().hex[:8]}"
+                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                 job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                 client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                 join_condition = " AND ".join([
@@ -387,7 +386,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         return pd.DataFrame()
 
     # 1.3.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
@@ -455,7 +454,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             logging.info(f"🔄 [INGEST] Facebook ad metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
             unique_keys = df[["ad_id", "account_id"]].dropna().drop_duplicates()
             if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_delete_keys_{uuid.uuid4().hex[:8]}"
+                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                 job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                 client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                 join_condition = " AND ".join([
@@ -524,7 +523,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         return pd.DataFrame()
 
     # 1.4.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
@@ -592,7 +591,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             logging.info(f"🔄 [INGEST] Facebook ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
             unique_keys = df[["ad_id", "account_id"]].dropna().drop_duplicates()
             if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_delete_keys_{uuid.uuid4().hex[:8]}"
+                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
                 job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                 client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
                 join_condition = " AND ".join([
@@ -657,7 +656,7 @@ def ingest_campaign_insights(
     # 2.1.2. Prepare full table_id for raw layer in BigQuery
     first_date = pd.to_datetime(df["date_start"].dropna().iloc[0])
     y, m = first_date.year, first_date.month
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook campaign insights from {start_date} to {end_date} with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook campaign insights from {start_date} to {end_date} with table_id {table_id}...")
@@ -850,7 +849,7 @@ def ingest_ad_insights(
     # 2.2.2. Prepare full table_id for raw layer in BigQuery
     first_date = pd.to_datetime(df["date_start"].dropna().iloc[0])
     y, m = first_date.year, first_date.month
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_ads_insights_api_raw"
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook ad insights from {start_date} to {end_date} with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad insights from {start_date} to {end_date} with table_id {table_id}...")

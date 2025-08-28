@@ -82,15 +82,17 @@ def fetch_account_name() -> str:
         logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")    
         try: 
             secret_client = secretmanager.SecretManagerServiceClient()
-            name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-            response = secret_client.access_secret_version(request={"name": name})
-            account_id = response.payload.data.decode("utf-8") 
+            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+            response = secret_client.access_secret_version(request={"name": secret_name})
+            account_id = response.payload.data.decode("utf-8")
+            account = AdAccount(f"act_{account_id}")
         except Exception as e:
-            print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
-        print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
+            print(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account from Google Secret Manager due to {e}.")
+        print(f"✅ [FETCH] Successfully retrieved information for Facebook ad account ID {account_id}.")
+        logging.info(f"✅ [FETCH] Successfully retrieved information for Facebook ad account ID {account_id}.")
 
         # 1.1.2. Fetch Facebook Ad Account info
         print(f"🔍 [FETCH] Retrieving Facebook ad account name for Facebook ad account id {account_id}...")
@@ -140,16 +142,22 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
     
     try:
         # 2.1.3. Get Facebook ad account ad information
-        print("🔍 [FETCH] Retrieving Facebook ad account information from Google Secret Manager...")
-        logging.info("🔍 [FETCH] Retrieving Facebook ad account information from Google Secret Manager...")        
-        secret_client = secretmanager.SecretManagerServiceClient()
-        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-        response = secret_client.access_secret_version(request={"name": name})
-        account_id = response.payload.data.decode("utf-8")
-        account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
-        account_name = account_info.get("name", "Unknown")
-        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
+        print(f"🔍 [FETCH] Retrieving Facebook ad account information for {ACCOUNT} from Google Secret Manager...")
+        logging.info(f"🔍 [FETCH] Retrieving Facebook ad account information for {ACCOUNT} from Google Secret Manager...")        
+        try:
+            secret_client = secretmanager.SecretManagerServiceClient()
+            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+            response = secret_client.access_secret_version(request={"name": secret_name})
+            account_id = response.payload.data.decode("utf-8")
+            account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
+            account_name = account_info.get("name", "Unknown")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
+        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
+        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
 
         # 2.1.4. Loop through all campaign IDs to fetch metadata for each campaign
         print(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} Facebook campaign_id(s).")
@@ -164,9 +172,8 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
                 record["account_name"] = account_name
                 all_records.append(record)
             except FacebookRequestError as fb_err:
-                msg = fb_err.api_error_message()
-                print(f"⚠️ [FETCH] Facebook API error while fetching campaign_id {campaign_id} due to {msg}.")
-                logging.warning(f"⚠️ [FETCH] Facebook API error while fetching campaign_id {campaign_id} due to {msg}.")
+                print(f"⚠️ [FETCH] Facebook API error while fetching campaign_id {campaign_id} due to {fb_err.api_error_message}.")
+                logging.warning(f"⚠️ [FETCH] Facebook API error while fetching campaign_id {campaign_id} due to {fb_err.api_error_message}..")
             except Exception as e:
                 print(f"❌ [FETCH] Failed to fetch Facebook metadata for campaign_id {campaign_id} due to {e}.")
                 logging.error(f"❌ [FETCH] Failed to fetch Facebook metadata for campaign_id {campaign_id} due to {e}.")
@@ -238,14 +245,20 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
         # 2.2.3. Get Facebook ad account ad information
         print("🔍 [FETCH] Retrieving Facebook ad account information...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account information...")        
-        secret_client = secretmanager.SecretManagerServiceClient()
-        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-        response = secret_client.access_secret_version(request={"name": name})
-        account_id = response.payload.data.decode("utf-8")
-        account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
-        account_name = account_info.get("name", "Unknown")
-        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
+        try: 
+            secret_client = secretmanager.SecretManagerServiceClient()
+            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+            response = secret_client.access_secret_version(request={"name": secret_name})
+            account_id = response.payload.data.decode("utf-8")
+            account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
+            account_name = account_info.get("name", "Unknown")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager: {e}")
+        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
+        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
 
         # 2.2.4. Loop through all adset IDs to fetch metadata for each adset
         print(f"🔍 [FETCH] Retrieving metadata for {len(adset_id_list)} Facebook adset(s)...")
@@ -260,9 +273,8 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
                 record["account_name"] = account_name
                 all_records.append(record)
             except FacebookRequestError as fb_err:
-                msg = fb_err.api_error_message()
-                print(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {msg}.")
-                logging.warning(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {msg}.")
+                print(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {fb_err.api_error_message}.")
+                logging.warning(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {fb_err.api_error_message}.")
             except Exception as e:
                 print(f"❌ [FETCH] Failed to fetch Facebook adset {adset_id} due to {e}.")
                 logging.error(f"❌ [FETCH] Failed to fetch Facebook adset {adset_id} due to {e}.")
@@ -327,13 +339,14 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
     logging.info("🔍 [FETCH] Retrieving Facebook ad account information...")    
     try:
         secret_client = secretmanager.SecretManagerServiceClient()
-        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-        response = secret_client.access_secret_version(request={"name": name})
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+        secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": secret_name})
         account_id = response.payload.data.decode("utf-8")
         account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
         account_name = account_info.get("name", "Unknown")
-        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name}.")
+        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
+        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
     except Exception as e:
         print(f"❌ [FETCH] Failed to retrieve Facebook ad account information due to {e}.")
         logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information due to {e}.")
@@ -359,9 +372,8 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
                 all_records.append(record)
                 break
             except FacebookRequestError as fb_err:
-                msg = fb_err.api_error_message()
-                print(f"⚠️ [FETCH] API error while fetching Facebook ad metdata for ad_id {ad_id} due to {msg}.")
-                logging.warning(f"⚠️ [FETCH] API error while fetching Facebook ad metdata for ad_id {ad_id} due to {msg}.")
+                print(f"⚠️ [FETCH] API error while fetching Facebook ad metdata for ad_id {ad_id} due to {fb_err.api_error_message}.")
+                logging.warning(f"⚠️ [FETCH] API error while fetching Facebook ad metdata for ad_id {ad_id} due to {fb_err.api_error_message}.")
             except Exception as e:
                 print(f"❌ [FETCH] Failed to fetch Facebook ad metadata for ad_id {ad_id} due to {e}.")
                 logging.error(f"❌ [FETCH] Failed to fetch Facebook ad metadata for ad_id {ad_id} due to {e}.")
@@ -415,12 +427,19 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     # 2.4.3. Get Facebook ad account information
     print(f"🔍 [FETCH] Retrieving Facebook ad account information...")
     logging.info(f"🔍 [FETCH] Retrieving Facebook ad account information...")    
-    secret_client = secretmanager.SecretManagerServiceClient()
-    name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-    response = secret_client.access_secret_version(request={"name": name})
-    account_id = response.payload.data.decode("utf-8")
-    print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id}.")
-    logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id}.")
+    try:
+        secret_client = secretmanager.SecretManagerServiceClient()
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+        secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": secret_name})
+        account_id = response.payload.data.decode("utf-8")
+        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
+        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
+    except Exception as e:
+        print(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
+        logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
+    print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
+    logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
 
     # 2.4.4. Loop through all ad_ids to fetch Facebook ad creative
     print(f"🔍 [FETCH] Retrieving Facebook ad creatives (thumbnail only) for {len(ad_id_list)} ad_id(s)...")
@@ -444,9 +463,8 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
                 })
                 break
             except FacebookRequestError as fb_err:
-                msg = fb_err.api_error_message()
-                print(f"⚠️ [FETCH] API error while fetching Facebook creative on ad_id {ad_id} due to {msg}.")
-                logging.warning(f"⚠️ [FETCH] API error while fetching Facebook creative on ad_id {ad_id} due to {msg}.")
+                print(f"⚠️ [FETCH] API error while fetching Facebook creative on ad_id {ad_id} due to {fb_err.api_error_message}.")
+                logging.warning(f"⚠️ [FETCH] API error while fetching Facebook creative on ad_id {ad_id} due to {fb_err.api_error_message}.")
             except Exception as e:
                 print(f"❌ [FETCH] Failed to fetch Facebook creative on ad_id {ad_id} due to {e}.")
                 logging.error(f"❌ [FETCH] Failed to fetch Facebook creative on ad_id {ad_id} due to {e}.")
@@ -493,8 +511,9 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")         
         secret_client = secretmanager.SecretManagerServiceClient()
-        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-        response = secret_client.access_secret_version(request={"name": name})
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+        secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+        response = secret_client.access_secret_version(request={"name": secret_name})
         account_id = response.payload.data.decode("utf-8")
         account = AdAccount(f"act_{account_id}")     
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
@@ -564,13 +583,18 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     try:
         print("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")
         logging.info("🔍 [FETCH] Retrieving Facebook ad account ID from Google Secret Manager...")   
-        secret_client = secretmanager.SecretManagerServiceClient()
-        name = f"projects/{PROJECT}/secrets/{ACCOUNT}/versions/latest"
-        response = secret_client.access_secret_version(request={"name": name})
-        account_id = response.payload.data.decode("utf-8")
-        account = AdAccount(f"act_{account_id}")
-        print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
+        try:
+            secret_client = secretmanager.SecretManagerServiceClient()
+            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+            response = secret_client.access_secret_version(request={"name": secret_name})
+            account_id = response.payload.data.decode("utf-8")
+            account = AdAccount(f"act_{account_id}")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
+        print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id} for {ACCOUNT} account.")
+        logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id} for {ACCOUNT} account.")
 
     # 3.2.2. Define Facebook ad parameters and fields
         params = {

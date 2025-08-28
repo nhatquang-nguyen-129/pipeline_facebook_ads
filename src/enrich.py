@@ -273,13 +273,17 @@ def enrich_campaign_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
         logging.info("🔄 [ENRICH] Enriching staging Facebook campaigns fields...")       
     
     # 2.2.1. Enrich ad-level field(s) from raw table_id
-        match = re.search(r"table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_", table_id)
+        match = re.search(
+            r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign_m\d{6}$",
+            table_id
+        )
+
         if match:
             df["platform"] = match.group("platform")
             df["department"] = match.group("department")
-            df["account_id"] = match.group("account")    
+            df["account_id"] = match.group("account")
         
-    # 2.2.3. Enrich ad-level field(s) from campaign_name column
+    # 2.2.3. Enrich campaign-level field(s) from campaign_name column
         df["hinh_thuc"] = df["campaign_name"].str.split("_").str[0]
         df["khu_vuc"] = df["campaign_name"].str.split("_").str[1]
         df["ma_ngan_sach_cap_1"] = df["campaign_name"].str.split("_").str[2]
@@ -307,11 +311,11 @@ def enrich_ad_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
         logging.info("🔄 [ENRICH] Enriching staging Facebook campaigns fields...")     
 
     # 2.2.1. Enrich ad-level field(s) from raw table_id
-        match = re.search(r"table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_", table_id)
+        match = re.search(r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign", table_id)
         if match:
             df["platform"] = match.group("platform")
             df["department"] = match.group("department")
-            df["account_id"] = match.group("account")
+            df["account_id"] = match.group("account")   
 
     # 2.2.2. Enrich ad-level field(s) from adset_name column
         if "adset_name" in df.columns:
