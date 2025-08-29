@@ -24,15 +24,14 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add time utilities for retry delay and datetime handling
-import time 
-from datetime import datetime
-
 # Add logging capability for tracking process execution and errors
 import logging
 
 # Add Python Pandas library for data processing
 import pandas as pd
+
+# Add time utilities for retry delay and datetime handling
+import time
 
 # Add Facebook SDK components for accessing objects
 from facebook_business.adobjects.adaccount import AdAccount
@@ -119,13 +118,13 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
     print(f"🚀 [FETCH] Starting to fetch Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
 
-    # 2.1.1. Validate input for Facebook campaign metadata selective fetching
+    # 2.1.1. Validate input
     if not campaign_id_list:
         print("⚠️ [FETCH] Empty Facebook campaign_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook campaign_id_list provided.")
         return pd.DataFrame()
 
-    # 2.1.2. Prepare fields for Facebook campaign metadata selective fetching  
+    # 2.1.2. Prepare fields
     default_fields = [
         "id", 
         "name", 
@@ -159,7 +158,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
         print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
 
-        # 2.1.4. Loop through all campaign IDs to fetch metadata for each campaign
+        # 2.1.4. Loop through all campaign_id(s)
         print(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} Facebook campaign_id(s).")
         logging.info(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} Facebook campaign_id(s).")        
         for campaign_id in campaign_id_list:
@@ -178,7 +177,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
                 print(f"❌ [FETCH] Failed to fetch Facebook metadata for campaign_id {campaign_id} due to {e}.")
                 logging.error(f"❌ [FETCH] Failed to fetch Facebook metadata for campaign_id {campaign_id} due to {e}.")
 
-        # 2.1.5. Convert Facebook campaign metadata to DataFrame
+        # 2.1.5. Convert to dataframe
         print(f"🔄 [FETCH] Converting metadata for {len(campaign_id_list)} Facebook campaign_id(s) to dataframe...")
         logging.info(f"🔄 [FETCH] Converting metadata for {len(campaign_id_list)} Facebook campaign_id(s) to dataframe...")   
         if not all_records:
@@ -222,13 +221,13 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
     print(f"🚀 [FETCH] Starting to fetch Facebook {len(adset_id_list)} adset metadata(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook {len(adset_id_list)} adset metadata(s)...")
 
-    # 2.2.1. Validate input for Facebook adset metadata selective fetching
+    # 2.2.1. Validate input
     if not adset_id_list:
         print("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
         return pd.DataFrame()
 
-    # 2.2.2. Prepare fields for Facebook adset metadata selective fetching
+    # 2.2.2. Prepare field(s)
     default_fields = [
         "id",
         "name",
@@ -260,7 +259,7 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
         print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
 
-        # 2.2.4. Loop through all adset IDs to fetch metadata for each adset
+        # 2.2.4. Loop through all adset_id(s)
         print(f"🔍 [FETCH] Retrieving metadata for {len(adset_id_list)} Facebook adset(s)...")
         logging.info(f"🔍 [FETCH] Retrieving metadata for {len(adset_id_list)} Facebook adset(s)...")
         for adset_id in adset_id_list:
@@ -283,7 +282,7 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
             logging.warning("⚠️ [FETCH] No Facebook adset metadata fetched.")
             return pd.DataFrame()
 
-        # 2.2.5. Convert Facebook adset metadata to DataFrame
+        # 2.2.5. Convert to dataframe
         print(f"🔄 [FETCH] Converting metadata for {len(adset_id_list)} Facebook adset(s) to DataFrame...")
         logging.info(f"🔄 [FETCH] Converting metadata for {len(adset_id_list)} Facebook adset(s) to DataFrame...")  
         try:     
@@ -295,7 +294,7 @@ def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> 
             logging.error(f"❌ [FETCH] Faled to convert Facebook adset metadata due to {e}.")
             return pd.DataFrame()
 
-        # 2.2.6. Enforce Facebook adset metadata schema
+        # 2.2.6. Enforce schema
         print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")
         logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")        
         df = ensure_table_schema(df, "fetch_adset_metadata")        
@@ -312,17 +311,17 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
     print("🚀 [FETCH] Starting to fetch Facebook ad metadata...")
     logging.info("🚀 [FETCH] Starting to fetch Facebook ad metadata...")
 
-    # 2.3.1. Validate input for Facebook ad metadata selective fetching
+    # 2.3.1. Validate input
     if not ad_id_list:
         print("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         return pd.DataFrame()
 
-    # 2.3.2. Implement retry logic with maximum retry time limit
+    # 2.3.2. Implement retry logic
     MAX_RETRIES = 3
     SLEEP_BETWEEN_RETRIES = 2
 
-    # 2.3.3. Prepare fields for Facebook adset metadata selective fetching
+    # 2.3.3. Prepare field(s)
     default_fields = ["id",
                       "name",
                       "adset_id",
@@ -352,7 +351,7 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
         logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information due to {e}.")
         return pd.DataFrame()
 
-    # 2.3.5. Loop through all ad_ids to fetch Facebook ad metadata
+    # 2.3.5. Loop through all ad_id(s)
     print(f"🔍 [FETCH] Retrieving metadata for {len(ad_id_list)} Facebook ad(s)...")
     logging.info(f"🔍 [FETCH] Retrieving metadata for {len(ad_id_list)} Facebook ad(s)...")
     for ad_id in ad_id_list:
@@ -383,7 +382,7 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
         logging.warning("⚠️ [FETCH] No Facebook ad metadata fetched.")
         return pd.DataFrame()
 
-    # 2.3.6. Convert Facebook ad metadata to DataFrame
+    # 2.3.6. Convert to dataframe
     print(f"🔄 [FETCH] Converting metadata for {len(ad_id_list)} Facebook adset(s) to DataFrame...")
     logging.info(f"🔄 [FETCH] Converting metadata for {len(ad_id_list)} Facebook adset(s) to DataFrame...")  
     try:
@@ -395,7 +394,7 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
         logging.error(f"❌ [FETCH] Failed to convert Facebook ad metadata to DataFrame due to {e}.")
         return pd.DataFrame()
 
-    # 2.3.7. Enforce Facebook ad metdata schema
+    # 2.3.7. Enforce schema
     print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook ad metadata...")
     logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook ad metadata...")
     try:
@@ -408,12 +407,12 @@ def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.Dat
         return pd.DataFrame()
     return df
 
-# 2.4. Fetch thumbnail URL of the creative linked to the given ad ID
+# 2.4. Fetch thumbnail URL of the creative linked to the given ad_id
 def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     print("🚀 [FETCH] Starting to fetch Facebook ad creatives (thumbnail only)...")
     logging.info("🚀 [FETCH] Starting to fetch Facebook ad creatives (thumbnail only)...")
     
-    # 2.4.1. Validate input for Facebook creative metadata selective fetching
+    # 2.4.1. Validate input
     if not ad_id_list:
         print("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
@@ -441,7 +440,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
     logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
 
-    # 2.4.4. Loop through all ad_ids to fetch Facebook ad creative
+    # 2.4.4. Loop through all ad_ids
     print(f"🔍 [FETCH] Retrieving Facebook ad creatives (thumbnail only) for {len(ad_id_list)} ad_id(s)...")
     logging.info(f"🔍 [FETCH] Retrieving Facebook ad creatives (thumbnail only) for {len(ad_id_list)} ad_id(s)...")    
     for ad_id in ad_id_list:
@@ -474,7 +473,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         logging.warning("⚠️ [FETCH] No Facebook creative metadata fetched.")
         return pd.DataFrame()
     
-    # 2.4.5. Convert Facebook ad creative to DataFrame
+    # 2.4.5. Convert to dataframe
     print(f"🔄 [FETCH] Converting creative for {len(ad_id_list)} Facebook ad_id(s) to DataFrame...")
     logging.info(f"🔄 [FETCH] Converting creative for {len(ad_id_list)} Facebook ad_id(s) to DataFrame...")  
     try:
@@ -486,7 +485,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         logging.error(f"❌ [FETCH] Failed to convert Facebook ad creative to DataFrame due to {e}.")
         return pd.DataFrame()
 
-    # 2.4.6. Enforce Facebook ad creative
+    # 2.4.6. Enforce schema
     try:
         print(f"🔄 [FETCH] Enforcing schema for Facebook ad creative with {len(df)} row(s)...")
         logging.info(f"🔄 [FETCH] Enforcing schema for Facebook ad creative with {len(df)} row(s)...")
@@ -499,7 +498,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         return pd.DataFrame()
     return df
 
-# 3. FETCH INSIGHTS FOR FACEBOOK ADS (ID, NAME, STATUS) FOR FACT TABLE
+# 3. FETCH INSIGHTS FOR FACT TABLE(S)
 
 # 3.1. Fetch campaign-level insights from Facebook Marketing API between two dates
 def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
@@ -519,7 +518,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id}.")
 
-        # 3.1.2. Define Facebook campaign parameters and fields
+        # 3.1.2. Define parameter(s) and field(s)
         params = {
             "level": "campaign",
             "time_increment": 1,
@@ -535,7 +534,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"🔍 [FETCH] Preparing Facebook API request with {fields} field(s).")
         logging.info(f"🔍 [FETCH] Preparing Facebook API request with {fields} field(s).")
 
-        # 3.1.3. Making Facebook API call with retry logic
+        # 3.1.3. Make Facebook API call
         for attempt in range(2):
             try:
                 print(f"🔍 [FETCH] Fetching Facebook campaign insights for account_id {account_id} from {start_date} to {end_date} with {attempt + 1} attempt(s).")
@@ -596,7 +595,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id} for {ACCOUNT} account.")
         logging.info(f"✅ [FETCH] Successfully retrieved Facebook ad account ID {account_id} for {ACCOUNT} account.")
 
-    # 3.2.2. Define Facebook ad parameters and fields
+    # 3.2.2. Define parameter(s) and field(s)
         params = {
             "level": "ad",
             "time_increment": 1,
@@ -612,7 +611,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         print(f"🔍 [FETCH] Preparing Facebook API request with {fields} field(s).")
         logging.info(f"🔍 [FETCH] Preparing Facebook API request with {fields} field(s).")
 
-        # 3.2.3. Making Facebook API call with retry logic
+        # 3.2.3. Make Facebook API call
         for attempt in range(2):
             try:
                 print(f"🔍 [FETCH] Fetching Facebook ad insights for account_id {account_id} from {start_date} to {end_date} for {attempt + 1} attempt(s).")
@@ -627,7 +626,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 print(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for Facebook ad insights from {start_date} to {end_date}.")
                 logging.info(f"✅ [FETCH] Successfully retrieved {len(df)} row(s) for Facebook ad insights from {start_date} to {end_date}.")
         
-        # 3.2.4. Enforce schema for Facebook ad insights
+        # 3.2.4. Enforce schema
                 print(f"🔄 [FETCH] Enforcing schema for Facebook ad insights from {start_date} to {end_date}...")
                 logging.info(f"🔄 [FETCH] Enforcing schema for Facebook ad insights from {start_date} to {end_date}...")                
                 df = ensure_table_schema(df, "fetch_ad_insights")                

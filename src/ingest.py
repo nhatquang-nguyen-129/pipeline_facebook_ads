@@ -22,17 +22,19 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add datetime utilities for managing timestamps and timezone conversions
+# Add datetime utilities for integration
 from datetime import datetime
+
+# Add timezone ultilities for integration
 import pytz
 
-# Add JSON support for debugging action list structure and testing data
+# Add JSON ultilities for integration
 import json 
 
-# Add logging capability for tracking process execution and errors
+# Add logging ultilities forintegration
 import logging
 
-# Add Python Pandas libraries for data processing
+# Add Python Pandas libraries for integration
 import pandas as pd
 
 # Add Google Authentication libraries for integration
@@ -44,10 +46,10 @@ from google.api_core.exceptions import NotFound
 # Add Google CLoud libraries for integration
 from google.cloud import bigquery
 
-# Add UUID module to generate unique identifiers for ingest operations or error tracking
+# Add UUID libraries for integration
 import uuid
 
-# Add internal Facebook module for data handling
+# Add internal Facebook module for handling
 from src.enrich import (
     enrich_campaign_insights, 
     enrich_ad_insights   
@@ -91,13 +93,13 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     print("🚀 [INGEST] Starting to ingest Facebook campaign metadata...")
     logging.info("🚀 [INGEST] Starting Facebook campaign metadata...")
 
-    # 1.1.1. Validate input list is not empty
+    # 1.1.1. Validate input
     if not campaign_id_list:
         print("⚠️ [INGEST] Empty Facebook campaign_id_list provided then ingestion is suspended.")
         logging.warning("⚠️ [INGEST] Empty Facebook campaign_id_list provided then ingestion is suspended.")
         raise ValueError("❌ [INGEST] Facebook campaign_id_list must be provided and not empty.")
 
-    # 1.1.2. Call Facebook API to fetch campaign metadata
+    # 1.1.2. Call Facebook API
     try:
         print(f"🔍 [INGEST] Fetching Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
         logging.info(f"🔍 [INGEST] Fetching Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
@@ -113,13 +115,13 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to fetch Facebook campaign metadata due to {e}.")
         return pd.DataFrame()
 
-    # 1.1.3. Prepare full table_id for raw layer in BigQuery
+    # 1.1.3. Prepare table_id
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) with table_id {table_id}...")
 
-    # 1.1.4. Enforce schema for Facebook campaign metadata
+    # 1.1.4. Enforce schema
     try:
         print(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")
         logging.info(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")
@@ -228,13 +230,13 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
     print("🚀 [INGEST] Starting to ingest Facebook adset metadata...")
     logging.info("🚀 [INGEST] Starting Facebook adset metadata...")
 
-    # 1.2.1. Validate input for Facebook adset metadata selective fetching
+    # 1.2.1. Validate input
     if not adset_id_list:
         print("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
         raise ValueError("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
 
-    # 1.2.2. Call Facebook API to fetch adset metadata
+    # 1.2.2. Call Facebook API
     try:
         print(f"🔍 [INGEST] Fetching Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
         logging.info(f"🔍 [INGEST] Fetching Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
@@ -365,13 +367,13 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
     print("🚀 [INGEST] Starting to ingest Facebook ad metadata...")
     logging.info("🚀 [INGEST] Starting Facebook ad metadata...")
 
-    # 1.3.1. Validate input for Facebook ad metadata selective fetching
+    # 1.3.1. Validate input
     if not ad_id_list:
         print("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         raise ValueError("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
 
-    # 1.3.2. Call Facebook API to fetch ad metadata
+    # 1.3.2. Call Facebook API
     try:
         print(f"🔍 [INGEST] Fetching Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
         logging.info(f"🔍 [INGEST] Fetching Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
@@ -481,7 +483,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed during Facebook ad metadata ingestion due to {e}.")
         raise
 
-    # 1.3.6. Upload Facebook ad metadata to Google BigQuery raw table
+    # 1.3.6. Upload to Google BigQuery
     try:
         print(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad metadata to {table_id}...")
         logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad metadata to {table_id}...")
@@ -506,7 +508,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
         raise ValueError("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
   
-    # 1.4.2. Call Facebook API to fetch adset metadata
+    # 1.4.2. Call Facebook API
     try:
         print(f"🔍 [INGEST] Fetching Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
         logging.info(f"🔍 [INGEST] Fetching Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
@@ -528,7 +530,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
 
-    # 1.4.4 Enforce schema for Facebook ad creative
+    # 1.4.4 Enforce schema
     try:
         print(f"🔍 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad creative...")
         logging.info(f"🔍 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad creative...")
@@ -618,7 +620,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed during Facebook ad creative ingestion due to {e}.")
         raise
 
-    # 1.4.6. Upload Facebook ad creative to Google BigQuery raw table
+    # 1.4.6. Upload to Google BigQuery
     try:
         print(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad creative to {table_id}...")
         logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad creative to {table_id}...")
@@ -653,7 +655,7 @@ def ingest_campaign_insights(
         logging.warning("⚠️ [INGEST] Empty Facebook campaign insights returned.")    
         return df
 
-    # 2.1.2. Prepare full table_id for raw layer in BigQuery
+    # 2.1.2. Prepare table_id
     first_date = pd.to_datetime(df["date_start"].dropna().iloc[0])
     y, m = first_date.year, first_date.month
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -910,8 +912,6 @@ def ingest_ad_insights(
         print(f"🔁 [INGEST] Parsing Facebook ad insights {df.columns.tolist()} date column(s)...")
         logging.info(f"🔁 [INGEST] Parsing Facebook ad insights {df.columns.tolist()} date column(s)...")
         df["date"] = pd.to_datetime(df["date_start"])
-        df["year"] = df["date"].dt.year
-        df["month"] = df["date"].dt.month
         df["date_start"] = df["date"].dt.strftime("%Y-%m-%d")
         print(f"✅ [INGEST] Successfully parsed {df.columns.tolist()} date column(s) for Facebook ad insights.")
         logging.info(f"✅ [INGEST] Successfully parsed {df.columns.tolist()} date column(s) for Facebook ad insights.")

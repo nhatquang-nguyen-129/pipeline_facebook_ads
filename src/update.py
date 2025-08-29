@@ -1,4 +1,3 @@
-#services/facebook/update.py
 """
 ==================================================================
 FACEBOOK UPDATE MODULE
@@ -104,7 +103,7 @@ def update_campaign_insights(start_date: str, end_date: str):
     print(f"🚀 [UPDATE] Starting Facebook campaign insights update from {start_date} to {end_date}...")
     logging.info(f"🚀 [UPDATE] Starting Facebook Ads campaign insights update from {start_date} to {end_date}...")
 
-    # 1.1.1. Start timing the update process to measure total execution duration
+    # 1.1.1. Start timing the update process
     start_time = time.time()
 
     # 1.1.2. Initialize Facebook SDK session
@@ -115,25 +114,33 @@ def update_campaign_insights(start_date: str, end_date: str):
         response = secret_client.access_secret_version(name=name)
         access_token = response.payload.data.decode("utf-8") if response.payload.data else None
         if not access_token:
-            msg = f"❌ [AUTH] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}."
-            print(msg)
-            logging.error(msg)
-            raise RuntimeError(msg)
+            print(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+            logging.error(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+            raise RuntimeError(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+        print(f"🔍 [UPDATE] Initializing Facebook SDK session...")
+        logging.info(f"🔍 [UPDATE] Initializing Facebook SDK session...")
         FacebookAdsApi.init(access_token=access_token, timeout=180)
-        print(f"✅ [AUTH] Successfully initialized Facebook SDK session with timeout 180s.")
-        logging.info(f"✅ [AUTH] Successfully initialized Facebook SDK session with timeout 180s.")
+        print("✅ [UPDATE] Successfully initialized Facebook SDK session.")
+        logging.info("✅ [UPDATE] Successfully initialized Facebook SDK session.")
     except Exception as e:
-        print(f"❌ [AUTH] Failed to initialize Facebook SDK session due to {str(e)}.")
-        logging.error(f"❌ [AUTH] Failed to initialize Facebook SDK session due to {str(e)}.")
+        print(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
+        logging.error(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
         raise
     
-    # 1.1.4. Initialize Google BigQuery session
+    # 1.1.3. Initialize Google BigQuery session
     try:
+        print(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
+        logging.info(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
         client = bigquery.Client(project=PROJECT)
+        print(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
+        logging.info(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
     except DefaultCredentialsError as e:
-        raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+        raise RuntimeError(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to credentials error.") from e
+    except Exception as e:
+        print(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
+        logging.error(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
 
-    # 1.1.3. Prepare raw_table_id in BigQuery  
+    # 1.1.4. Prepare raw_table_id in BigQuery  
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     print(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
@@ -278,38 +285,59 @@ def update_campaign_insights(start_date: str, end_date: str):
 # 1.2. Update Facebook ad insights data for a given date range
 def update_ad_insights(start_date: str, end_date: str):
     print(f"🚀 [UPDATE] Starting Facebook ad insights update from {start_date} to {end_date}...")
-    logging.info(f"🚀 [UPDATE] Starting Facebook ad insights update from {start_date} to {end_date}...")
+    logging.info(f"🚀 [UPDATE] Starting Facebook Ads ad insights update from {start_date} to {end_date}...")
 
-    # 1.2.1. Start timing the update process to measure total execution duration
+    # 1.2.1. Start timing the update process
     start_time = time.time()
 
-    # 1.2.3. Validate environment variables
-    if not all([COMPANY, PLATFORM, ACCOUNT]):
-        raise ValueError("❌ [UPDATE] Missing Facebook Ads COMPANY/PLATFORM/ACCOUNT in environment variables.")
-
+    # 1.2.2. Initialize Facebook SDK session
     try:
-        config_account_confirmation = MAPPING_FACEBOOK_SECRET[COMPANY][PLATFORM]["account"][ACCOUNT]
-    except KeyError:
-        raise ValueError("❌ [UPDATE] Invalid Facebook Ads COMPANY/PLATFORM/ACCOUNT in MAPPING_FACEBOOK_SECRET")
+        secret_client = secretmanager.SecretManagerServiceClient()
+        DEFAULT_SECRET_ID = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
+        name = f"projects/{PROJECT}/secrets/{DEFAULT_SECRET_ID}/versions/latest"
+        response = secret_client.access_secret_version(name=name)
+        access_token = response.payload.data.decode("utf-8") if response.payload.data else None
+        if not access_token:
+            print(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+            logging.error(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+            raise RuntimeError(f"❌ [UPDATE] Failed to retrieve Facebook access token from Secret Manager secret_id {DEFAULT_SECRET_ID}.")
+        print(f"🔍 [UPDATE] Initializing Facebook SDK session...")
+        logging.info(f"🔍 [UPDATE] Initializing Facebook SDK session...")
+        FacebookAdsApi.init(access_token=access_token, timeout=180)
+        print("✅ [UPDATE] Successfully initialized Facebook SDK session.")
+        logging.info("✅ [UPDATE] Successfully initialized Facebook SDK session.")
+    except Exception as e:
+        print(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
+        logging.error(f"❌ [UPDATE] Failed to initialize Facebook SDK session due to {str(e)}.")
+        raise
 
-    # 1.2.3. Prepare raw_table_id in BigQuery  
-    raw_dataset = get_facebook_dataset("raw")
-    print(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
-    logging.info(f"🔍 [UPDATE] Proceeding to update Facebook campaign insights from {start_date} to {end_date}...")
+    # 1.2.3. Initialize Google BigQuery session
+    try:
+        print(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
+        logging.info(f"🔍 [UPDATE] Initializing Google BigQuery client for project {PROJECT}...")
+        client = bigquery.Client(project=PROJECT)
+        print(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
+        logging.info(f"✅ [UPDATE] Successfully initialized Google BigQuery client for {PROJECT}.")
+    except DefaultCredentialsError as e:
+        raise RuntimeError(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to credentials error.") from e
+    except Exception as e:
+        print(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
+        logging.error(f"❌ [UPDATE] Failed to initialize Google BigQuery client due to {str(e)}.")
 
-    # 1.2.4. Iterate over input date range to verify data freshness
+    # 1.2.4. Prepare raw_table_id in BigQuery  
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    print(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
+    logging.info(f"🔍 [UPDATE] Proceeding to update Facebook ad insights from {start_date} to {end_date}...")
+
+    # 1.2.5. Iterate over input date range to verify data freshness
     date_range = pd.date_range(start=start_date, end=end_date)
     updated_months = set()
     updated_ad_ids = set()
-    init_sdk_session()
-    try:
-        client = bigquery.Client(project=PROJECT)
-    except DefaultCredentialsError as e:
-        raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+    updated_date = pd.DataFrame(columns=["date", "company", "platform", "department", "account", "row"])
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
         y, m = date.year, date.month
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_ad_m{m:02d}{y}"
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
         print(f"🔎 [UPDATE] Evaluating {day_str} in Facebook ad insights table {table_id}...")
         logging.info(f"🔎 [UPDATE] Evaluating {day_str} in Facebook ad insights table {table_id}...")      
         should_ingest = False
@@ -349,7 +377,7 @@ def update_ad_insights(start_date: str, end_date: str):
                 logging.error(f"❌ [UPDATE] Failed to verify Facebook ad insights data freshness for {day_str} due to {e}.")
                 should_ingest = True
 
-        # 1.2.5. Ingest Facebook ad insights from Facebook API to Google BigQuery raw tables
+        # 1.2.6. Ingest Facebook ad insights from Facebook API to Google BigQuery raw tables
         if should_ingest:
             try:
                 print(f"🔄 [UPDATE] Triggering Facebook ad insights ingestion for {day_str}...")
@@ -364,15 +392,23 @@ def update_ad_insights(start_date: str, end_date: str):
                     updated_ad_ids.update(df["ad_id"].dropna().unique())
                 print(f"✅ [UPDATE] Successfully ingested Facebook ad insights with {len(df)} row(s) for day {day_str}.")
                 logging.info(f"✅ [UPDATE] Successfully ingested Facebook ad insights with {len(df)} row(s) for day {day_str}.")
+                ingested_record = pd.DataFrame([{
+                    "date": day_str,
+                    "company": COMPANY,
+                    "platform": PLATFORM,
+                    "department": DEPARTMENT,
+                    "account": ACCOUNT,
+                    "row": len(df)
+                }])
+                updated_date = pd.concat([updated_date, ingested_record], ignore_index=True)
             except Exception as e:
                 print(f"❌ [UPDATE] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
 
-    # 1.2.6. Ingest Facebook ad metadata from Facebook API to Google BigQuery raw tables
+    # 1.2.7. Ingest Facebook ad metadata from Facebook API to Google BigQuery raw tables
     if updated_ad_ids:
         print(f"🔄 [UPDATE] Triggering Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
         logging.info(f"🔄 [UPDATE] Triggering Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
-
         try:
             ingest_ad_metadata(ad_id_list=list(updated_ad_ids))
             print(f"✅ [UPDATE] Successfully ingested Facebook ad metadata for {len(updated_ad_ids)} ad_id(s).")
@@ -381,13 +417,13 @@ def update_ad_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to ingest Facebook ad metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
-    # 1.2.7. Ingest Facebook adset metadata from Facebook API to Google BigQuery raw tables
+        # 1.2.8. Ingest Facebook adset metadata
         try:
             print(f"🔄 [UPDATE] Triggering Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
             logging.info(f"🔄 [UPDATE] Triggering Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
-            raw_dataset = get_facebook_dataset("raw")
+            raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
             tables = client.list_tables(dataset=raw_dataset)
-            pattern = rf"^{COMPANY}_table_{PLATFORM}_ad_m\d{{2}}\d{{4}}$"
+            pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
             ad_tables = [
                 f"{PROJECT}.{raw_dataset}.{table.table_id}"
                 for table in tables if re.match(pattern, table.table_id)
@@ -413,7 +449,7 @@ def update_ad_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to ingest Facebook adset metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to ingest Facebook adset metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
-    # 1.2.8. Ingest Facebook ad creative from Facebook API to Google BigQuery raw tables
+        # 1.2.9. Ingest Facebook ad creative
         print(f"🔄 [UPDATE] Triggering Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s)...")
         logging.info(f"🔄 [UPDATE] Triggering Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s)...")
         try:
@@ -424,15 +460,15 @@ def update_ad_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s) due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s) due to {e}.")
     else:
-        print("⚠️ [UPDATE] No updated ad_id(s) for Facebook campaign metadata then ingestion is skipped.")
-        logging.info("⚠️ [UPDATE] No updated ad_id(s) for Facebook campaign metadata then ingestion is skipped.")
+        print("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
+        logging.warning("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
 
-    # 1.2.9. Rebuild Facebook ad insights staging table
+    # 1.2.10. Rebuild Facebook ad insights staging table
     if updated_months:
         print("🔄 [UPDATE] Triggering to rebuild staging table for Facebook ad insights...")
         logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook ad insights...")
         try:
-            staging_ad_insights()
+            staging_ad_insights(updated_date=updated_date)
             print("✅ [UPDATE] Successfully rebuilt staging table for Facebook ad insights.")
             logging.info("✅ [UPDATE] Successfully rebuilt staging table for Facebook ad insights.")
         except Exception as e:
@@ -440,23 +476,28 @@ def update_ad_insights(start_date: str, end_date: str):
             logging.error(f"❌ [UPDATE] Failed to rebuild staging table for Facebook ad insights due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
-        logging.info("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
+        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
 
-    # 1.2.10. Rebuild Facebook materialized table for creative performance
+    # 1.2.11. Rebuild Facebook materialized table for creative performance
+    if updated_months:
         print("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook creative performance...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook creative performance...")
-    try:
-        mart_creative_all()
-        print("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
-        logging.info("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
-    except Exception as e:
-        print(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
-        logging.error(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
+        try:
+            mart_creative_all()
+            print("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
+            logging.info("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
+        except Exception as e:
+            print(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
+    else:
+        print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
+        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
 
-    # 1.2.11. Measure the total execution time of Facebook ad insights update process
+    # 1.2.12. Measure the total execution time of Facebook ad insights update process
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
+
 
 import argparse
 if __name__ == "__main__":
@@ -465,4 +506,4 @@ if __name__ == "__main__":
     parser.add_argument("--end_date", type=str, required=True, help="End date in YYYY-MM-DD format")
     args = parser.parse_args()
 
-    update_campaign_insights(start_date=args.start_date, end_date=args.end_date)
+    update_ad_insights(start_date=args.start_date, end_date=args.end_date)

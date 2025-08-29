@@ -190,9 +190,8 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "noi_dung": str,
             "thang": str,
             "nen_tang": str,
-            "platform": str,
-            "department": str,
-            "account": str,
+            "phong_ban": str,
+            "tai_khoan": str,
             "date": "datetime64[ns, UTC]"
         },
         "staging_ad_insights": {
@@ -221,6 +220,8 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             "dinh_dang": str,
             "adset_name_invalid": bool,
             "nen_tang": str,
+            "phong_ban": str,
+            "tai_khoan": str,
             "thumbnail_url": str,
             "result": int,
             "result_type": str,

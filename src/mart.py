@@ -31,20 +31,26 @@ from google.auth.exceptions import DefaultCredentialsError
 # Add Google CLoud libraries for integration
 from google.cloud import bigquery
 
-# Get Google Cloud Project ID environment variable
-PROJECT = os.getenv("PROJECT")
-
-# Get Facebook service environment variable for Brand
+# Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
 
-# Get Facebook service environment variable for Platform
+# Get environment variable for Google Cloud Project ID
+PROJECT = os.getenv("PROJECT")
+
+# Get environment variable for Platform
 PLATFORM = os.getenv("PLATFORM")
 
-# Get Facebook service environment variable for Account
+# Get environmetn variable for Department
+DEPARTMENT = os.getenv("DEPARTMENT")
+
+# Get environment variable for Account
 ACCOUNT = os.getenv("ACCOUNT")
 
-# Get Facebook service environment variable for Account
+# Get nvironment variable for Layer
 LAYER = os.getenv("LAYER")
+
+# Get environment variable for Mode
+MODE = os.getenv("MODE")
 
 # 1. TRANSFORM FACEBOOK ADS STAGING DATA INTO MONTHLY MATERIALIZED TABLE FOR SPENDING
 
