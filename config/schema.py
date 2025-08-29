@@ -17,18 +17,18 @@ data inconsistency between raw → staging → mart layers.
 It only provides schema utilities to support other pipeline components.
 ===================================================================
 """
-# Add logging capability for tracking process execution and errors
+# Add external logging libraries for integration
 import logging
 
-# Add Python Pandas library for data processing
+# Add external Python Pandas libraries for integration
 import pandas as pd
 
-# Add Python NumPy library for numerical computing and array operations
+# Add external Python NumPy libraries for integration
 import numpy as np
 
-# 1. PROCESS SCHEMA FOR GIVEN PYTHON DATAFRAME
+# 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
-# 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes for the specified schema type
+# 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
 def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
     
     # 1.1.1. Define schema mapping for Facebook data type
@@ -238,10 +238,10 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
     if schema_type not in mapping_facebook_schema:
         raise ValueError(f"❌ Unknown schema_type: {schema_type}")
 
-    # 1.1.3. Retrieve the expected schema definition for the given type
+    # 1.1.3. Retrieve the expected schema definition
     expected_columns = mapping_facebook_schema[schema_type]
     
-    # 1.1.4. Iterate through each expected column and enforce schema rules
+    # 1.1.4. Iterate through each expected column
     for col, dtype in expected_columns.items():
         if col not in df.columns:
             df[col] = pd.NA
@@ -254,7 +254,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
                 )
                 df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(dtype)
 
-    # 1.1.6. Handle datetime type by forcing UTC
+    # 1.1.6. Handle datetime type
             elif dtype == "datetime64[ns, UTC]":
                 df[col] = pd.to_datetime(df[col], errors="coerce")
                 if df[col].dt.tz is None:
@@ -266,7 +266,7 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
             else:
                 df[col] = df[col].astype(dtype, errors="ignore")
     
-    # 1.1.8. Reorder columns to match schema definition
+    # 1.1.8. Reorder columns
         except Exception as e:
             print(f"⚠️ [SCHEMA] Column '{col}' cannot be coerced to {dtype} due to {e}.")
             logging.warning(f"⚠️ [SCHEMA] Column '{col}' cannot be coerced to {dtype} due to {e}.")

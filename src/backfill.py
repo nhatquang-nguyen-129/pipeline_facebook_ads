@@ -24,22 +24,19 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))  
 
-# Add utilities for logging and time management
-from time import time
-
-# Add utilities for logging and error tracking
+# Add external logging libraries for integration
 import logging
 
-# Add external Python Pandas libraries for data processing
+# Add external Python Pandas libraries for integration
 import pandas as pd
 
-# Add Google Authentication libraries for integration
+# Add external Google Authentication libraries for integration
 from google.auth.exceptions import DefaultCredentialsError
 
-# Add external Google Cloud SDK libraries for cloud computation
+# Add external Google Cloud SDK libraries for integration
 from google.cloud.exceptions import NotFound
 
-# Add Google Cloud libraries for integration
+# Add external Google Cloud libraries for integration
 from google.cloud import bigquery
 
 # Add internal Facebook module for handling
@@ -85,22 +82,20 @@ ACCOUNT = os.getenv("ACCOUNT")
 
 # 1.1. Backfill historical Facebook campaign insights for a given date range
 def backfill_campaign_insights(start_date: str, end_date: str):
-    print(f"🚀 [BACKFILL] Starting backfill for Facebook campaign insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [BACKFILL] Starting backfill for Facebook campaign insights from {start_date} to {end_date}...")
+    print(f"🚀 [BACKFILL] Starting Facebook campaign insights backfill from {start_date} to {end_date}...")
+    logging.info(f"🚀 [BACKFILL] Starting Facebook campaign insights backfill from {start_date} to {end_date}...")
 
-    # 1. Tạo date_range
+    # 1.1.1. Validate date range
     date_range = pd.date_range(start=start_date, end=end_date)
     missing_dates = []
 
-    # 2. Check trong BQ xem ngày nào đã có dữ liệu
+    # 1.1.2. Iterate over input date range to verify data existence
     client = bigquery.Client(project=PROJECT)
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
         y, m = date.year, date.month
         table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{m:02d}{y}"
-
         query = f"""
             SELECT COUNT(1) as cnt
             FROM `{table_id}`
@@ -109,7 +104,6 @@ def backfill_campaign_insights(start_date: str, end_date: str):
         job_config = bigquery.QueryJobConfig(
             query_parameters=[bigquery.ScalarQueryParameter("day_str", "STRING", day_str)]
         )
-
         try:
             result = list(client.query(query, job_config=job_config).result())
             count = result[0]["cnt"] if result else 0

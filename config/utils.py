@@ -24,15 +24,15 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add Python Pandas library for data processing
+# Add external Python Pandas libraries for integration
 import pandas as pd
 
-# Add Python "re" library for expression matching
+# Add external Python "re" libraries for integration
 import re
 
 # 1. STRING PROCESSING ULTILITIES
 
-# 1.1. Remove accents from unicode strings
+# 1.1. Remove accents from unicode string(s)
 def remove_string_accents(text: str) -> str:
     if not isinstance(text, str):
         return text
