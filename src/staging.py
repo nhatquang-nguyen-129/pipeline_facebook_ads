@@ -73,14 +73,14 @@ LAYER = os.getenv("LAYER")
 # Get environment variable for Mode
 MODE = os.getenv("MODE")
 
-# 1. TRANSFORM FACEBOOK ADS RAW DATA INTO CLEANED STAGING TABLES FOR MODELING AND ANALYSIS
+# 1. TRANSFORM FACEBOOK ADS RAW DATA INTO CLEANED STAGING TABLES
 
 # 1.1. Transform Facebook Ads campaign-level insights from raw tables into cleaned staging tables
 def staging_campaign_insights(updated_date: pd.DataFrame):
     print("🚀 [STAGING] Starting unified staging process for Facebook campaign insights...")
     logging.info("🚀 [STAGING] Starting unified staging process for Facebook campaign insights...")
 
-    # 1.1.1. Prepare Facebook ingested data to process staging phase
+    # 1.1.1. Prepare table_id
     try: 
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
@@ -88,10 +88,10 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
         logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook campaign insights...")
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [INGEST] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
-        logging.info(f"🔍 [INGEST] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
+        print(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
+        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
 
-    # 1.1.2. Scan all Facebook raw campaign insights tables which match naming convetion
+    # 1.1.2. Scan all Facebook raw campaign insights table(s)
         print("🔍 [STAGING] Scanning all raw Facebook campaign insights table(s)...")
         logging.info("🔍 [STAGING] Scanning all raw Facebook campaign insights table(s)...")
         try:
@@ -111,7 +111,7 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully found {len(raw_tables)} raw Facebook campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully found {len(raw_tables)} raw Facebook campaign insights table(s).")
 
-    # 1.1.3. Query, join và enrich tất cả các bảng raw Facebook campaign insights (theo tháng)
+    # 1.1.3. Query raw table(s)
         all_dfs = []
         updated_date["date"] = pd.to_datetime(updated_date["date"])
         updated_months = updated_date["date"].dt.to_period("M").unique()
@@ -119,14 +119,11 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
             f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m{d.month:02d}{d.year}"
             for d in updated_months.to_timestamp()
         ]
-
         for raw_table, month_period in zip(raw_tables, updated_months):
-            # Lấy danh sách ngày trong tháng này cần xử lý
             month_days = updated_date[updated_date["date"].dt.to_period("M") == month_period]["date"]
             target_days_str = ",".join([f"DATE('{d.strftime('%Y-%m-%d')}')" for d in month_days])
             print(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table} for {len(month_days)} day(s)...")
             logging.info(f"🔄 [STAGING] Querying raw Facebook campaign insights table {raw_table} for {len(month_days)} day(s)...")
-
             query = f"""
                 SELECT
                     raw.*,
@@ -135,44 +132,48 @@ def staging_campaign_insights(updated_date: pd.DataFrame):
                     metadata.effective_status AS delivery_status
                 FROM `{raw_table}` AS raw
                 LEFT JOIN `{raw_campaign_metadata}` AS metadata
-                ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
-                AND CAST(raw.account_id  AS STRING) = CAST(metadata.account_id  AS STRING)
+                    ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
+                    AND CAST(raw.account_id  AS STRING) = CAST(metadata.account_id  AS STRING)
                 WHERE DATE(raw.date) IN ({target_days_str})
             """
             try:
                 df_month = client.query(query).to_dataframe()
-                if not df_month.empty:
-    # 1.1.4. Enrich Facebook staging campaigns insights fields
-                    print(f"🔄 [STAGING] Enriching fields for {len(df_month)} row(s) from {raw_table}...")
-                    logging.info(f"🔄 [STAGING] Enriching fields for {len(df_month)} row(s) from {raw_table}...")
+                print(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of Facebook campaign insights from {raw_table}.")
+                logging.info(f"✅ [STAGING] Successfully queried {len(df_month)} row(s) of Facebook campaign insights from {raw_table}.")
+            except Exception as e:
+                print(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
+                continue
+
+    # 1.1.4. Enrich Facebook campaign insights
+            if not df_month.empty:
+                try:
+                    print(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
+                    logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
                     df_month = enrich_campaign_fields(df_month, table_id=raw_table)
                     if "nhan_su" in df_month.columns:
                         df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
                     all_dfs.append(df_month)
-            except Exception as e:
-                print(f"❌ [STAGING] Failed to query or enrich {raw_table} due to {e}.")
-                logging.warning(f"❌ [STAGING] Failed to query or enrich {raw_table} due to {e}.")
-                continue
-
+                except Exception as e:
+                    print(f"❌ [STAGING] Failed to trigger enrichment for Facebook campaign insights due to {e}.")
+                    logging.warning(f"❌ [STAGING] Failed to trigger enrichment for Facebook campaign insights due to {e}.")
+                    continue
         if not all_dfs:
             print("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             return
-
         df_all = pd.concat(all_dfs, ignore_index=True)
-        print(f"✅ [STAGING] Successfully combined & enriched {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
-        logging.info(f"✅ [STAGING] Successfully combined & enriched {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
+        print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
+        logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
 
     # 1.1.5. Enforce schema for Facebook staging campaign insights
         try:
-            print(f"🔄 [STAGING] Enforcing schema for {len(df_all)} row(s) of staging Facebook campaign insights...")
-            logging.info(f"🔄 [STAGING] Enforcing schema for {len(df_all)} row(s) of staging Facebook campaign insights...")
+            print(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook campaign insights...")
+            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook campaign insights...")
             df_all = ensure_table_schema(df_all, "staging_campaign_insights")
-            print(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook campaign insights.")
-            logging.info(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook campaign insights.")
         except Exception as e:
-            print(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
+            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
+            logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook campaign insights due to {e}.")
             raise   
 
     # 1.1.6. Upload Facebook staging campaign insights to Google BigQuery
@@ -283,8 +284,8 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_ad_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
 
-        print(f"🔍 [INGEST] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
-        logging.info(f"🔍 [INGEST] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
+        print(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
+        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
 
     except Exception as e:
         print(f"❌ [STAGING] Failed to prepare metadata for Facebook ad insights due to {e}.")
@@ -385,8 +386,8 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook ad insights.")
         logging.info(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook ad insights.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
+        print(f"❌ [STAGING]] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
+        logging.error(f"❌ [STAGING] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
         raise
 
     # 1.2.5. Enforce schema for Facebook staging ad insights
@@ -397,8 +398,8 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook ad insights.")
         logging.info(f"✅ [STAGING] Successfully enforced {len(df_all)} row(s) of staging Facebook ad insights.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
+        print(f"❌ [STAGING] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
+        logging.error(f"❌ [STAGING] Failed to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
         raise
 
     # 1.2.6. Upload Facebook staging ad insights to Google BigQuery raw table
@@ -421,5 +422,5 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}.")
         logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to upload Facebook staging ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to upload Facebook staging ad insights due to {e}.")
+        print(f"❌ [STAGING] Failed to upload Facebook staging ad insights due to {e}.")
+        logging.error(f"❌ [STAGING] Failed to upload Facebook staging ad insights due to {e}.")

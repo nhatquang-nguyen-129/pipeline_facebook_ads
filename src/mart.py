@@ -52,14 +52,14 @@ LAYER = os.getenv("LAYER")
 # Get environment variable for Mode
 MODE = os.getenv("MODE")
 
-# 1. TRANSFORM FACEBOOK ADS STAGING DATA INTO MONTHLY MATERIALIZED TABLE FOR SPENDING
+# 1. BUILD MONTHLY MATERIALIZED TABLE FOR SPENDING FROM STAGING TABLE(S)
 
 # 1.1. Build materialized table for Facebook campaign spending by union all staging tables
 def mart_spend_all() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook campaign spending...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook campaign spending...")
 
-    # 1.1.1. Prepare full table_id for raw layer in BigQuery  
+    # 1.1.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -70,7 +70,7 @@ def mart_spend_all() -> None:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
     
-    # 1.1.2. Query all staging tables to build materialized table for Facebook campaign spending
+    # 1.1.2. Query all staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
@@ -124,14 +124,14 @@ def mart_spend_all() -> None:
         print(f"❌ [MART] Failed to build materialized table for Facebook campaign spending due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook campaign spending due to {e}.")
 
-# 2. TRANSFORM FACEBOOK ADS STAGING DATA INTO MONTHLY MATERIALIZED TABLE FOR CAMPAIGN PERFORMANCE
+# 2. BUILD MONTHLY MATERIALIZED TABLE FOR CAMPAIGN PERFORMANCE FROM STAGING TABLE(S)
 
 # 2.1. Build materialzed table for Facebook campaign performance by union all staging tables
 def mart_campaign_all() -> None:
     print(f"🚀 [MART] Starting to build materialized table for Facebook campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook campaign performance...")
 
-    # 2.2.1. Prepare full table_id for raw layer in BigQuery
+    # 2.2.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -142,7 +142,7 @@ def mart_campaign_all() -> None:
         print(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
         logging.info(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
 
-    # 2.2.2. Query all staging tables to build materialized table for Facebook campaign performance
+    # 2.2.2. Query all staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
@@ -188,14 +188,14 @@ def mart_campaign_all() -> None:
         print(f"❌ [MART] Failed to build materialized table for Facebook campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook campaign performance due to {e}.")
 
-# 3. TRANSFORM FACEBOOK ADS STAGING DATA INTO MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE
+# 3. MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
 
 # 3.1. Build materialized table for Facebook creative performance by union all staging tables
 def mart_creative_all() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance...")
 
-    # 3.1.1. Prepare full table_id for raw layer in BigQuery
+    # 3.1.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
@@ -206,7 +206,7 @@ def mart_creative_all() -> None:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
     
-    # 3.1.2. Query all staging tables to build materialized table for Facebook creative
+    # 3.1.2. Query all staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:

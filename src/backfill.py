@@ -66,18 +66,6 @@ LAYER = os.getenv("LAYER")
 # Get environment variable for Mode
 MODE = os.getenv("MODE")
 
-# Get Google Cloud Project ID environment variable
-PROJECT = os.getenv("GCP_PROJECT_ID")
-
-# Get Facebook service environment variable for Brand
-COMPANY = os.getenv("COMPANY") 
-
-# Get Facebook service environment variable for Platform
-PLATFORM = os.getenv("PLATFORM")
-
-# Get Facebook service environment variable for Account
-ACCOUNT = os.getenv("ACCOUNT")
-
 # 1. BACKFILL FACEBOOK ADS DATA FOR A GIVEN DATE RANGE
 
 # 1.1. Backfill historical Facebook campaign insights for a given date range
@@ -140,33 +128,39 @@ def backfill_campaign_insights(start_date: str, end_date: str):
                 print(f"🔄 [BACKFILL] Triggering Facebook campaign insights update for {d}...")
                 logging.info(f"🔄 [BACKFILL] Triggering Facebook campaign insights update for {d}...")
                 update_campaign_insights(d, d)
-                print(f"✅ [BACKFILL] Successfully updated Facebook campaign insights for {d}.")
-                logging.info(f"✅ [BACKFILL] Successfully updated Facebook campaign insights for {d}.")
             except Exception as e:
-                print(f"❌ [BACKFILL] Failed to backfill Facebook campaign insights for {d} due to {e}.")
-                logging.error(f"❌ [BACKFILL] Failed to backfill Facebook campaign insights for {d} due to {e}.")
+                print(f"❌ [BACKFILL] Failed to trigger Facebook campaign insights update for {d} due to {e}.")
+                logging.error(f"❌ [BACKFILL] Failed to trigger Facebook campaign insights update for {d} due to {e}.")
     else:
         print(f"✅ [BACKFILL] No missing dates detected for Facebook campaign insights from {start_date} to {end_date} then backfill is skipped.")
         logging.info(f"✅ [BACKFILL] No missing dates detected for Facebook campaign insights from {start_date} to {end_date} then backfill is skipped.")
 
 # 1.2. Backfill historical Facebook ad insights for a given date range
 def backfill_ad_insights(start_date: str, end_date: str):
-    print(f"🚀 [BACKFILL] Starting backfill for Facebook ad insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [BACKFILL] Starting backfill for Facebook ad insights from {start_date} to {end_date}...")
+    print(f"🚀 [BACKFILL] Starting Facebook ad insights backfill from {start_date} to {end_date}...")
+    logging.info(f"🚀 [BACKFILL] Starting Facebook ad insights backfill from {start_date} to {end_date}...")
 
-    # 1. Tạo date_range
+    # 1.2.1. Validate date range
     date_range = pd.date_range(start=start_date, end=end_date)
     missing_dates = []
 
-    # 2. Check trong BQ xem ngày nào đã có dữ liệu
-    client = bigquery.Client(project=PROJECT)
+    # 1.2.2. Iterate over input date range to verify data existence
+    try:
+        print(f"🔍 [BACKFILL]] Initializing Google BigQuery client for project {PROJECT}...")
+        logging.info(f"🔍 [BACKFILL]] Initializing Google BigQuery client for project {PROJECT}..")
+        client = bigquery.Client(project=PROJECT)
+        print(f"✅ [BACKFILL] Successfully initialized Google BigQuery client for {PROJECT}.")
+        logging.info(f"✅ [BACKFILL] Successfully initialized Google BigQuery client for {PROJECT}.")
+    except DefaultCredentialsError as e:
+        raise RuntimeError(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to credentials error.") from e
+    except Exception as e:
+        print(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to {str(e)}.")
+        logging.error(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to {str(e)}.")
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
         y, m = date.year, date.month
         table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
-
         query = f"""
             SELECT COUNT(1) as cnt
             FROM `{table_id}`
@@ -175,54 +169,44 @@ def backfill_ad_insights(start_date: str, end_date: str):
         job_config = bigquery.QueryJobConfig(
             query_parameters=[bigquery.ScalarQueryParameter("day_str", "STRING", day_str)]
         )
-
         try:
             result = list(client.query(query, job_config=job_config).result())
             count = result[0]["cnt"] if result else 0
             if count == 0:
-                print(f"⚠️ [BACKFILL] Missing data for {day_str} in {table_id}, will ingest...")
-                logging.warning(f"⚠️ [BACKFILL] Missing data for {day_str} in {table_id}, will ingest...")
+                print(f"⚠️ [BACKFILL] Facebook ad insights for {day_str} not found in table {table_id} then ingestion will be proceeding...")
+                logging.warning(f"⚠️ [BACKFILL] Facebook ad insights for {day_str} not found in table {table_id} then ingestion will be proceeding...")
                 missing_dates.append(day_str)
             else:
-                print(f"✅ [BACKFILL] Data for {day_str} already exists in {table_id}, skip.")
-                logging.info(f"✅ [BACKFILL] Data for {day_str} already exists in {table_id}, skip.")
+                print(f"✅ [BACKFILL] Facebook ad insights for {day_str} already exists in {table_id} then ingestion is skipped.")
+                logging.info(f"✅ [BACKFILL] Facebook ad insights for {day_str} already exists in {table_id} then ingestion is skipped.")
         except NotFound:
-            print(f"⚠️ [BACKFILL] Table {table_id} not found, ingesting {day_str}...")
-            logging.warning(f"⚠️ [BACKFILL] Table {table_id} not found, ingesting {day_str}...")
+            print(f"⚠️ [BACKFILL] Facebook ad insights table {table_id} not found then ingestion for {day_str} will be proceeding...")
+            logging.warning(f"⚠️ [BACKFILL] Facebook ad insights table {table_id} not found then ingestion for {day_str} will be proceeding...")
             missing_dates.append(day_str)
         except Exception as e:
-            print(f"❌ [BACKFILL] Failed to check table {table_id} for {day_str} due to {e}, will force ingest...")
-            logging.error(f"❌ [BACKFILL] Failed to check table {table_id} for {day_str} due to {e}, will force ingest...")
+            print(f"❌ [BACKFILL] Failed to verify Facebook ad insights table {table_id} existence for {day_str} due to {e} then forced ingestion will be proceeding...")
+            logging.error(f"❌ [BACKFILL] Failed to verify Facebook ad insights table {table_id} existence for {day_str} due to {e} then forced ingestion will be proceeding...")
             missing_dates.append(day_str)
 
-    # 3. Ingest bù những ngày thiếu
+    # 1.2.3. Ingest Facebook campaign insights for missing date(s)
     if missing_dates:
         for d in missing_dates:
             try:
-                update_ad_insights(d, d)  # dùng lại hàm update 1 ngày
+                print(f"🔄 [BACKFILL] Triggering Facebook ad insights update for {d}...")
+                logging.info(f"🔄 [BACKFILL] Triggering Facebook ad insights update for {d}...")
+                update_ad_insights(d, d)
             except Exception as e:
-                print(f"❌ [BACKFILL] Failed to backfill {d} due to {e}.")
-                logging.error(f"❌ [BACKFILL] Failed to backfill {d} due to {e}.")
+                print(f"❌ [BACKFILL] Failed to trigger Facebook ad insights update for {d} due to {e}.")
+                logging.error(f"❌ [BACKFILL] Failed to trigger Facebook ad insights update for {d} due to {e}.")
     else:
-        print("✅ [BACKFILL] No missing dates detected, nothing to backfill.")
-        logging.info("✅ [BACKFILL] No missing dates detected, nothing to backfill.")
+        print(f"✅ [BACKFILL] No missing dates detected for Facebook ad insights from {start_date} to {end_date} then backfill is skipped.")
+        logging.info(f"✅ [BACKFILL] No missing dates detected for Facebook ad insights from {start_date} to {end_date} then backfill is skipped.")
 
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
     parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
-
     args = parser.parse_args()
 
-    # Validate ENV
-    brand = os.environ.get("BRAND")
-    platform = os.environ.get("PLATFORM")
-    account_key = os.environ.get("ACCOUNT_KEY")
-
-    if not all([brand, platform, account_key]):
-        raise EnvironmentError("❌ Please set BRAND, PLATFORM, and ACCOUNT_KEY environment variables.")
-
-    # Run backfill
     backfill_campaign_insights(start_date=args.start_date, end_date=args.end_date)

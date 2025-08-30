@@ -101,18 +101,16 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
 
     # 1.1.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Fetching Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Fetching Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
+        print(f"🔍 [INGEST] Triggering to fetch Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
+        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook campaign metadata for {len(campaign_id_list)} campaign_id(s) from API...")
         df = fetch_campaign_metadata(campaign_id_list=campaign_id_list)
-        print(f"✅ [INGEST] Successfully fetching {len(df)} rows(s) of Facebook campaign metadata.")
-        logging.info(f"✅ [INGEST] Successfully fetching {len(df)} row(s) of Facebook campaign metadata.")
         if df.empty:
             print("⚠️ [INGEST] Empty Facebook campaign metadata returned.")
             logging.warning("⚠️ [INGEST] Empty Facebook campaign metadata returned.")
             return pd.DataFrame()
     except Exception as e:
-        print(f"❌ [INGEST] Failed to fetch Facebook campaign metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to fetch Facebook campaign metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger Facebook campaign metadata fetch due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger Facebook campaign metadata fetch due to {e}.")
         return pd.DataFrame()
 
     # 1.1.3. Prepare table_id
@@ -123,20 +121,18 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
 
     # 1.1.4. Enforce schema
     try:
-        print(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")
-        logging.info(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")
+        print(f"🔄 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook campaign metadata...")
+        logging.info(f"🔄 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook campaign metadata...")
         df = ensure_table_schema(df, "ingest_campaign_metadata")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook campaign metadata.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook campaign metadata.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook campaign metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook campaign metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook campaign metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook campaign metadata due to {e}.")
         return df
     
     # 1.1.5. Delete existing row(s) or create new table if it not exist
     try:
-        print(f"🔍 [INGEST] Checking Facebok campaign metadata table {table_id} existence...")
-        logging.info(f"🔍 [INGEST] Checking Facebok campaign metadata table {table_id} existence...")
+        print(f"🔍 [INGEST] Checking Facebook campaign metadata table {table_id} existence...")
+        logging.info(f"🔍 [INGEST] Checking Facebook campaign metadata table {table_id} existence...")
         df = df.drop_duplicates()
         try:
             client = bigquery.Client(project=PROJECT)
@@ -238,18 +234,16 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
 
     # 1.2.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Fetching Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Fetching Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
+        print(f"🔍 [INGEST] Triggering to fetch Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
+        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
         df = fetch_adset_metadata(adset_id_list=adset_id_list)
-        print(f"✅ [INGEST] Successfully fetching {len(df)} rows(s) of Facebook adset metadata.")
-        logging.info(f"✅ [INGEST] Successfully fetching {len(df)} rows(s) of Facebook adset metadata.")
         if df.empty:
             print("⚠️ [INGEST] Empty Facebook adset metadata returned.")
             logging.warning("⚠️ [INGEST] Empty Facebook adset metadata returned.")
             return pd.DataFrame()
     except Exception as e:
-        print(f"❌ [INGEST] Failed to fetch Facebook adset metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to fetch Facebook adset metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger Facebook adset metadata fetch due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger Facebook adset metadata fetch due to {e}.")
         return pd.DataFrame()
 
     # 1.2.3. Prepare full table_id for raw layer in BigQuery
@@ -260,14 +254,12 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
 
     # 1.2.4. Enforce schema for Facebook adset metadata
     try:
-        print(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")
+        print(f"🔄 [INGEST] Trigger to enforce schema for {len(df)} row(s) of Facebook adset metadata...")
         logging.info(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")
         df = ensure_table_schema(df, "ingest_adset_metadata")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook adset metadata.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook adset metadata.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook adset metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook adset metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook adset metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook adset metadata due to {e}.")
         return df
 
     # 1.2.5. Delete existing row(s) or create new table if it not exist
@@ -375,16 +367,16 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
 
     # 1.3.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Fetching Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Fetching Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
+        print(f"🔍 [INGEST] Trigger to fetch Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
+        logging.info(f"🔍 [INGEST] Trigger to fetch Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
         df = fetch_ad_metadata(ad_id_list=ad_id_list)
         if df.empty:
             print("⚠️ [INGEST] Empty Facebook ad metadata returned.")
             logging.warning("⚠️ [INGEST] Empty Facebook ad metadata returned.")
             return pd.DataFrame()
     except Exception as e:
-        print(f"❌ [INGEST] Failed to fetch Facebook ad metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to fetch Facebook ad metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger Facebook ad metadata fetch due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger Facebook ad metadata fetch due to {e}.")
         return pd.DataFrame()
 
     # 1.3.3. Prepare full table_id for raw layer in BigQuery
@@ -395,14 +387,12 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
 
     # 1.3.4. Enforce schema for Facebook ad metadata
     try:
-        print(f"🔄 [INGEST] Enforcing schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
-        logging.info(f"🔄 [INGEST] Enforcing schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
+        print(f"🔄 [INGEST] Trigger to enforce schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
+        logging.info(f"🔄 [INGEST] Trigger to enforce schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
         df = ensure_table_schema(df, "ingest_ad_metadata")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad metadata.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad metadata.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook ad metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook ad metadata due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad metadata due to {e}.")
         return df
 
     # 1.3.5. Delete existing row(s) or create new table if it not exist
@@ -510,18 +500,16 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
   
     # 1.4.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Fetching Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Fetching Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
+        print(f"🔍 [INGEST] Triggering to fetch Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
+        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
         df = fetch_ad_creative(ad_id_list)
-        print(f"✅ [INGEST] Successfully fetching {len(df)} rows(s) of Facebook creative metadata.")
-        logging.info(f"✅ [INGEST] Successfully fetching {len(df)} rows(s) of Facebook creative metadata.")
         if df.empty:
             print("⚠️ [INGEST] No Facebook ad creative returned.")
             logging.warning("⚠️ [INGEST] No Facebook ad creative returned.")
             return pd.DataFrame()
     except Exception as e:
-        print(f"❌ [INGEST] Failed to fetch Facebook ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to fetch Facebook ad creative due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger Facebook ad creative fetch due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger Facebook ad creative fetch due to {e}.")
         return pd.DataFrame()
 
     # 1.4.3. Prepare full table_id for raw layer in BigQuery
@@ -532,14 +520,12 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
 
     # 1.4.4 Enforce schema
     try:
-        print(f"🔍 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad creative...")
-        logging.info(f"🔍 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad creative...")
+        print(f"🔍 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad creative...")
+        logging.info(f"🔍 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad creative...")
         df = ensure_table_schema(df, schema_type="ingest_ad_creative")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad creative.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad creative.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook ad creative due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad creative due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad creative due to {e}.")
         return df
 
     # 1.4.5. Delete existing row(s) or create new table if it not exist
@@ -647,8 +633,8 @@ def ingest_campaign_insights(
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook campaign insights from {start_date} to {end_date}...")
 
     # 2.1.1. Call Facebook API to fetch campaign insights
-    print("🔍 [INGEST] Fetching Facebook campaigns insights from API...")
-    logging.info("🔍 [INGEST] Fetching Facebook campaigns insights from API...")
+    print("🔍 [INGEST] Triggering to fetch Facebook campaigns insights from API...")
+    logging.info("🔍 [INGEST] Triggering to fetch Facebook campaigns insights from API...")
     df = fetch_campaign_insights(start_date, end_date)    
     if df.empty:
         print("⚠️ [INGEST] Empty Facebook campaign insights returned.")
@@ -665,17 +651,15 @@ def ingest_campaign_insights(
 
     # 2.1.3. Enrich Facebook campaign insights
     try:
-        print(f"🔁 [INGEST] Enriching Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
-        logging.info(f"🔁 [INGEST] Enriching Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
+        print(f"🔁 [INGEST] Trigger to enrich Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
+        logging.info(f"🔁 [INGEST] Trigger to enrich Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s)...")
         df = enrich_campaign_insights(df)
         df["account_name"] = fetch_account_name()
         df["date_range"] = f"{start_date}_to_{end_date}"
         df["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        print(f"✅ [INGEST] Successfully enriched Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s).")
-        logging.info(f"✅ [INGEST] Successfully enriched Facebook campaign insights from {start_date} to {end_date} with {len(df)} row(s).")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enrich Facebook campaign insights from {start_date} to {end_date} due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enrich Facebook campaign insights from {start_date} to {end_date} due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger enrichment Facebook campaign insights from {start_date} to {end_date} due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger enrichment Facebook campaign insights from {start_date} to {end_date} due to {e}.")
         raise
 
     # 2.1.4. Cast Facebook numeric fields to float
@@ -703,16 +687,14 @@ def ingest_campaign_insights(
 
     # 2.1.5. Enforce schema for Facebook campaign insights
     try:
-        print(f"🔁 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign insights...")
-        logging.info(f"🔁 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook campaign insights...")
+        print(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook campaign insights...")
+        logging.info(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook campaign insights...")
         if "actions" in df.columns:
             df["actions"] = df["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
         df = ensure_table_schema(df, schema_type="ingest_campaign_insights")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook campaign insights.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook campaign insights.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook campaign insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook campaign insights due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook campaign insights due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook campaign insights due to {e}.")
         raise
 
     # 2.1.6. Parse date column(s) for Facebook campaign insights
@@ -840,8 +822,8 @@ def ingest_ad_insights(
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook ad insights from {start_date} to {end_date}...")
 
     # 2.2.1. Call Facebook API to fetch campaign insights
-    print("🔍 [INGEST] Fetching Facebook ad insights from API...")
-    logging.info("🔍 [INGEST] Fetching Facebook ad insights from API...")
+    print("🔍 [INGEST] Triggering to fetch Facebook ad insights from API...")
+    logging.info("🔍 [INGEST] Triggering to fetch Facebook ad insights from API...")
     df = fetch_ad_insights(start_date, end_date)
     if df.empty:
         print("⚠️ [INGEST] Empty Facebook ad insights returned.")
@@ -858,16 +840,14 @@ def ingest_ad_insights(
  
     # 2.2.3. Enrich Facebook ad insights
     try:
-        print(f"🔁 [INGEST] Enriching Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
-        logging.info(f"🔁 [INGEST] Enriching Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
+        print(f"🔁 [INGEST] Triggering to enrich Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
+        logging.info(f"🔁 [INGEST] Triggering to enrich Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s)...")
         df = enrich_ad_insights(df)
         df["date_range"] = f"{start_date}_to_{end_date}"
         df["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        print(f"✅ [INGEST] Successfully enriched Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s).")
-        logging.info(f"✅ [INGEST] Successfully enriched Facebook ad insights from {start_date} to {end_date} with {len(df)} row(s).")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enrich Facebook ad insights from {start_date} to {end_date} due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enrich Facebook ad insights from {start_date} to {end_date} due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger enrichment Facebook ad insights from {start_date} to {end_date} due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger enrichment Facebook ad insights from {start_date} to {end_date} due to {e}.")
         raise
 
     # 2.2.4. Cast Facebook numeric fields to float
@@ -895,16 +875,14 @@ def ingest_ad_insights(
 
     # 2.2.5. Enforce schema for Facebook ad insights
     try:
-        print(f"🔁 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad insights...")
-        logging.info(f"🔁 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook ad insights...")
+        print(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad insights...")
+        logging.info(f"🔁 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad insights...")
         if "actions" in df.columns:
             df["actions"] = df["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
         df = ensure_table_schema(df, "ingest_ad_insights")
-        print(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad insights.")
-        logging.info(f"✅ [INGEST] Successfully enforced schema for {len(df)} row(s) of Facebook ad insights.")
     except Exception as e:
-        print(f"❌ [INGEST] Failed to enforce schema for Facebook ad insights due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook ad insights due to {e}.")
+        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad insights due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad insights due to {e}.")
         raise
 
     # 2.2.6. Parse date column(s) for Facebook campaign insights
