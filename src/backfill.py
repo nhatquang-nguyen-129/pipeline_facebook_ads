@@ -90,7 +90,17 @@ def backfill_campaign_insights(start_date: str, end_date: str):
     missing_dates = []
 
     # 1.1.2. Iterate over input date range to verify data existence
-    client = bigquery.Client(project=PROJECT)
+    try:
+        print(f"🔍 [BACKFILL]] Initializing Google BigQuery client for project {PROJECT}...")
+        logging.info(f"🔍 [BACKFILL]] Initializing Google BigQuery client for project {PROJECT}..")
+        client = bigquery.Client(project=PROJECT)
+        print(f"✅ [BACKFILL] Successfully initialized Google BigQuery client for {PROJECT}.")
+        logging.info(f"✅ [BACKFILL] Successfully initialized Google BigQuery client for {PROJECT}.")
+    except DefaultCredentialsError as e:
+        raise RuntimeError(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to credentials error.") from e
+    except Exception as e:
+        print(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to {str(e)}.")
+        logging.error(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to {str(e)}.")
     raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
@@ -108,32 +118,36 @@ def backfill_campaign_insights(start_date: str, end_date: str):
             result = list(client.query(query, job_config=job_config).result())
             count = result[0]["cnt"] if result else 0
             if count == 0:
-                print(f"⚠️ [BACKFILL] Missing data for {day_str} in {table_id}, will ingest...")
-                logging.warning(f"⚠️ [BACKFILL] Missing data for {day_str} in {table_id}, will ingest...")
+                print(f"⚠️ [BACKFILL] Facebook campaign insights for {day_str} not found in table {table_id} then ingestion will be proceeding...")
+                logging.warning(f"⚠️ [BACKFILL] Facebook campaign insights for {day_str} not found in table {table_id} then ingestion will be proceeding...")
                 missing_dates.append(day_str)
             else:
-                print(f"✅ [BACKFILL] Data for {day_str} already exists in {table_id}, skip.")
-                logging.info(f"✅ [BACKFILL] Data for {day_str} already exists in {table_id}, skip.")
+                print(f"✅ [BACKFILL] Facebook campaign insights for {day_str} already exists in {table_id} then ingestion is skipped.")
+                logging.info(f"✅ [BACKFILL] Facebook campaign insights for {day_str} already exists in {table_id} then ingestion is skipped.")
         except NotFound:
-            print(f"⚠️ [BACKFILL] Table {table_id} not found, ingesting {day_str}...")
-            logging.warning(f"⚠️ [BACKFILL] Table {table_id} not found, ingesting {day_str}...")
+            print(f"⚠️ [BACKFILL] Facebook campaign insights table {table_id} not found then ingestion for {day_str} will be proceeding...")
+            logging.warning(f"⚠️ [BACKFILL] Facebook campaign insights table {table_id} not found then ingestion for {day_str} will be proceeding...")
             missing_dates.append(day_str)
         except Exception as e:
-            print(f"❌ [BACKFILL] Failed to check table {table_id} for {day_str} due to {e}, will force ingest...")
-            logging.error(f"❌ [BACKFILL] Failed to check table {table_id} for {day_str} due to {e}, will force ingest...")
+            print(f"❌ [BACKFILL] Failed to verify Facebook campaign insights table {table_id} existence for {day_str} due to {e} then forced ingestion will be proceeding...")
+            logging.error(f"❌ [BACKFILL] Failed to verify Facebook campaign insights table {table_id} existence for {day_str} due to {e} then forced ingestion will be proceeding...")
             missing_dates.append(day_str)
 
-    # 3. Ingest bù những ngày thiếu
+    # 1.1.3. Ingest Facebook campaign insights for missing date(s)
     if missing_dates:
         for d in missing_dates:
             try:
-                update_campaign_insights(d, d)  # dùng lại hàm update 1 ngày
+                print(f"🔄 [BACKFILL] Triggering Facebook campaign insights update for {d}...")
+                logging.info(f"🔄 [BACKFILL] Triggering Facebook campaign insights update for {d}...")
+                update_campaign_insights(d, d)
+                print(f"✅ [BACKFILL] Successfully updated Facebook campaign insights for {d}.")
+                logging.info(f"✅ [BACKFILL] Successfully updated Facebook campaign insights for {d}.")
             except Exception as e:
-                print(f"❌ [BACKFILL] Failed to backfill {d} due to {e}.")
-                logging.error(f"❌ [BACKFILL] Failed to backfill {d} due to {e}.")
+                print(f"❌ [BACKFILL] Failed to backfill Facebook campaign insights for {d} due to {e}.")
+                logging.error(f"❌ [BACKFILL] Failed to backfill Facebook campaign insights for {d} due to {e}.")
     else:
-        print("✅ [BACKFILL] No missing dates detected, nothing to backfill.")
-        logging.info("✅ [BACKFILL] No missing dates detected, nothing to backfill.")
+        print(f"✅ [BACKFILL] No missing dates detected for Facebook campaign insights from {start_date} to {end_date} then backfill is skipped.")
+        logging.info(f"✅ [BACKFILL] No missing dates detected for Facebook campaign insights from {start_date} to {end_date} then backfill is skipped.")
 
 # 1.2. Backfill historical Facebook ad insights for a given date range
 def backfill_ad_insights(start_date: str, end_date: str):
