@@ -1,40 +1,13 @@
 substitutions:
   _REGION: asia-southeast1
-  _IMAGE: gcr.io/pipeline_facebook_ads/v0.0.5
-  _JOB_NAME: replace-me-in-trigger
-  _MODE: replace-me-in-trigger
+  _IMAGE: asia-southeast1-docker.pkg.dev/seer-digital-ads/pipeline_facebook_ads/v0.0.1
 
 steps:
-  # Step 1: Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', '${_IMAGE}:latest', '.']
+    args: ['build', '-t', '${_IMAGE}', '.']
 
-  # Step 2: Push image to Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', '${_IMAGE}:latest']
+    args: ['push', '${_IMAGE}']
 
-  # Step 3: Create or update Cloud Run Job
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'bash'
-    args:
-      - -c
-      - |
-        # Check if job exists
-        if gcloud run jobs describe ${_JOB_NAME} --region=${_REGION}; then
-          echo "🔁 Job ${_JOB_NAME} exists. Updating..."
-          gcloud run jobs update ${_JOB_NAME} \
-            --image=${_IMAGE}:latest \
-            --region=${_REGION} \
-            --set-env-vars=MODE=${_MODE}
-        else
-          echo "🆕 Job ${_JOB_NAME} doesn't exist. Creating..."
-          gcloud run jobs create ${_JOB_NAME} \
-            --image=${_IMAGE}:latest \
-            --region=${_REGION} \
-            --set-env-vars=MODE=${_MODE} \
-            --memory=512Mi \
-            --cpu=1 \
-            --max-retries=1
-        fi
-options:
-  logging: CLOUD_LOGGING_ONLY
+images:
+  - '${_IMAGE}'
