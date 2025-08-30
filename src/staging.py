@@ -286,7 +286,7 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
-            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+            raise RuntimeError("❌ [STAGING] Failed to initialize Google BigQuery client due to credentials error.") from e
         updated_date["date"] = pd.to_datetime(updated_date["date"])
         updated_months = updated_date["date"].dt.to_period("M").unique()
         raw_tables = [
@@ -409,19 +409,19 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                     )
                     if clustering_fields:  
                         table.clustering_fields = clustering_fields  
-                    print(f"🔍 [STAGING] Creating staging table {staging_ad_insights} with partition on 'date'...")
-                    logging.info(f"🔍 [STAGING] Creating staging table {staging_ad_insights} with partition on 'date'...")
+                    print(f"🔍 [STAGING] Creating staging Facebook ad insights table {staging_ad_insights} with partition on 'date'...")
+                    logging.info(f"🔍 [STAGING] Creating staging Facebook ad insights table {staging_ad_insights} with partition on 'date'...")
                 table = client.create_table(table)
-                print(f"✅ [STAGING] Successfully created table {staging_ad_insights}.")
-                logging.info(f"✅ [STAGING] Successfully created table {staging_ad_insights}.")
+                print(f"✅ [STAGING] Successfully created staging Facebook ad insights table {staging_ad_insights}.")
+                logging.info(f"✅ [STAGING] Successfully created staging Facebook ad insights table {staging_ad_insights}.")
             else:
                 new_dates = df_all["date"].dropna().dt.date.unique().tolist()
                 query_existing = f"SELECT DISTINCT DATE(date) AS d FROM `{staging_ad_insights}`"
                 existing_dates = [row.d for row in client.query(query_existing).result()]
                 overlap = set(new_dates) & set(existing_dates)
                 if overlap:
-                    print(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap}, deleting them before upload...")
-                    logging.warning(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap}, deleting them before upload...")
+                    print(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap} in staging Facebook ad insights table {staging_ad_insights} then deletion will be proceeding...")
+                    logging.warning(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap} in staging Facebook ad insights table {staging_ad_insights} then deletion will be proceeding...")
                     for date_val in overlap:
                         query = f"""
                             DELETE FROM `{staging_ad_insights}`
@@ -432,11 +432,11 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                         )
                         try:
                             result = client.query(query, job_config=job_config).result()
-                            print(f"✅ [STAGING] Deleted {result.num_dml_affected_rows} row(s) for {date_val}.")
-                            logging.info(f"✅ [STAGING] Deleted {result.num_dml_affected_rows} row(s) for {date_val}.")
+                            print(f"✅ [STAGING] Successfully deleted {result.num_dml_affected_rows} row(s) for {date_val} in staging Facebook ad insights table {staging_ad_insights}.")
+                            logging.info(f"✅ [STAGING] Successfully deleted {result.num_dml_affected_rows} row(s) for {date_val} in staging Facebook ad insights table {staging_ad_insights}.")
                         except Exception as e:
-                            print(f"❌ [STAGING] Failed to delete rows for {date_val} due to {e}.")
-                            logging.error(f"❌ [STAGING] Failed to delete rows for {date_val} due to {e}.")
+                            print(f"❌ [STAGING] Failed to delete row(s) of staging Facebook ad insights table for {date_val} due to {e}.")
+                            logging.error(f"❌ [STAGING] Failed to delete row(s) of staging Facebook ad insights table for {date_val} due to {e}.")
             job_config = bigquery.LoadJobConfig(
                 write_disposition="WRITE_APPEND",
                 source_format=bigquery.SourceFormat.PARQUET,
@@ -448,12 +448,12 @@ def staging_ad_insights(updated_date: pd.DataFrame):
             )
             load_job = client.load_table_from_dataframe(
                 df_all,
-                staging_campaign_insights,
+                staging_ad_insights,
                 job_config=job_config
             )
             load_job.result()
-            print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to {staging_ad_insights}.")
-            logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to {staging_ad_insights}.")
+            print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
+            logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
         except Exception as e:
             print(f"❌ [STAGING] Failed during staging Facebook ad insights upload due to {e}.")
             logging.error(f"❌ [STAGING] Failed during staging Facebook ad insights upload due to {e}.")

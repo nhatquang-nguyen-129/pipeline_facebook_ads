@@ -196,8 +196,8 @@ def update_campaign_insights(start_date: str, end_date: str):
         # 1.1.6. Ingest Facebook campaign insights from Facebook API to Google BigQuery raw tables
         if should_ingest:
             try:
-                print(f"🔄 [UPDATE] Triggering Facebook campaign insights ingestion for {day_str}...")
-                logging.info(f"🔄 [UPDATE] Triggering Facebook campaign insights ingestion for {day_str}...")
+                print(f"🔄 [UPDATE] Triggering to ingest Facebook campaign insights for {day_str}...")
+                logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook campaign insights for {day_str}...")
                 df = ingest_campaign_insights(
                     start_date=day_str,
                     end_date=day_str,
@@ -206,8 +206,6 @@ def update_campaign_insights(start_date: str, end_date: str):
                 updated_months.add((y, m))
                 if "campaign_id" in df.columns:
                     updated_campaign_ids.update(df["campaign_id"].dropna().unique())
-                print(f"✅ [UPDATE] Successfully ingested Facebook campaign insights with {len(df)} row(s) for day {day_str}.")
-                logging.info(f"✅ [UPDATE] Successfully ingested Facebook campaign insights with {len(df)} row(s) for day {day_str}.")
                 ingested_record = pd.DataFrame([{
                     "date": day_str,
                     "company": COMPANY,
@@ -218,20 +216,18 @@ def update_campaign_insights(start_date: str, end_date: str):
                 }])
                 updated_date = pd.concat([updated_date, ingested_record], ignore_index=True)
             except Exception as e:
-                print(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
-                logging.error(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
+                print(f"❌ [UPDATE] Failed to trigger Facebook campaign insights ingestion for {day_str} due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger Facebook campaign insights ingestion for {day_str} due to {e}.")
     
     # 1.1.7. Ingest Facebook campaign metadata from Facebook API to Google BigQuery raw tables
     if updated_campaign_ids:
-        print(f"🔄 [UPDATE] Triggering Facebook campaign metadata ingestion for {len(updated_campaign_ids)} campaign_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering Facebook campaign metadata ingestion for {len(updated_campaign_ids)} campaign_id(s)...")
+        print(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
         try:
             ingest_campaign_metadata(campaign_id_list=list(updated_campaign_ids))
-            print(f"✅ [UPDATE] Successfully ingested Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s).")
-            logging.info(f"✅ [UPDATE] Successfully ingested Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s).")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to ingest Facebook campaign metadata ingest for {len(updated_campaign_ids)} campaign_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to ingest Facebook campaign metadata ingest for {len(updated_campaign_ids)} campaign_id(s) due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger Facebook campaign metadata ingestion for {len(updated_campaign_ids)} campaign_id(s) due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger Facebook campaign metadata ingestion for {len(updated_campaign_ids)} campaign_id(s) due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated campaign_ids for Facebook campaign metadata then ingestion is skipped.")
         logging.warning("⚠️ [UPDATE] No updated campaign_ids for Facebook campaign metadata then ingestion is skipped.")
@@ -242,11 +238,9 @@ def update_campaign_insights(start_date: str, end_date: str):
         logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook campaign insights...")
         try:
             staging_campaign_insights(updated_date=updated_date)
-            print("✅ [UPDATE] Successfully rebuilt staging table for Facebook campaign insights.")
-            logging.info("✅ [UPDATE] Successfully rebuilt staging table for Facebook campaign insights.")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to rebuild staging table for Facebook campaign insights due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to rebuild staging table for Facebook campaign insights due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook campaign insights due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook campaign insights due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated for Facebook campaign insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook campaign insights then staging table rebuild is skipped.")
@@ -257,22 +251,18 @@ def update_campaign_insights(start_date: str, end_date: str):
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign spending...")
         try:
             mart_spend_all()
-            print("✅ [UPDATE] Successfully rebuilt materialized table for Facebook campaign spending.")
-            logging.info("✅ [UPDATE] Successfully rebuilt materialized table for Facebook campaign spending.")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook campaign spending due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook campaign spending due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
 
     # 1.1.10. Rebuild Facebook materialized tables for campaign performance
         print("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign performance...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign performance...")
         try:
             mart_campaign_all()
-            print("✅ [UPDATE] Successfully rebuilt materialized table for Facebook campaign performance.")
-            logging.info("✅ [UPDATE] Successfully rebuilt materialized table for Facebook campaign performance.")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook campaign performance due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook campaign performance due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated for Facebook campaign insights then skip building materialized tables.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook campaign insights then skip building materialized tables.")
@@ -380,8 +370,8 @@ def update_ad_insights(start_date: str, end_date: str):
         # 1.2.6. Ingest Facebook ad insights from Facebook API to Google BigQuery raw tables
         if should_ingest:
             try:
-                print(f"🔄 [UPDATE] Triggering Facebook ad insights ingestion for {day_str}...")
-                logging.info(f"🔄 [UPDATE] Triggering Facebook ad insights ingestion for {day_str}...")
+                print(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
+                logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
                 df = ingest_ad_insights(
                     start_date=day_str,
                     end_date=day_str,
@@ -390,8 +380,6 @@ def update_ad_insights(start_date: str, end_date: str):
                 updated_months.add((y, m))
                 if "ad_id" in df.columns:
                     updated_ad_ids.update(df["ad_id"].dropna().unique())
-                print(f"✅ [UPDATE] Successfully ingested Facebook ad insights with {len(df)} row(s) for day {day_str}.")
-                logging.info(f"✅ [UPDATE] Successfully ingested Facebook ad insights with {len(df)} row(s) for day {day_str}.")
                 ingested_record = pd.DataFrame([{
                     "date": day_str,
                     "company": COMPANY,
@@ -402,25 +390,23 @@ def update_ad_insights(start_date: str, end_date: str):
                 }])
                 updated_date = pd.concat([updated_date, ingested_record], ignore_index=True)
             except Exception as e:
-                print(f"❌ [UPDATE] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
-                logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
+                print(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
+                logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
 
     # 1.2.7. Ingest Facebook ad metadata from Facebook API to Google BigQuery raw tables
     if updated_ad_ids:
-        print(f"🔄 [UPDATE] Triggering Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
+        print(f"🔄 [UPDATE] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
         try:
             ingest_ad_metadata(ad_id_list=list(updated_ad_ids))
-            print(f"✅ [UPDATE] Successfully ingested Facebook ad metadata for {len(updated_ad_ids)} ad_id(s).")
-            logging.info(f"✅ [UPDATE] Successfully ingested Facebook ad metadata for {len(updated_ad_ids)} ad_id(s).")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to ingest Facebook ad metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
         # 1.2.8. Ingest Facebook adset metadata
         try:
-            print(f"🔄 [UPDATE] Triggering Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
-            logging.info(f"🔄 [UPDATE] Triggering Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s)...")
+            print(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(updated_ad_ids)} ad_id(s)...")
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
             tables = client.list_tables(dataset=raw_dataset)
             pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
@@ -443,22 +429,18 @@ def update_ad_insights(start_date: str, end_date: str):
             adset_ids_df = client.query(union_query, job_config=job_config).to_dataframe()
             adset_id_list = adset_ids_df["adset_id"].dropna().unique().tolist()
             ingest_adset_metadata(adset_id_list=adset_id_list)
-            print(f"✅ [UPDATE] Successfully ingested Facebook adset metadata for {len(updated_ad_ids)} ad_id(s).")
-            logging.info(f"✅ [UPDATE] Successfully ingested Facebook adset metadata for {len(updated_ad_ids)} ad_id(s).")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to ingest Facebook adset metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to ingest Facebook adset metadata ingest for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger Facebook adset metadata ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
 
         # 1.2.9. Ingest Facebook ad creative
-        print(f"🔄 [UPDATE] Triggering Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s)...")
-        logging.info(f"🔄 [UPDATE] Triggering Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s)...")
+        print(f"🔄 [UPDATE] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
         try:
             ingest_ad_creative(ad_id_list=list(updated_ad_ids))
-            print(f"✅ [UPDATE] Successfully ingested Facebook ad creative for {len(updated_ad_ids)} ad_id(s).")
-            logging.info(f"✅ [UPDATE] Successfully ingested Facebook ad creative for {len(updated_ad_ids)} ad_id(s).")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s) due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad creative ingestion for {len(updated_ad_ids)} ad_id(s) due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
         logging.warning("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
@@ -469,11 +451,9 @@ def update_ad_insights(start_date: str, end_date: str):
         logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook ad insights...")
         try:
             staging_ad_insights(updated_date=updated_date)
-            print("✅ [UPDATE] Successfully rebuilt staging table for Facebook ad insights.")
-            logging.info("✅ [UPDATE] Successfully rebuilt staging table for Facebook ad insights.")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to rebuild staging table for Facebook ad insights due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to rebuild staging table for Facebook ad insights due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook ad insights due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook ad insights due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
@@ -484,11 +464,9 @@ def update_ad_insights(start_date: str, end_date: str):
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook creative performance...")
         try:
             mart_creative_all()
-            print("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
-            logging.info("✅ [UPDATE] Successfully rebuilt materialized table for Facebook creative performance.")
         except Exception as e:
-            print(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to rebuild materialized table for Facebook creative performance due to {e}.")
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
     else:
         print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
