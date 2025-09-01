@@ -64,7 +64,7 @@ if not all([COMPANY, PLATFORM, ACCOUNT, LAYER, MODE]):
 if PLATFORM != "facebook":
     raise ValueError("❌ [MAIN] Only PLATFORM=facebook is supported in this script.")
 try:
-    update_module = importlib.import_module(f"scr.update")
+    update_module = importlib.import_module(f"src.update")
 except ModuleNotFoundError:
     raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure src/update.py exists.")
 
