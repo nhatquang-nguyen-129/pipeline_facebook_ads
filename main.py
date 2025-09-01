@@ -15,8 +15,7 @@ It supports **incremental daily ingestion** for selected data layers
 ✔️ Supports scheduled jobs or manual on-demand executions  
 
 ⚠️ This script does *not* contain data processing logic itself.  
-It simply delegates update tasks to platform-specific modules  
-(e.g., services.facebook.update, services.budget.update).
+It simply delegates update tasks to platform-specific modules .
 ==================================================================
 """
 # Add project root to sys.path to enable absolute imports
@@ -65,9 +64,9 @@ if not all([COMPANY, PLATFORM, ACCOUNT, LAYER, MODE]):
 if PLATFORM != "facebook":
     raise ValueError("❌ [MAIN] Only PLATFORM=facebook is supported in this script.")
 try:
-    update_module = importlib.import_module(f"services.{PLATFORM}.update")
+    update_module = importlib.import_module(f"scr.update")
 except ModuleNotFoundError:
-    raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure services/{PLATFORM}/update.py exists.")
+    raise ImportError(f"❌ [MAIN] Platform '{PLATFORM}' is not supported so please ensure src/update.py exists.")
 
 # 1.2. Main entrypoint function
 def main():
