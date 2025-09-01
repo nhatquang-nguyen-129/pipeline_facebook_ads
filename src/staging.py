@@ -76,7 +76,7 @@ MODE = os.getenv("MODE")
 # 1. TRANSFORM FACEBOOK ADS RAW DATA INTO CLEANED STAGING TABLES
 
 # 1.1. Transform Facebook Ads campaign-level insights from raw tables into cleaned staging tables
-def staging_campaign_insights(_: pd.DataFrame = None):
+def staging_campaign_insights() -> None:
     print("🚀 [STAGING] Starting unified staging process for Facebook campaign insights...")
     logging.info("🚀 [STAGING] Starting unified staging process for Facebook campaign insights...")
 
@@ -86,7 +86,6 @@ def staging_campaign_insights(_: pd.DataFrame = None):
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
         print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook campaign insights...")
         logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook campaign insights...")
-
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_campaign_insights = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         print(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
@@ -99,15 +98,16 @@ def staging_campaign_insights(_: pd.DataFrame = None):
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
             raise RuntimeError("❌ [STAGING] Failed to initialize Google BigQuery client due to credentials error.") from e
-
         query_tables = f"""
             SELECT table_name
             FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
-            WHERE table_name LIKE '{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m%'
+            WHERE REGEXP_CONTAINS(
+                table_name,
+                r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_m[0-1][0-9][0-9]{{4}}$'
+            )
         """
         raw_tables = [row.table_name for row in client.query(query_tables).result()]
         raw_tables = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables]
-
         if not raw_tables:
             print("⚠️ [STAGING] No raw Facebook campaign insights table(s) found then staging is skipped.")
             logging.warning("⚠️ [STAGING] No raw Facebook campaign insights table(s) found then staging is skipped.")
@@ -153,12 +153,10 @@ def staging_campaign_insights(_: pd.DataFrame = None):
                     print(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
                     logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
                     continue
-
         if not all_dfs:
             print("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             return
-
         df_all = pd.concat(all_dfs, ignore_index=True)
         print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
@@ -184,7 +182,6 @@ def staging_campaign_insights(_: pd.DataFrame = None):
                 table_exists = True
             except Exception:
                 table_exists = False
-
             if not table_exists:
                 schema = []
                 for col, dtype in df_all.dtypes.items():
@@ -228,8 +225,8 @@ def staging_campaign_insights(_: pd.DataFrame = None):
                     job_config=job_config
                 )
                 load_job.result()
-                print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook campaign insights table {staging_campaign_insights} (TRUNCATED old data).")
-                logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook campaign insights table {staging_campaign_insights} (TRUNCATED old data).")
+                print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook campaign insights table {staging_campaign_insights}.")
+                logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook campaign insights table {staging_campaign_insights}.")
         except Exception as e:
             print(f"❌ [STAGING] Failed during staging Facebook campaign insights upload due to {e}.")
             logging.error(f"❌ [STAGING] Failed during staging Facebook campaign insights upload due to {e}.")
@@ -238,7 +235,7 @@ def staging_campaign_insights(_: pd.DataFrame = None):
         logging.error(f"❌ [STAGING] Faild to unify staging Facebook campaign insights table due to {e}.")
 
 # 1.2. Transform Facebook Ads ad-level insights from raw tables into cleaned staging tables
-def staging_ad_insights(updated_date: pd.DataFrame):
+def staging_ad_insights() -> None:
     print("🚀 [STAGING] Starting unified staging process for Facebook ad insights...")
     logging.info("🚀 [STAGING] Starting unified staging process for Facebook ad insights...")
 
@@ -263,12 +260,16 @@ def staging_ad_insights(updated_date: pd.DataFrame):
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
             raise RuntimeError("❌ [STAGING] Failed to initialize Google BigQuery client due to credentials error.") from e
-        updated_date["date"] = pd.to_datetime(updated_date["date"])
-        updated_months = updated_date["date"].dt.to_period("M").unique()
-        raw_tables = [
-            f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{d.month:02d}{d.year}"
-            for d in updated_months.to_timestamp()
-        ]
+        query_tables = f"""
+            SELECT table_name
+            FROM `{PROJECT}.{raw_dataset}.INFORMATION_SCHEMA.TABLES`
+            WHERE REGEXP_CONTAINS(
+                table_name,
+                r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m[0-1][0-9][0-9]{{4}}$'
+            )
+        """
+        raw_tables = [row.table_name for row in client.query(query_tables).result()]
+        raw_tables = [f"{PROJECT}.{raw_dataset}.{t}" for t in raw_tables]
         if not raw_tables:
             print("⚠️ [STAGING] No raw Facebook ad insights table(s) found then staging is skipped.")
             logging.warning("⚠️ [STAGING] No raw Facebook ad insights table(s) found then staging is skipped.")
@@ -278,17 +279,9 @@ def staging_ad_insights(updated_date: pd.DataFrame):
 
     # 1.2.3. Query raw table(s)
         all_dfs = []
-        updated_date["date"] = pd.to_datetime(updated_date["date"])
-        updated_months = updated_date["date"].dt.to_period("M").unique()
-        raw_tables = [
-            f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{d.month:02d}{d.year}"
-            for d in updated_months.to_timestamp()
-        ]
-        for raw_table, month_period in zip(raw_tables, updated_months):
-            month_days = updated_date[updated_date["date"].dt.to_period("M") == month_period]["date"]
-            target_days_str = ",".join([f"DATE('{d.strftime('%Y-%m-%d')}')" for d in month_days])
-            print(f"🔄 [STAGING] Querying raw Facebook ad insights table {raw_table} for {len(month_days)} day(s)...")
-            logging.info(f"🔄 [STAGING] Querying raw Facebook ad insights table {raw_table} for {len(month_days)} day(s)...")
+        for raw_table in raw_tables:
+            print(f"🔄 [STAGING] Querying raw Facebook ad insights table {raw_table}...")
+            logging.info(f"🔄 [STAGING] Querying raw Facebook ad insights table {raw_table}...")
             query = f"""
                 SELECT
                     raw.*,
@@ -310,7 +303,6 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                 LEFT JOIN `{raw_creative_metadata}` AS creative
                     ON CAST(raw.ad_id AS STRING) = CAST(creative.ad_id AS STRING)
                     AND CAST(raw.account_id AS STRING) = CAST(creative.account_id AS STRING)
-                WHERE DATE(raw.date) IN ({target_days_str})
             """
             try:
                 df_month = client.query(query).to_dataframe()
@@ -320,8 +312,8 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                 print(f"❌ [STAGING] Failed to query Facebook ad insights raw table {raw_table} due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to query Facebook ad insights raw table {raw_table} due to {e}.")
                 continue
-    
-    # 1.1.4. Enrich Facebook ad insights            
+
+    # 1.2.4. Enrich Facebook ad insights
             if not df_month.empty:
                 try:
                     print(f"🔄 [STAGING] Triggering to enrich staging Facebook ad insights field(s) for {len(df_month)} row(s) from {raw_table}...")
@@ -331,8 +323,8 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                         df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
                     all_dfs.append(df_month)
                 except Exception as e:
-                    print(f"❌ [STAGING] Failed to trigger enrichment for Facebook campaign insights due to {e}.")
-                    logging.warning(f"❌ [STAGING] Failed to trigger enrichment for Facebook campaign insights due to {e}.")
+                    print(f"❌ [STAGING] Failed to trigger enrichment for Facebook ad insights due to {e}.")
+                    logging.warning(f"❌ [STAGING] Failed to trigger enrichment for Facebook ad insights due to {e}.")
                     continue
         if not all_dfs:
             print("⚠️ [STAGING] No data found in any raw Facebook ad insights table(s).")
@@ -342,20 +334,20 @@ def staging_ad_insights(updated_date: pd.DataFrame):
         print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all raw Facebook ad insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all raw Facebook ad insights table(s).")
 
-    # 1.2.5. Enforce schema for Facebook staging campaign insights
+    # 1.2.5. Enforce schema for Facebook staging ad insights
         try:
             print(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights...")
             logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights...")
             df_all = ensure_table_schema(df_all, "staging_ad_insights")
         except Exception as e:
-            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
+            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len[df_all]} row(s) of staging Facebook ad insights due to {e}.")
             logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
             raise
 
-    # 1.2.6. Upload Facebook staging ad insights to Google BigQuery raw table
+    # 1.2.6. Upload Facebook staging ad insights to Google BigQuery table
         try:
             print(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}...")
-            logging.info(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging Facebook campaign insights to Google BigQuery table {staging_ad_insights}...")
+            logging.info(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}...")
             df_all = df_all.drop_duplicates()
             clustering_fields = [f for f in ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"] if f in df_all.columns]
             try:
@@ -363,6 +355,7 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                 table_exists = True
             except Exception:
                 table_exists = False
+
             if not table_exists:
                 schema = []
                 for col, dtype in df_all.dtypes.items():
@@ -383,56 +376,35 @@ def staging_ad_insights(updated_date: pd.DataFrame):
                         type_=bigquery.TimePartitioningType.DAY,
                         field="date"
                     )
-                    if clustering_fields:  
-                        table.clustering_fields = clustering_fields  
+                    if clustering_fields:
+                        table.clustering_fields = clustering_fields
                     print(f"🔍 [STAGING] Creating staging Facebook ad insights table {staging_ad_insights} with partition on 'date'...")
                     logging.info(f"🔍 [STAGING] Creating staging Facebook ad insights table {staging_ad_insights} with partition on 'date'...")
                 table = client.create_table(table)
                 print(f"✅ [STAGING] Successfully created staging Facebook ad insights table {staging_ad_insights}.")
                 logging.info(f"✅ [STAGING] Successfully created staging Facebook ad insights table {staging_ad_insights}.")
             else:
-                new_dates = df_all["date"].dropna().dt.date.unique().tolist()
-                query_existing = f"SELECT DISTINCT DATE(date) AS d FROM `{staging_ad_insights}`"
-                existing_dates = [row.d for row in client.query(query_existing).result()]
-                overlap = set(new_dates) & set(existing_dates)
-                if overlap:
-                    print(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap} in staging Facebook ad insights table {staging_ad_insights} then deletion will be proceeding...")
-                    logging.warning(f"⚠️ [STAGING] Found {len(overlap)} overlapping date(s) {overlap} in staging Facebook ad insights table {staging_ad_insights} then deletion will be proceeding...")
-                    for date_val in overlap:
-                        query = f"""
-                            DELETE FROM `{staging_ad_insights}`
-                            WHERE DATE(date) = @date_value
-                        """
-                        job_config = bigquery.QueryJobConfig(
-                            query_parameters=[bigquery.ScalarQueryParameter("date_value", "DATE", date_val)]
-                        )
-                        try:
-                            result = client.query(query, job_config=job_config).result()
-                            print(f"✅ [STAGING] Successfully deleted {result.num_dml_affected_rows} row(s) for {date_val} in staging Facebook ad insights table {staging_ad_insights}.")
-                            logging.info(f"✅ [STAGING] Successfully deleted {result.num_dml_affected_rows} row(s) for {date_val} in staging Facebook ad insights table {staging_ad_insights}.")
-                        except Exception as e:
-                            print(f"❌ [STAGING] Failed to delete row(s) of staging Facebook ad insights table for {date_val} due to {e}.")
-                            logging.error(f"❌ [STAGING] Failed to delete row(s) of staging Facebook ad insights table for {date_val} due to {e}.")
-            job_config = bigquery.LoadJobConfig(
-                write_disposition="WRITE_APPEND",
-                source_format=bigquery.SourceFormat.PARQUET,
-                time_partitioning=bigquery.TimePartitioning(
-                    type_=bigquery.TimePartitioningType.DAY,
-                    field="date"
-                ),
-                clustering_fields=clustering_fields if clustering_fields else None
-            )
-            load_job = client.load_table_from_dataframe(
-                df_all,
-                staging_ad_insights,
-                job_config=job_config
-            )
-            load_job.result()
-            print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
-            logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
+                job_config = bigquery.LoadJobConfig(
+                    write_disposition="WRITE_TRUNCATE",
+                    source_format=bigquery.SourceFormat.PARQUET,
+                    time_partitioning=bigquery.TimePartitioning(
+                        type_=bigquery.TimePartitioningType.DAY,
+                        field="date"
+                    ),
+                    clustering_fields=clustering_fields if clustering_fields else None
+                )
+                load_job = client.load_table_from_dataframe(
+                    df_all,
+                    staging_ad_insights,
+                    job_config=job_config
+                )
+                load_job.result()
+                print(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
+                logging.info(f"✅ [STAGING] Successfully uploaded {len(df_all)} row(s) to staging Facebook ad insights table {staging_ad_insights}.")
         except Exception as e:
             print(f"❌ [STAGING] Failed during staging Facebook ad insights upload due to {e}.")
             logging.error(f"❌ [STAGING] Failed during staging Facebook ad insights upload due to {e}.")
     except Exception as e:
         print(f"❌ [STAGING] Faild to unify staging Facebook ad insights table due to {e}.")
         logging.error(f"❌ [STAGING] Faild to unify staging Facebook ad insights table due to {e}.")
+
