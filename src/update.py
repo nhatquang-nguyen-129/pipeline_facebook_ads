@@ -237,7 +237,7 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("🔄 [UPDATE] Triggering to rebuild staging table for Facebook campaign insights...")
         logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook campaign insights...")
         try:
-            staging_campaign_insights(updated_date=updated_date)
+            staging_campaign_insights()
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook campaign insights due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger staging table rebuild for Facebook campaign insights due to {e}.")
