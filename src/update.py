@@ -203,8 +203,6 @@ def update_campaign_insights(start_date: str, end_date: str):
                 )
                 if "campaign_id" in df.columns:
                     updated_campaign_ids.update(df["campaign_id"].dropna().unique())
-                print(f"✅ [UPDATE] Successfully ingested Facebook campaign insights with {len(df)} row(s) for day {day_str}.")
-                logging.info(f"✅ [UPDATE] Successfully ingested Facebook campaign insights with {len(df)} row(s) for day {day_str}.")
             except Exception as e:
                 print(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
@@ -222,10 +220,10 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updated campaign_ids for Facebook campaign metadata then ingestion is skipped.")
         logging.warning("⚠️ [UPDATE] No updated campaign_ids for Facebook campaign metadata then ingestion is skipped.")
 
-    # 1.1.8 Rebuild Facebook campaign insights staging table
+    # 1.1.8 Rebuild staging Facebook campaign insights table
     if updated_campaign_ids:
-        print("🔄 [UPDATE] Triggering to rebuild staging table for Facebook campaign insights...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook campaign insights...")
+        print("🔄 [UPDATE] Triggering to rebuild staging Facebook campaign insights table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild staging Facebook campaign insights table...")
         try:
             staging_campaign_insights()
         except Exception as e:
@@ -235,19 +233,19 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updates for Facebook campaign insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then staging table rebuild is skipped.")
 
-    # 1.1.9. Rebuild Facebook materialized tables for campaign spending
+    # 1.1.9. Rebuild materialized Facebook campaign spend table
     if updated_campaign_ids:
-        print("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign spending...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign spending...")
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign spend table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign spend table...")
         try:
             mart_spend_all()
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
 
-    # 1.1.10. Rebuild Facebook materialized tables for campaign performance
-        print("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign performance...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook campaign performance...")
+    # 1.1.10. Rebuild materialized Facebook campaign performance table
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
         try:
             mart_campaign_all()
         except Exception as e:
@@ -257,7 +255,7 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
         logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
 
-    # 1.1.11. Measure the total execution time of Facebook campaign insights update process
+    # 1.1.11. Measure the total execution time
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [UPDATE] Successfully completed Facebook Ads campaign insights update in {elapsed}s.")
     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads campaign insights update in {elapsed}s.")
@@ -311,7 +309,6 @@ def update_ad_insights(start_date: str, end_date: str):
 
     # 1.2.5. Iterate over input date range to verify data freshness
     date_range = pd.date_range(start=start_date, end=end_date)
-    updated_months = set()
     updated_ad_ids = set()
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
@@ -361,11 +358,13 @@ def update_ad_insights(start_date: str, end_date: str):
             try:
                 print(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook ad insights for {day_str}...")
-                ingest_ad_insights(
+                df = ingest_ad_insights(
                     start_date=day_str,
                     end_date=day_str,
                     write_disposition="WRITE_APPEND"
                 )
+                if "ad_id" in df.columns:
+                    updated_ad_ids.update(df["ad_id"].dropna().unique())
             except Exception as e:
                 print(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
                 logging.error(f"❌ [UPDATE] Failed to trigger Facebook ad insights ingestion for {day_str} due to {e}.")
@@ -422,10 +421,10 @@ def update_ad_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
         logging.warning("⚠️ [UPDATE] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
 
-    # 1.2.10. Rebuild Facebook ad insights staging table
-    if updated_months:
-        print("🔄 [UPDATE] Triggering to rebuild staging table for Facebook ad insights...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild staging table for Facebook ad insights...")
+    # 1.2.10. Rebuild staging Facebook ad insights table
+    if updated_ad_ids:
+        print("🔄 [UPDATE] Triggering to rebuild staging Facebook ad insights table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild staging Facebook ad insights table...")
         try:
             staging_ad_insights()
         except Exception as e:
@@ -435,10 +434,10 @@ def update_ad_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then staging table rebuild is skipped.")
 
-    # 1.2.11. Rebuild Facebook materialized table for creative performance
-    if updated_months:
-        print("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook creative performance...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized table for Facebook creative performance...")
+    # 1.2.11. Rebuild materialized Facebook creative performance
+    if updated_ad_ids:
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook creative performance table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook creative performance table...")
         try:
             mart_creative_all()
         except Exception as e:
@@ -448,7 +447,7 @@ def update_ad_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
 
-    # 1.2.12. Measure the total execution time of Facebook ad insights update process
+    # 1.2.12. Measure the total execution time
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
