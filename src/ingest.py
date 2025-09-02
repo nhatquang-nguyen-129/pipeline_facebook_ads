@@ -228,9 +228,9 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
 
     # 1.2.1. Validate input
     if not adset_id_list:
-        print("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
-        logging.warning("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
-        raise ValueError("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
+        print("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
+        logging.warning("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
 
     # 1.2.2. Call Facebook API
     try:
@@ -361,9 +361,9 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
 
     # 1.3.1. Validate input
     if not ad_id_list:
-        print("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
-        logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
-        raise ValueError("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
+        print("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
+        logging.warning("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
 
     # 1.3.2. Call Facebook API
     try:
@@ -494,9 +494,9 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
 
     # 1.4.1. Validate input for Facebook ad creative selective fetching
     if not ad_id_list:
-        print("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
-        logging.warning("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
-        raise ValueError("⚠️ [FETCH] Empty Facebook ad_id_list provided.")
+        print("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
+        logging.warning("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
   
     # 1.4.2. Call Facebook API
     try:

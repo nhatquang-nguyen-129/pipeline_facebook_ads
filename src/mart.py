@@ -139,8 +139,8 @@ def mart_campaign_all() -> None:
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
-        print(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
-        logging.info(f"🔍 [INGEST] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
+        print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
+        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
 
     # 2.2.2. Query all staging table(s)
         try:
