@@ -105,17 +105,21 @@ def main():
         else:
             raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} so please re-check input environment variable.")
         if "campaign" in layers:
-            print(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            update_campaign_insights(start_date=start_date, end_date=end_date)
-            print(f"✅ [MAIN] Successfully completed update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
-            logging.info(f"✅ [MAIN] Successfully completed update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
+            try:
+                print(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {LAYER} layer from {start_date} to {end_date}...")
+                logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {LAYER} layer from {start_date} to {end_date}...")
+                update_campaign_insights(start_date=start_date, end_date=end_date)
+            except Exception as e:
+                print(f"❌ [MAIN] Failed to trigger update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {LAYER} layer from {start_date} to {end_date} due to {e}.")
+                logging.error(f"❌ [MAIN] Failed to trigger update {PLATFORM} campaign insights of {COMPANY} in {MODE} mode and {LAYER} layer from {start_date} to {end_date} due to {e}.")
         if "ad" in layers:
-            print(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
-            update_ad_insights(start_date=start_date, end_date=end_date)
-            print(f"✅ [MAIN] Successfully completed update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
-            logging.info(f"✅ [MAIN] Successfully completed update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}.")
+            try:
+                print(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
+                logging.info(f"🚀 [MAIN] Starting to update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date}...")
+                update_ad_insights(start_date=start_date, end_date=end_date)
+            except Exception as e:
+                print(f"❌ [MAIN] Failed to trigger update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date} due to {e}.")
+                logging.error(f"❌ [MAIN] Failed to trigger update {PLATFORM} ad insights of {COMPANY} in {MODE} mode and {layers} layer from {start_date} to {end_date} due to {e}.")
 
 # 1.3. Entrypoint guard
 if __name__ == "__main__":

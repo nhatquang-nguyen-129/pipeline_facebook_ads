@@ -73,6 +73,9 @@ from src.mart import (
     mart_spend_all,
     mart_campaign_all,
     mart_creative_all,
+    mart_spend_festival,
+    mart_campaign_festival,
+    mart_creative_festival
 )
 
 # Get environment variable for Company
@@ -243,7 +246,16 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
 
-    # 1.1.10. Rebuild materialized Facebook campaign performance table
+    # 1.1.10. Rebuild materialized Facebook festival campaign spend table
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign spend table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign spend table...")
+        try:
+            mart_spend_festival()
+        except Exception as e:
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign spending due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign spending due to {e}.")
+
+    # 1.1.11. Rebuild materialized Facebook campaign performance table
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
         try:
@@ -251,6 +263,15 @@ def update_campaign_insights(start_date: str, end_date: str):
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
+
+    # 1.1.12. Rebuild materialized Facebook festival campaign performance table
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
+        try:
+            mart_campaign_festival()
+        except Exception as e:
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
     else:
         print("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
         logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
@@ -446,18 +467,21 @@ def update_ad_insights(start_date: str, end_date: str):
     else:
         print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
         logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
+    
+    # 1.2.12. Rebuild materialized Facebook festival creative performance
+    if updated_ad_ids:
+        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival creative performance table...")
+        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival creative performance table...")
+        try:
+            mart_creative_festival()
+        except Exception as e:
+            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival creative performance due to {e}.")
+            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival creative performance due to {e}.")
+    else:
+        print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building festival creative materialized table.")
+        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building festival creative materialized table.")
 
-    # 1.2.12. Measure the total execution time
+    # 1.2.13. Measure the total execution time
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
-
-
-import argparse
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Update Facebook campaign insights for a given date range.")
-    parser.add_argument("--start_date", type=str, required=True, help="Start date in YYYY-MM-DD format")
-    parser.add_argument("--end_date", type=str, required=True, help="End date in YYYY-MM-DD format")
-    args = parser.parse_args()
-
-    update_campaign_insights(start_date=args.start_date, end_date=args.end_date)

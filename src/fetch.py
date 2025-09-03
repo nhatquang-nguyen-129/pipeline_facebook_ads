@@ -151,12 +151,12 @@ def fetch_campaign_metadata(campaign_id_list: list[str], fields: list[str] = Non
             account_id = response.payload.data.decode("utf-8")
             account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
             account_name = account_info.get("name", "Unknown")
+            print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
         except Exception as e:
             print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} from Google Secret Manager due to {e}.")
             raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID from Google Secret Manager: {e}")
-        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
 
         # 2.1.4. Loop through all campaign_id(s)
         print(f"🔍 [FETCH] Retrieving metadata for {len(campaign_id_list)} Facebook campaign_id(s).")
@@ -437,8 +437,6 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     except Exception as e:
         print(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
         logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account information for {ACCOUNT} account due to {e}.")
-    print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
-    logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} for {ACCOUNT} account.")
 
     # 2.4.4. Loop through all ad_ids
     print(f"🔍 [FETCH] Retrieving Facebook ad creatives (thumbnail only) for {len(ad_id_list)} ad_id(s)...")

@@ -91,7 +91,7 @@ def staging_campaign_insights() -> None:
         print(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
         logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_campaign_insights} for Facebook campaign insights...")
 
-    # 1.1.2. Scan all Facebook raw campaign insights table(s)
+    # 1.1.2. Scan all raw table(s)
         print("🔍 [STAGING] Scanning all raw Facebook campaign insights table(s)...")
         logging.info("🔍 [STAGING] Scanning all raw Facebook campaign insights table(s)...")
         try:
@@ -140,7 +140,7 @@ def staging_campaign_insights() -> None:
                 logging.warning(f"❌ [STAGING] Failed to query Facebook campaign insights raw table {raw_table} due to {e}.")
                 continue
 
-    # 1.1.4. Enrich Facebook campaign insights
+    # 1.1.4. Enrich insights
             if not df_month.empty:
                 try:
                     print(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
@@ -253,7 +253,7 @@ def staging_ad_insights() -> None:
         print(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
         logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook ad insights...")
 
-    # 1.2.2. Scan all Facebook raw ad insights tables which match naming convetion
+    # 1.2.2. Scan all raw table(s)
         print("🔍 [STAGING] Scanning all raw Facebook ad insights table(s)...")
         logging.info("🔍 [STAGING] Scanning all raw Facebook ad insights table(s)...")
         try:
@@ -313,7 +313,7 @@ def staging_ad_insights() -> None:
                 logging.warning(f"❌ [STAGING] Failed to query Facebook ad insights raw table {raw_table} due to {e}.")
                 continue
 
-    # 1.2.4. Enrich Facebook ad insights
+    # 1.2.4. Enrich insights
             if not df_month.empty:
                 try:
                     print(f"🔄 [STAGING] Triggering to enrich staging Facebook ad insights field(s) for {len(df_month)} row(s) from {raw_table}...")
@@ -334,7 +334,7 @@ def staging_ad_insights() -> None:
         print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all raw Facebook ad insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all raw Facebook ad insights table(s).")
 
-    # 1.2.5. Enforce schema for Facebook staging ad insights
+    # 1.2.5. Enforce schema
         try:
             print(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights...")
             logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(df_all)} row(s) of staging Facebook ad insights...")
@@ -344,7 +344,7 @@ def staging_ad_insights() -> None:
             logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(df_all)} row(s) of staging Facebook ad insights due to {e}.")
             raise
 
-    # 1.2.6. Upload Facebook staging ad insights to Google BigQuery table
+    # 1.2.6. Upload to Google BigQuery
         try:
             print(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}...")
             logging.info(f"🔍 [STAGING] Uploading {len(df_all)} row(s) of staging Facebook ad insights to Google BigQuery table {staging_ad_insights}...")
@@ -355,7 +355,6 @@ def staging_ad_insights() -> None:
                 table_exists = True
             except Exception:
                 table_exists = False
-
             if not table_exists:
                 schema = []
                 for col, dtype in df_all.dtypes.items():
@@ -407,4 +406,3 @@ def staging_ad_insights() -> None:
     except Exception as e:
         print(f"❌ [STAGING] Faild to unify staging Facebook ad insights table due to {e}.")
         logging.error(f"❌ [STAGING] Faild to unify staging Facebook ad insights table due to {e}.")
-

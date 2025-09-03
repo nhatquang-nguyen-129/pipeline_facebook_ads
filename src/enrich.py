@@ -302,7 +302,7 @@ def enrich_ad_fields(df: pd.DataFrame, table_id: str) -> pd.DataFrame:
     try:
         table_name = table_id.split(".")[-1]
         match = re.search(
-            r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_campaign_m\d{6}$",
+            r"^(?P<company>\w+)_table_(?P<platform>\w+)_(?P<department>\w+)_(?P<account>\w+)_ad_m\d{6}$",
             table_name
         )
         if match:
