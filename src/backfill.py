@@ -293,28 +293,72 @@ def backfill_ad_insights(start_date: str, end_date: str):
         logging.error(f"❌ [BACKFILL] Failed to initialize Google BigQuery client due to {e}.")
         raise
 
-    # 2.4. Backfill date range
+    # 2.4. Prepare table_id
+    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+    print(f"🔍 [BACKFILL] Proceeding to backfill Facebook ad insights from {start_date} to {end_date}...")
+    logging.info(f"🔍 [BACKFILL] Proceeding to backfill Facebook ad insights from {start_date} to {end_date}...")
+
+    # 2.5. Backfill date range with evaluation
     date_range = pd.date_range(start=start_date, end=end_date)
     updated_ad_ids = set()
     for date in date_range:
         day_str = date.strftime("%Y-%m-%d")
-        print(f"🔄 [BACKFILL] Ingesting Facebook ad insights for {day_str}...")
-        logging.info(f"🔄 [BACKFILL] Ingesting Facebook ad insights for {day_str}...")
-        try:
-            df = ingest_ad_insights(
-                start_date=day_str,
-                end_date=day_str,
-                write_disposition="WRITE_APPEND"
-            )
-            if df is not None and "ad_id" in df.columns:
-                updated_ad_ids.update(df["ad_id"].dropna().unique())
-            print(f"✅ [BACKFILL] Successfully ingested {len(df)} row(s) for {day_str}.")
-            logging.info(f"✅ [BACKFILL] Successfully ingested {len(df)} row(s) for {day_str}.")
-        except Exception as e:
-            print(f"❌ [BACKFILL] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
-            logging.error(f"❌ [BACKFILL] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
+        y, m = date.year, date.month
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
 
-    # 2.5. Ingest Facebook ad metadata
+        print(f"🔎 [BACKFILL] Evaluating {day_str} in Facebook ad insights table {table_id}...")
+        logging.info(f"🔎 [BACKFILL] Evaluating {day_str} in Facebook ad insights table {table_id}...")
+
+        should_ingest = False
+        try:
+            client.get_table(table_id)
+        except NotFound:
+            print(f"⚠️ [BACKFILL] Facebook ad insights table {table_id} not found then ingestion will be starting...")
+            logging.warning(f"⚠️ [BACKFILL] Facebook ad insights table {table_id} not found then ingestion will be starting...")
+            should_ingest = True
+        else:
+            query = f"""
+                SELECT COUNT(1) as cnt
+                FROM `{table_id}`
+                WHERE date_start = @day_str
+            """
+            job_config = bigquery.QueryJobConfig(
+                query_parameters=[bigquery.ScalarQueryParameter("day_str", "STRING", day_str)]
+            )
+            try:
+                result = list(client.query(query, job_config=job_config).result())
+                count = result[0]["cnt"] if result else 0
+                if count == 0:
+                    print(f"⚠️ [BACKFILL] Facebook ad insights for {day_str} was not found then ingestion will be starting...")
+                    logging.warning(f"⚠️ [BACKFILL] Facebook ad insights for {day_str} was not found then ingestion will be starting...")
+                    should_ingest = True
+                else:
+                    print(f"✅ [BACKFILL] Facebook ad insights for {day_str} already exists in {table_id} then ingestion is skipped.")
+                    logging.info(f"✅ [BACKFILL] Facebook ad insights for {day_str} already exists in {table_id} then ingestion is skipped.")
+            except Exception as e:
+                print(f"❌ [BACKFILL] Failed to verify Facebook ad insights data for {day_str} due to {e} then ingestion will be starting...")
+                logging.error(f"❌ [BACKFILL] Failed to verify Facebook ad insights data for {day_str} due to {e} then ingestion will be starting...")
+                should_ingest = True
+
+        # 2.6. Ingest Facebook ad insights
+        if should_ingest:
+            try:
+                print(f"🔄 [BACKFILL] Triggering to ingest Facebook ad insights for {day_str}...")
+                logging.info(f"🔄 [BACKFILL] Triggering to ingest Facebook ad insights for {day_str}...")
+                df = ingest_ad_insights(
+                    start_date=day_str,
+                    end_date=day_str,
+                    write_disposition="WRITE_APPEND"
+                )
+                if df is not None and "ad_id" in df.columns:
+                    updated_ad_ids.update(df["ad_id"].dropna().unique())
+                print(f"✅ [BACKFILL] Successfully ingested {len(df)} row(s) for {day_str}.")
+                logging.info(f"✅ [BACKFILL] Successfully ingested {len(df)} row(s) for {day_str}.")
+            except Exception as e:
+                print(f"❌ [BACKFILL] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
+                logging.error(f"❌ [BACKFILL] Failed to ingest Facebook ad insights for {day_str} due to {e}.")
+
+    # 2.7. Ingest Facebook ad metadata
     if updated_ad_ids:
         print(f"🔄 [BACKFILL] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
         logging.info(f"🔄 [BACKFILL] Triggering to ingest Facebook ad metadata for {len(updated_ad_ids)} ad_id(s)...")
@@ -324,7 +368,7 @@ def backfill_ad_insights(start_date: str, end_date: str):
             print(f"❌ [BACKFILL] Failed to trigger Facebook ad metadata ingestion due to {e}.")
             logging.error(f"❌ [BACKFILL] Failed to trigger Facebook ad metadata ingestion due to {e}.")
 
-    # 2.6. Ingest Facebook adset metadata
+    # 2.8. Ingest Facebook adset metadata
         try:
             print(f"🔄 [BACKFILL] Triggering to ingest Facebook adset metadata from {len(updated_ad_ids)} ad_id(s)...")
             logging.info(f"🔄 [BACKFILL] Triggering to ingest Facebook adset metadata from {len(updated_ad_ids)} ad_id(s)...")
@@ -351,7 +395,7 @@ def backfill_ad_insights(start_date: str, end_date: str):
             print(f"❌ [BACKFILL] Failed to trigger Facebook adset metadata ingestion due to {e}.")
             logging.error(f"❌ [BACKFILL] Failed to trigger Facebook adset metadata ingestion due to {e}.")
 
-    # 2.7. Ingest Facebook ad creative
+    # 2.9. Ingest Facebook ad creative
         print(f"🔄 [BACKFILL] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
         logging.info(f"🔄 [BACKFILL] Triggering to ingest Facebook ad creative for {len(updated_ad_ids)} ad_id(s)...")
         try:
@@ -363,7 +407,7 @@ def backfill_ad_insights(start_date: str, end_date: str):
         print("⚠️ [BACKFILL] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
         logging.warning("⚠️ [BACKFILL] No updated ad_id(s) for Facebook ad metadata then ingestion is skipped.")
 
-    # 2.8. Rebuild staging ad insights
+    # 2.10. Rebuild staging ad insights
     if updated_ad_ids:
         print("🔄 [BACKFILL] Triggering to rebuild staging table for Facebook ad insights...")
         logging.info("🔄 [BACKFILL] Triggering to rebuild staging table for Facebook ad insights...")
@@ -376,7 +420,7 @@ def backfill_ad_insights(start_date: str, end_date: str):
         print("⚠️ [BACKFILL] No updates for Facebook ad insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [BACKFILL] No updates for Facebook ad insights then staging table rebuild is skipped.")
 
-    # 2.9. Rebuild mart creative performance
+    # 2.11. Rebuild mart creative performance
     if updated_ad_ids:
         print("🔄 [BACKFILL] Triggering to rebuild materialized table for Facebook creative performance...")
         logging.info("🔄 [BACKFILL] Triggering to rebuild materialized table for Facebook creative performance...")
@@ -389,7 +433,16 @@ def backfill_ad_insights(start_date: str, end_date: str):
         print("⚠️ [BACKFILL] No updates for Facebook ad insights then skip building creative materialized table.")
         logging.warning("⚠️ [BACKFILL] No updates for Facebook ad insights then skip building creative materialized table.")
 
-    # 2.10. Measure execution time
+    # 2.12. Measure execution time
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [BACKFILL] Successfully completed Facebook Ads ad insights backfill in {elapsed}s.")
     logging.info(f"✅ [BACKFILL] Successfully completed Facebook Ads ad insights backfill in {elapsed}s.")
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
+    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    backfill_ad_insights(start_date=args.start_date, end_date=args.end_date)
