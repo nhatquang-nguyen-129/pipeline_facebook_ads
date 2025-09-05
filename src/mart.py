@@ -66,7 +66,7 @@ def mart_spend_all() -> None:
         print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign spending...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign spending...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_spending_all"    
+        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_spend"    
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook campaign spending...")
     
@@ -136,7 +136,7 @@ def mart_spend_festival() -> None:
         print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign spending...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign spending...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_all_spend_fes"    
+        mart_table_spend = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_campaign_spend"    
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook festival campaign spending...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook festival campaign spending...")
     
@@ -209,7 +209,7 @@ def mart_campaign_all() -> None:
         print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_all"
+        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
 
@@ -271,7 +271,7 @@ def mart_campaign_festival() -> None:
         print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Festival campaign performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Festival campaign performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_all_campaign_fes"
+        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_campaign_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Festival campaign performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Festival campaign performance...")
 
@@ -403,7 +403,7 @@ def mart_creative_festival() -> None:
         print(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Festival creative performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Festival creative performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_all_creative_fes"
+        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_creative_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
 
