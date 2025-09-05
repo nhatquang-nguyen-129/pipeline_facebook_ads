@@ -336,7 +336,7 @@ def mart_creative_all() -> None:
         print(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook creative performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook creative performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_all"
+        mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook creative performance...")
     
