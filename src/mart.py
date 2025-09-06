@@ -129,17 +129,17 @@ def mart_spend_supplier() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook supplier campaign spending...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook supplier campaign spending...")
 
-    # 3.1.1. Prepare table_id
+    # 1.2.1. Prepare table_id
     try:
         raw_supplier_table = f"{PROJECT}.{COMPANY}_dataset_budget_api_raw.{COMPANY}_table_budget_marketing_supplier_supplier_list"
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_spend_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_supplier_campaign_spend"
+        mart_table_spend_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_spend"
         print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
 
-        # 3.1.2. Query staging table(s)
+        # 1.2.2. Query staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
@@ -163,7 +163,7 @@ def mart_spend_supplier() -> None:
                     CAST(a.date AS DATE) AS ngay,
                     SAFE_CAST(a.spend AS FLOAT64) AS spend,
                     LOWER(SAFE_CAST(a.delivery_status AS STRING)) AS delivery_status,
-                    s.supplier AS supplier_name
+                    s.supplier_name AS supplier_name
                 FROM `{staging_table_campaign}` a
                 LEFT JOIN `{raw_supplier_table}` s
                   ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier)
@@ -203,7 +203,7 @@ def mart_spend_festival() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook festival campaign spending...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook festival campaign spending...")
 
-    # 1.2.1. Prepare table_id
+    # 1.3.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -214,7 +214,7 @@ def mart_spend_festival() -> None:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook festival campaign spending...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_spend} for Facebook festival campaign spending...")
     
-        # 1.2.2. Query all staging table(s)
+        # 1.3.2. Query all staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
@@ -344,7 +344,7 @@ def mart_campaign_supplier() -> None:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_campaign_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_supplier_campaign_performance"
+        mart_table_campaign_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_performance"
 
         print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
@@ -362,10 +362,10 @@ def mart_campaign_supplier() -> None:
             WITH base AS (
                 SELECT
                     a.*,
-                    s.supplier AS supplier_name
+                    s.supplier_name AS supplier_name
                 FROM `{staging_table_campaign}` a
                 LEFT JOIN `{raw_supplier_table}` s
-                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier)
+                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.ma_ngan_sach_cap_1 = 'NC'
                   AND a.date IS NOT NULL
             )
@@ -472,21 +472,86 @@ def mart_campaign_festival() -> None:
 # 3. MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
 
 # 3.1. Build materialized table for Facebook creative performance by union all staging tables
+def mart_creative_all() -> None:
+    print("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
+    logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (All)...")
+
+    # 3.1.1. Prepare table_id
+    try:
+        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+        staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+        mart_table_creative_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+        print(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table} for creative performance (All)...")
+
+        # 3.1.2. Query staging table(s)
+        try:
+            client = bigquery.Client(project=PROJECT)
+        except DefaultCredentialsError as e:
+            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+        query = f"""
+            CREATE OR REPLACE TABLE `{mart_table_creative_all}`
+            PARTITION BY ngay
+            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
+            AS
+            SELECT
+                SAFE_CAST(nhan_su AS STRING) AS nhan_su,
+                SAFE_CAST(ma_ngan_sach_cap_1 AS STRING) AS ma_ngan_sach_cap_1,
+                SAFE_CAST(khu_vuc AS STRING) AS khu_vuc,
+                SAFE_CAST(chuong_trinh AS STRING) AS chuong_trinh,
+                SAFE_CAST(noi_dung AS STRING) AS noi_dung,
+                SAFE_CAST(nen_tang AS STRING) AS nen_tang,
+                SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
+                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,
+                SAFE_CAST(campaign_name AS STRING) AS campaign_name,
+                SAFE_CAST(adset_name AS STRING) AS adset_name,
+                SAFE_CAST(ad_name AS STRING) AS ad_name,
+                SAFE_CAST(thumbnail_url AS STRING) AS thumbnail_url,
+                SAFE_CAST(vi_tri AS STRING) AS vi_tri,
+                SAFE_CAST(doi_tuong AS STRING) AS doi_tuong,
+                SAFE_CAST(dinh_dang AS STRING) AS dinh_dang,
+                CAST(date AS DATE) AS ngay,
+                SAFE_CAST(spend AS FLOAT64) AS spend,
+                SAFE_CAST(result AS INT64) AS result,
+                SAFE_CAST(result_type AS STRING) AS result_type,
+                SAFE_CAST(purchase AS INT64) AS purchase,
+                SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
+                SAFE_CAST(reach AS INT64) AS reach,
+                SAFE_CAST(impressions AS INT64) AS impressions,
+                SAFE_CAST(clicks AS INT64) AS clicks,
+                CASE
+                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
+                    ELSE "❓"
+                END AS trang_thai
+            FROM `{staging_table}`
+        """
+        client.query(query).result()
+        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative_all}`"
+        row_count = list(client.query(count_query).result())[0]["row_count"]
+        print(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative_all} with {row_count} row(s) for Facebook creative performance (All).")
+    except Exception as e:
+        print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (All) due to {e}.")
+
+# 3.2. Build materialized table for Facebook supplier creative performance by union all staging tables
 def mart_creative_supplier() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
 
-    # 3.1.1. Prepare table_id
+    # 3.2.1. Prepare table_id
     try:
         raw_supplier_table = f"{PROJECT}.{COMPANY}_dataset_budget_api_raw.{COMPANY}_table_budget_marketing_supplier_supplier_list"
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"     
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_creative_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_supplier_creative_performance"
+        mart_table_creative_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_creative_performance"
         print(f"🔍 [MART] Using staging table {staging_table} with supplier list {raw_supplier_table}...")
         logging.info(f"🔍 [MART] Using staging table {staging_table} with supplier list {raw_supplier_table}...")
 
-        # 3.1.2. Query staging table(s)
+        # 3.2.2. Query staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
@@ -499,10 +564,10 @@ def mart_creative_supplier() -> None:
             WITH base AS (
                 SELECT
                     a.*,
-                    s.supplier AS supplier_name
+                    s.supplier_name AS supplier_name
                 FROM `{staging_table}` a
                 LEFT JOIN `{raw_supplier_table}` s
-                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier)
+                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.ma_ngan_sach_cap_1 = 'NC'
             )
             SELECT
@@ -547,12 +612,12 @@ def mart_creative_supplier() -> None:
         print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
 
-# 3.2. Build materialized table for Facebook festival creative performance by union all staging tables
+# 3.3. Build materialized table for Facebook festival creative performance by union all staging tables
 def mart_creative_festival() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance (Festival only)...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (Festival only)...")
 
-    # 3.2.1. Prepare table_id
+    # 3.3.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
@@ -563,7 +628,7 @@ def mart_creative_festival() -> None:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
 
-    # 3.2.2. Query all staging table(s)
+    # 3.3.2. Query all staging table(s)
         try:
             client = bigquery.Client(project=PROJECT)
         except DefaultCredentialsError as e:
