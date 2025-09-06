@@ -166,7 +166,7 @@ def mart_spend_supplier() -> None:
                     s.supplier_name AS supplier_name
                 FROM `{staging_table_campaign}` a
                 LEFT JOIN `{raw_supplier_table}` s
-                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier)
+                  ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.date IS NOT NULL
                   AND a.ma_ngan_sach_cap_1 = 'NC'
             )

@@ -294,8 +294,8 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
     else:
-        print("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
-        logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized tables.")
+        print("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized table(s).")
+        logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized table(s).")
 
     # 1.1.11. Measure the total execution time
     elapsed = round(time.time() - start_time, 2)
