@@ -485,12 +485,8 @@ def update_ad_insights(start_date: str, end_date: str):
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook creative performance due to {e}.")
-    else:
-        print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
-        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
 
     # 1.2.12. Rebuild materialized Facebook supplier creative performance
-    if updated_ad_ids:
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier creative performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier creative performance table...")
         try:
@@ -498,12 +494,8 @@ def update_ad_insights(start_date: str, end_date: str):
         except Exception as e:
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier creative performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier creative performance due to {e}.")
-    else:
-        print("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
-        logging.warning("⚠️ [UPDATE] No updated for Facebook ad insights then skip building creative materialized table.")
 
     # 1.2.12. Rebuild materialized Facebook festival creative performance
-    if updated_ad_ids:
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival creative performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival creative performance table...")
         try:
