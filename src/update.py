@@ -70,9 +70,6 @@ from src.staging import (
     staging_ad_insights
 )
 from src.mart import (
-    mart_spend_all,
-    mart_spend_supplier,
-    mart_spend_festival,
     mart_campaign_all,
     mart_campaign_supplier,
     mart_campaign_festival,
@@ -239,35 +236,8 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("⚠️ [UPDATE] No updates for Facebook campaign insights then staging table rebuild is skipped.")
         logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then staging table rebuild is skipped.")
 
-    # 1.1.9. Rebuild materialized Facebook campaign spend table
+    # 1.1.9. Rebuild materialized Facebook campaign performance table
     if updated_campaign_ids:
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign spend table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign spend table...")
-        try:
-            mart_spend_all()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign spending due to {e}.")
-
-    # 1.1.10. Rebuild materialized Facebook supplier campaign spend table
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign spend table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign spend table...")
-        try:
-            mart_spend_supplier()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign spending due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign spending due to {e}.")
-
-    # 1.1.10. Rebuild materialized Facebook festival campaign spend table
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign spend table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign spend table...")
-        try:
-            mart_spend_festival()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign spending due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign spending due to {e}.")
-
-    # 1.1.11. Rebuild materialized Facebook campaign performance table
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook campaign performance table...")
         try:
@@ -276,7 +246,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook campaign performance due to {e}.")
 
-    # 1.1.11. Rebuild materialized Facebook supplier campaign performance table
+    # 1.1.10. Rebuild materialized Facebook supplier campaign performance table
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign performance table...")
         try:
@@ -285,7 +255,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign performance due to {e}.")
             logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign performance due to {e}.")
 
-    # 1.1.12. Rebuild materialized Facebook festival campaign performance table
+    # 1.1.11. Rebuild materialized Facebook festival campaign performance table
         print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
         logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
         try:
