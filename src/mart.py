@@ -183,7 +183,7 @@ def mart_campaign_supplier() -> None:
             raise
 
     # 1.2.5. Query supplier metadata from Google Sheets
-        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_sheet_id_supplier"
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_budget_sheet_id_supplier"
         secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
         response = secret_client.access_secret_version(name=secret_name)
         sheet_id_supplier = response.payload.data.decode("UTF-8")
@@ -194,10 +194,19 @@ def mart_campaign_supplier() -> None:
             raise RuntimeError("❌ [MART] Missing 'supplier_name' column in supplier sheet.")
         temp_table_id = f"{PROJECT}.{mart_dataset}.temp_supplier_{uuid.uuid4().hex[:8]}"
         job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-        bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
-        print(f"✅ [MART] Temp supplier table {temp_table_id} created with {len(df_supplier)} row(s).")
-
+        try:
+            print(f"🔍 [MART] Creating supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            logging.info(f"🔍 [MART] Creating supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
+            print(f"✅ [MART] Successfully created supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            logging.info(f"✅ [MART] Successfully created supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+        except Exception as e:
+            print(f"❌ [MART] Failed to create supplier metadata temporary table {temp_table_id} due to {e}.")
+            logging.error(f"❌ [MART] Failed to create supplier metadata temporary table {temp_table_id} due to {e}.")
+    
     # 1.2.6. Query staging table to build materialized table for supplier
+        print(f"🔄 [MART] Querying staging Facebook campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")
+        logging.info(f"🔄 [MART] Querying staging Facebook campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_campaign_supplier}`
             PARTITION BY ngay
@@ -243,19 +252,21 @@ def mart_campaign_supplier() -> None:
         bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_campaign_supplier}`"
         row_count = list(bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
-        logging.info(f"✅ [MART] Successfully created {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
+        print(f"✅ [MART] Successfully built materialized table {mart_table_campaign_supplier} with {row_count} row(s) for Facebook supplier campaign performance.")
+        logging.info(f"✅ [MART] Successfully built materialized table {mart_table_campaign_supplier} with {row_count} row(s) for Facebook supplier campaign performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Facebook campaign performance (Supplier) due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook campaign performance (Supplier) due to {e}.")
+        print(f"❌ [MART] Failed to build materialized table for Facebook supplier campaign performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook supplier campaign performance due to {e}.")
     finally:
         try:
+            print(f"🔄 [MART] Facebook supplier campaign performance process is completed then supplier metadata temporary table deletion will be proceeding...")
+            logging.info(f"🔄 [MART] Facebook supplier campaign performance process is completed then supplier metadata temporary table deletion will be proceeding...")
             bigquery_client.delete_table(temp_table_id, not_found_ok=True)
-            print(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
-            logging.info(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+            print(f"✅ [INGEST] Successfully deleted supplier metadata temporary table {temp_table_id}.")
+            logging.info(f"✅ [INGEST] Successfully deleted supplier metadata temporary table {temp_table_id}.")
         except Exception as cleanup_error:
-            print(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
-            logging.warning(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
+            print(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
+            logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
 
 # 1.3. Build materialzed table for Facebook festival campaign performance by union all staging tables
 def mart_campaign_festival() -> None:
@@ -434,7 +445,7 @@ def mart_creative_supplier() -> None:
             raise
 
         # 2.2.5. Query supplier metadata from Google Sheets
-        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_sheet_id_supplier"
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_budget_sheet_id_supplier"
         secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
         response = secret_client.access_secret_version(name=secret_name)
         sheet_id_supplier = response.payload.data.decode("UTF-8")
