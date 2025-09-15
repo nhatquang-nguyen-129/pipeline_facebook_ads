@@ -34,22 +34,19 @@ import json
 # Add logging ultilities forintegration
 import logging
 
+# Add UUID ultilities for integration
+import uuid
+
 # Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Google Authentication libraries for integration
+# Add Google Authentication modules for integration
 from google.auth.exceptions import DefaultCredentialsError
 
-# Add Google API Core libraries for integration
-from google.api_core.exceptions import NotFound
-
-# Add Google CLoud libraries for integration
+# Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add UUID libraries for integration
-import uuid
-
-# Add internal Facebook module for handling
+# Add internal Facebook modules for handling
 from src.enrich import (
     enrich_campaign_insights, 
     enrich_ad_insights   

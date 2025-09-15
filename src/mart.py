@@ -22,28 +22,28 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging capability for tracking process execution and errors
+# Add logging ultilities for integration
 import logging
 
-# Add Python Pandas library for data processing
+# Add UUID ultilities for integration
+import uuid
+
+# Add Python Pandas libraries for integraton
 import pandas as pd
 
-# Add Google Authentication libraries for integration
+# Add Google Authentication modules for integration
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
 from google.auth.transport.requests import AuthorizedSession
 
-# Add Google Spreadsheets API libraries for integration
-import gspread
-
-# Add Google CLoud libraries for integration
+# Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add Google Secret Manager for integration
+# Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
 
-# Add UUID libraries for integration
-import uuid
+# Add Google Spreadsheets API modules for integration
+import gspread
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -132,8 +132,8 @@ def mart_campaign_all() -> None:
 
 # 1.2. Build materialzed table for Facebook supplier campaign performance by union all staging tables
 def mart_campaign_supplier() -> None:
-    print("🚀 [MART] Starting to build materialized table for Facebook campaign performance (Supplier)...")
-    logging.info("🚀 [MART] Starting to build materialized table for Facebook campaign performance (Supplier)...")
+    print("🚀 [MART] Starting to build materialized table for Facebook supplier campaign performance...")
+    logging.info("🚀 [MART] Starting to build materialized table for Facebook supplier campaign performance...")
 
     # 1.2.1. Prepare table_id
     try:
@@ -141,7 +141,6 @@ def mart_campaign_supplier() -> None:
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_campaign_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_performance"
-
         print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
 
@@ -150,8 +149,8 @@ def mart_campaign_supplier() -> None:
             print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
             logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
             bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
-            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud project {PROJECT}.")
         except DefaultCredentialsError as e:
             raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to your credentials.") from e
 
@@ -160,8 +159,8 @@ def mart_campaign_supplier() -> None:
             print(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
             logging.info(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
             secret_client = secretmanager.SecretManagerServiceClient()
-            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
-            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
+            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
         except Exception as e:
             print(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
             logging.error(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
@@ -262,23 +261,23 @@ def mart_campaign_supplier() -> None:
             print(f"🔄 [MART] Facebook supplier campaign performance process is completed then supplier metadata temporary table deletion will be proceeding...")
             logging.info(f"🔄 [MART] Facebook supplier campaign performance process is completed then supplier metadata temporary table deletion will be proceeding...")
             bigquery_client.delete_table(temp_table_id, not_found_ok=True)
-            print(f"✅ [INGEST] Successfully deleted supplier metadata temporary table {temp_table_id}.")
-            logging.info(f"✅ [INGEST] Successfully deleted supplier metadata temporary table {temp_table_id}.")
+            print(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
+            logging.info(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
         except Exception as cleanup_error:
             print(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
             logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
 
 # 1.3. Build materialzed table for Facebook festival campaign performance by union all staging tables
 def mart_campaign_festival() -> None:
-    print(f"🚀 [MART] Starting to build materialized table for Facebook campaign performance (Festival only)...")
-    logging.info(f"🚀 [MART] Starting to build materialized table Facebook campaign performance (Festival only)...")
+    print(f"🚀 [MART] Starting to build materialized table for Facebook festival campaign performance...")
+    logging.info(f"🚀 [MART] Starting to build materialized table for Facebook festival campaign performance...")
 
     # 1.3.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Festival campaign performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Festival campaign performance...")
+        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign performance...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_campaign_performance"
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Festival campaign performance...")
@@ -325,11 +324,11 @@ def mart_campaign_festival() -> None:
         client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
         row_count = list(client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Festival campaign performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Festival campaign performance.")
+        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook festival campaign performance.")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook festival campaign performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Festival campaign performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Festival campaign performance due to {e}.")
+        print(f"❌ [MART] Failed to build materialized table for Facebook festival campaign performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook festival campaign performance due to {e}.")
 
 # 2. MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
 
@@ -403,36 +402,41 @@ def mart_creative_supplier() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
 
+    # 2.2.1. Prepare table_id
     try:
-        # 2.2.1. Prepare table_id
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table_creative = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+        staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_creative_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_creative_performance"
+        print(f"🔍 [MART] Using staging table {staging_table_ad} with supplier metadata...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_ad} with supplier metadata...")
 
-        print(f"🔍 [MART] Using staging table {staging_table_creative} with supplier metadata...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_creative} with supplier metadata...")
-
-        # 2.2.2. Initialize BigQuery client
+    # 2.2.2. Initialize Google BigQuery client
         try:
+            print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
             bigquery_client = bigquery.Client(project=PROJECT)
-            print(f"✅ [MART] Successfully initialized BigQuery client for {PROJECT}.")
-            logging.info(f"✅ [MART] Successfully initialized BigQuery client for {PROJECT}.")
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud project {PROJECT}.")
         except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [MART] Failed to initialize BigQuery client due to your credentials.") from e
+            raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to your credentials.") from e
 
-        # 2.2.3. Initialize Secret Manager client
+    # 2.2.3. Initialize Google Secret Manager client
         try:
+            print(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
             secret_client = secretmanager.SecretManagerServiceClient()
-            print("✅ [MART] Successfully initialized Secret Manager client.")
-            logging.info("✅ [MART] Successfully initialized Secret Manager client.")
+            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
         except Exception as e:
-            print(f"❌ [MART] Failed to initialize Secret Manager client due to {e}.")
-            logging.error(f"❌ [MART] Failed to initialize Secret Manager client due to {e}.")
+            print(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
             raise
 
-        # 2.2.4. Initialize Google Sheets client
+    # 2.2.4. Initialize Google Sheets client
         try:
+            print(f"🔍 [MART] Initializing Google Sheets client...")
+            logging.info(f"🔍 [MART] Initializing Google Sheets client....")
             scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
             creds, _ = default(scopes=scopes)
             gspread_client = gspread.Client(auth=creds)
@@ -444,7 +448,7 @@ def mart_creative_supplier() -> None:
             logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
             raise
 
-        # 2.2.5. Query supplier metadata from Google Sheets
+    # 2.2.5. Query supplier metadata from Google Sheets
         secret_id = f"{COMPANY}_secret_{DEPARTMENT}_budget_sheet_id_supplier"
         secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
         response = secret_client.access_secret_version(name=secret_name)
@@ -452,16 +456,23 @@ def mart_creative_supplier() -> None:
         worksheet = gspread_client.open_by_key(sheet_id_supplier).worksheet("supplier")
         records = worksheet.get_all_records()
         df_supplier = pd.DataFrame(records)
-
         if "supplier_name" not in df_supplier.columns:
             raise RuntimeError("❌ [MART] Missing 'supplier_name' column in supplier sheet.")
-
         temp_table_id = f"{PROJECT}.{mart_dataset}.temp_supplier_{uuid.uuid4().hex[:8]}"
         job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-        bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
-        print(f"✅ [MART] Temp supplier table {temp_table_id} created with {len(df_supplier)} row(s).")
+        try:
+            print(f"🔍 [MART] Creating supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            logging.info(f"🔍 [MART] Creating supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
+            print(f"✅ [MART] Successfully created supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+            logging.info(f"✅ [MART] Successfully created supplier metadata temporary table {temp_table_id} with {len(df_supplier)} row(s).")
+        except Exception as e:
+            print(f"❌ [MART] Failed to create supplier metadata temporary table {temp_table_id} due to {e}.")
+            logging.error(f"❌ [MART] Failed to create supplier metadata temporary table {temp_table_id} due to {e}.")
 
-        # 2.2.6. Query staging table to build materialized creative table
+    # 2.2.6. Query staging table to build materialized table for supplier
+        print(f"🔄 [MART] Querying staging Facebook ad insights table {staging_table_ad} to build materialized table for supplier creative performance...")
+        logging.info(f"🔄 [MART] Querying staging Facebook ad insights table {staging_table_ad} to build materialized table for supplier creative performance...")
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_creative_supplier}`
             PARTITION BY ngay
@@ -471,7 +482,7 @@ def mart_creative_supplier() -> None:
                 SELECT
                     a.*,
                     s.supplier_name AS supplier_name
-                FROM `{staging_table_creative}` a
+                FROM `{staging_table_ad}` a
                 LEFT JOIN `{temp_table_id}` s
                   ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.ma_ngan_sach_cap_1 = 'NC'
@@ -513,36 +524,37 @@ def mart_creative_supplier() -> None:
         bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative_supplier}`"
         row_count = list(bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
-        logging.info(f"✅ [MART] Successfully created {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
-
+        print(f"✅ [MART] Successfully built materialized table {mart_table_creative_supplier} with {row_count} row(s) for Facebook supplier creative performance.")
+        logging.info(f"✅ [MART] Successfully built materialized table {mart_table_creative_supplier} with {row_count} row(s) for Facebook supplier creative performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
+        print(f"❌ [MART] Failed to build materialized table for Facebook supplier creative performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook supplier creative performance due to {e}.")
     finally:
         try:
+            print(f"🔄 [MART] Facebook supplier creative performance process is completed then supplier metadata temporary table deletion will be proceeding...")
+            logging.info(f"🔄 [MART] Facebook supplier creative performance process is completed then supplier metadata temporary table deletion will be proceeding...")
             bigquery_client.delete_table(temp_table_id, not_found_ok=True)
-            print(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
-            logging.info(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+            print(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
+            logging.info(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
         except Exception as cleanup_error:
-            print(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
-            logging.warning(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
+            print(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
+            logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
 
 # 2.3. Build materialized table for Facebook festival creative performance by union all staging tables
 def mart_creative_festival() -> None:
-    print("🚀 [MART] Starting to build materialized table for Facebook creative performance (Festival only)...")
-    logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (Festival only)...")
+    print("🚀 [MART] Starting to build materialized table for Facebook festival creative performance...")
+    logging.info("🚀 [MART] Starting to build materialized table for Facebook festival creative performance...")
 
     # 2.3.1. Prepare table_id
     try:
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
-        print(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Festival creative performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Festival creative performance...")
+        print(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook festival creative performance...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table} to build materialized table for Facebook festival creative performance...")
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_creative_performance"
-        print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
-        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Festival creative performance...")
+        print(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook festival creative performance...")
+        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_creative} for Facebook festival creative performance...")
 
     # 2.3.2. Query all staging table(s)
         try:
@@ -590,8 +602,8 @@ def mart_creative_festival() -> None:
         client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative}`"
         row_count = list(client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Festival creative performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Festival creative performance.")
+        print(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Facebook festival creative performance.")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Facebook festival creative performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Festival creative performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Festival creative performance due to {e}.")
+        print(f"❌ [MART] Failed to build materialized table for Facebook festival creative performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook festival creative performance due to {e}.")

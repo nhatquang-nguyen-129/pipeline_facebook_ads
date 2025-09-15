@@ -24,16 +24,16 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging capability for tracking process execution and errors
+# Add logging ultilities for integraton
 import logging
 
-# Add Python Pandas library for data processing
-import pandas as pd
-
-# Add time utilities for retry delay and datetime handling
+# Add time ultilities for integration
 import time
 
-# Add Facebook SDK components for accessing objects
+# Add Python Pandas libraries for integration
+import pandas as pd
+
+# Add Facebook Business modules for integration
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adset import AdSet
@@ -41,10 +41,10 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.exceptions import FacebookRequestError
 
-# Add Google Secret Manager libraries for integration
+# Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
 
-# Add internal Facebook module for data handling
+# Add internal Facebook modules for handling
 from config.schema import ensure_table_schema
 
 # Get environment variable for Company

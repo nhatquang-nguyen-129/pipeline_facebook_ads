@@ -22,13 +22,13 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging capability for tracking process execution and errors
+# Add logging ultilities for integraton
 import logging
 
-# Add Python Pandas library for handling
+# Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Python "re" library for handling
+# Add Python "re" libraries for integraton
 import re
 
 # Get optimization_goal mapping to action_type used for calculating main result type

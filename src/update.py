@@ -22,41 +22,41 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging capability for tracking process execution and errors
+# Add logging ultilities for integration
 import logging
 
-# Add Python Pandas library for data processing
-import pandas as pd
-
-# Add Python "re" library for expression matching
-import re
-
-# Add Python 'time' library for tracking execution time and implementing delays
-import time
-
-# Add Python 'datetime' library for datetime manipulation and timezone handling
+# Add Python 'datetime' libraries for integration
 from datetime import (
     datetime,
     timedelta,
     timezone
 )
 
-# Add Google Authentication libraries for integration
+# Add Python Pandas libraries for integration
+import pandas as pd
+
+# Add Python "re" libraries for integration
+import re
+
+# Add Python 'time' libraries for integration
+import time
+
+# Add Google Authentication modules for integration
 from google.auth.exceptions import DefaultCredentialsError
 
-# Add Google API Core libraries for integration
+# Add Google API Core modules for integration
 from google.api_core.exceptions import NotFound
 
-# Add Google Cloud libraries for integration
+# Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add Google Secret Manager libraries for integration
+# Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
 
-# Add Facebook Business libraries for integration
+# Add Facebook Business modules for integration
 from facebook_business.api import FacebookAdsApi
 
-# Add internal Facebook module for data handling
+# Add internal Facebook module for handling
 from src.ingest import (
     ingest_campaign_metadata,
     ingest_adset_metadata,
@@ -481,12 +481,3 @@ def update_ad_insights(start_date: str, end_date: str):
     elapsed = round(time.time() - start_time, 2)
     print(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads ad insights update in {elapsed}s.")
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
-    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
-    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
-    args = parser.parse_args()
-
-    update_ad_insights(start_date=args.start_date, end_date=args.end_date)
