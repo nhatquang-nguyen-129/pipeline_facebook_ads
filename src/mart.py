@@ -25,11 +25,25 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add logging capability for tracking process execution and errors
 import logging
 
+# Add Python Pandas library for data processing
+import pandas as pd
+
 # Add Google Authentication libraries for integration
+from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
+from google.auth.transport.requests import AuthorizedSession
+
+# Add Google Spreadsheets API libraries for integration
+import gspread
 
 # Add Google CLoud libraries for integration
 from google.cloud import bigquery
+
+# Add Google Secret Manager for integration
+from google.cloud import secretmanager
+
+# Add UUID libraries for integration
+import uuid
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -123,20 +137,67 @@ def mart_campaign_supplier() -> None:
 
     # 1.2.1. Prepare table_id
     try:
-        raw_supplier_table = f"{PROJECT}.{COMPANY}_dataset_budget_api_raw.{COMPANY}_table_budget_marketing_supplier_supplier_metadata"
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_campaign_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_performance"
 
-        print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier list {raw_supplier_table}...")
+        print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
 
-    # 1.2.2. Query staging table(s)
+    # 1.2.2. Initialize Google BigQuery client
         try:
-            client = bigquery.Client(project=PROJECT)
+            print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud project {PROJECT}...")
+            bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
+            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
         except DefaultCredentialsError as e:
-            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+            raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to your credentials.") from e
+
+    # 1.2.3. Initialize Google Secret Manager client
+        try:
+            print(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud project {PROJECT}...")
+            secret_client = secretmanager.SecretManagerServiceClient()
+            print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
+            logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}...")
+        except Exception as e:
+            print(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.")
+            raise
+
+    # 1.2.4. Initialize Google Sheets client
+        try:
+            print(f"🔍 [MART] Initializing Google Sheets client...")
+            logging.info(f"🔍 [MART] Initializing Google Sheets client....")
+            scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+            creds, _ = default(scopes=scopes)
+            gspread_client = gspread.Client(auth=creds)
+            gspread_client.session = AuthorizedSession(creds)
+            print(f"✅ [MART] Successfully initialized Google Sheets client with scope {scopes}.")
+            logging.info(f"✅ [MART] Successfully initialized Google Sheets client with scope {scopes}.")
+        except Exception as e:
+            print(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
+            raise
+
+    # 1.2.5. Query supplier metadata from Google Sheets
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_sheet_id_supplier"
+        secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+        response = secret_client.access_secret_version(name=secret_name)
+        sheet_id_supplier = response.payload.data.decode("UTF-8")
+        worksheet = gspread_client.open_by_key(sheet_id_supplier).worksheet("supplier")
+        records = worksheet.get_all_records()
+        df_supplier = pd.DataFrame(records)        
+        if "supplier_name" not in df_supplier.columns:
+            raise RuntimeError("❌ [MART] Missing 'supplier_name' column in supplier sheet.")
+        temp_table_id = f"{PROJECT}.{mart_dataset}.temp_supplier_{uuid.uuid4().hex[:8]}"
+        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+        bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
+        print(f"✅ [MART] Temp supplier table {temp_table_id} created with {len(df_supplier)} row(s).")
+
+    # 1.2.6. Query staging table to build materialized table for supplier
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_campaign_supplier}`
             PARTITION BY ngay
@@ -147,7 +208,7 @@ def mart_campaign_supplier() -> None:
                     a.*,
                     s.supplier_name AS supplier_name
                 FROM `{staging_table_campaign}` a
-                LEFT JOIN `{raw_supplier_table}` s
+                LEFT JOIN `{temp_table_id}` s
                   ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.ma_ngan_sach_cap_1 = 'NC'
                   AND a.date IS NOT NULL
@@ -179,15 +240,22 @@ def mart_campaign_supplier() -> None:
                 END AS trang_thai
             FROM base
         """
-        client.query(query).result()
+        bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_campaign_supplier}`"
-        row_count = list(client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
-
+        row_count = list(bigquery_client.query(count_query).result())[0]["row_count"]
+        print(f"✅ [MART] Successfully created {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
+        logging.info(f"✅ [MART] Successfully created {mart_table_campaign_supplier} with {row_count} row(s) for Facebook campaign performance (Supplier).")
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for Facebook campaign performance (Supplier) due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook campaign performance (Supplier) due to {e}.")
+    finally:
+        try:
+            bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+            print(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+            logging.info(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+        except Exception as cleanup_error:
+            print(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
+            logging.warning(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
 
 # 1.3. Build materialzed table for Facebook festival campaign performance by union all staging tables
 def mart_campaign_festival() -> None:
@@ -324,21 +392,65 @@ def mart_creative_supplier() -> None:
     print("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook creative performance (Supplier)...")
 
-    # 2.2.1. Prepare table_id
     try:
-        raw_supplier_table = f"{PROJECT}.{COMPANY}_dataset_budget_api_raw.{COMPANY}_table_budget_marketing_supplier_supplier_metadata"
+        # 2.2.1. Prepare table_id
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"     
+        staging_table_creative = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
         mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
         mart_table_creative_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_creative_performance"
-        print(f"🔍 [MART] Using staging table {staging_table} with supplier list {raw_supplier_table}...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table} with supplier list {raw_supplier_table}...")
 
-    # 2.2.2. Query staging table(s)
+        print(f"🔍 [MART] Using staging table {staging_table_creative} with supplier metadata...")
+        logging.info(f"🔍 [MART] Using staging table {staging_table_creative} with supplier metadata...")
+
+        # 2.2.2. Initialize BigQuery client
         try:
-            client = bigquery.Client(project=PROJECT)
+            bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [MART] Successfully initialized BigQuery client for {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized BigQuery client for {PROJECT}.")
         except DefaultCredentialsError as e:
-            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+            raise RuntimeError("❌ [MART] Failed to initialize BigQuery client due to your credentials.") from e
+
+        # 2.2.3. Initialize Secret Manager client
+        try:
+            secret_client = secretmanager.SecretManagerServiceClient()
+            print("✅ [MART] Successfully initialized Secret Manager client.")
+            logging.info("✅ [MART] Successfully initialized Secret Manager client.")
+        except Exception as e:
+            print(f"❌ [MART] Failed to initialize Secret Manager client due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Secret Manager client due to {e}.")
+            raise
+
+        # 2.2.4. Initialize Google Sheets client
+        try:
+            scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+            creds, _ = default(scopes=scopes)
+            gspread_client = gspread.Client(auth=creds)
+            gspread_client.session = AuthorizedSession(creds)
+            print(f"✅ [MART] Successfully initialized Google Sheets client with scope {scopes}.")
+            logging.info(f"✅ [MART] Successfully initialized Google Sheets client with scope {scopes}.")
+        except Exception as e:
+            print(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
+            raise
+
+        # 2.2.5. Query supplier metadata from Google Sheets
+        secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_sheet_id_supplier"
+        secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
+        response = secret_client.access_secret_version(name=secret_name)
+        sheet_id_supplier = response.payload.data.decode("UTF-8")
+        worksheet = gspread_client.open_by_key(sheet_id_supplier).worksheet("supplier")
+        records = worksheet.get_all_records()
+        df_supplier = pd.DataFrame(records)
+
+        if "supplier_name" not in df_supplier.columns:
+            raise RuntimeError("❌ [MART] Missing 'supplier_name' column in supplier sheet.")
+
+        temp_table_id = f"{PROJECT}.{mart_dataset}.temp_supplier_{uuid.uuid4().hex[:8]}"
+        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+        bigquery_client.load_table_from_dataframe(df_supplier[["supplier_name"]], temp_table_id, job_config=job_config).result()
+        print(f"✅ [MART] Temp supplier table {temp_table_id} created with {len(df_supplier)} row(s).")
+
+        # 2.2.6. Query staging table to build materialized creative table
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_creative_supplier}`
             PARTITION BY ngay
@@ -348,10 +460,11 @@ def mart_creative_supplier() -> None:
                 SELECT
                     a.*,
                     s.supplier_name AS supplier_name
-                FROM `{staging_table}` a
-                LEFT JOIN `{raw_supplier_table}` s
+                FROM `{staging_table_creative}` a
+                LEFT JOIN `{temp_table_id}` s
                   ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
                 WHERE a.ma_ngan_sach_cap_1 = 'NC'
+                  AND a.date IS NOT NULL
             )
             SELECT
                 SAFE_CAST(nhan_su AS STRING) AS nhan_su,
@@ -369,7 +482,7 @@ def mart_creative_supplier() -> None:
                 SAFE_CAST(vi_tri AS STRING) AS vi_tri,
                 SAFE_CAST(doi_tuong AS STRING) AS doi_tuong,
                 SAFE_CAST(dinh_dang AS STRING) AS dinh_dang,
-                SAFE_CAST(supplier_name AS STRING) AS supplier_name, -- thêm supplier_name
+                SAFE_CAST(supplier_name AS STRING) AS supplier_name,
                 CAST(date AS DATE) AS ngay,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
                 SAFE_CAST(result AS INT64) AS result,
@@ -386,14 +499,23 @@ def mart_creative_supplier() -> None:
                 END AS trang_thai
             FROM base
         """
-        client.query(query).result()
+        bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative_supplier}`"
-        row_count = list(client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
+        row_count = list(bigquery_client.query(count_query).result())[0]["row_count"]
+        print(f"✅ [MART] Successfully created {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
+        logging.info(f"✅ [MART] Successfully created {mart_table_creative_supplier} with {row_count} row(s) for Facebook creative performance (Supplier).")
+
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook creative performance (Supplier) due to {e}.")
+    finally:
+        try:
+            bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+            print(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+            logging.info(f"🧹 [MART] Temp supplier table {temp_table_id} deleted.")
+        except Exception as cleanup_error:
+            print(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
+            logging.warning(f"⚠️ [MART] Failed to delete temp table {temp_table_id} due to {cleanup_error}.")
 
 # 2.3. Build materialized table for Facebook festival creative performance by union all staging tables
 def mart_creative_festival() -> None:
