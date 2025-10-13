@@ -291,48 +291,43 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             return pd.DataFrame()
 
     # 2.1.9. Convert to Python DataFrame
-        print(f"🔄 [FETCH] Converting Facebook Ads metadata for {len(campaign_id_list)} Facebook campaign_id(s) to dataframe...")
-        logging.info(f"🔄 [FETCH] Converting metadata for {len(campaign_id_list)} Facebook campaign_id(s) to dataframe...")   
-        if not all_records:
-            print("⚠️ [FETCH] No Facebook campaign metadata fetched.")
-            logging.warning("⚠️ [FETCH] No Facebook campaign metadata fetched.")
-            return pd.DataFrame()
         try:
-            df = pd.DataFrame(all_records)
-            print(f"✅ [FETCH] Successfully converted Facebook campaign metadata to dataframe with {len(df)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully converted Facebook campaign metadata to dataframe with {len(df)} row(s).")        
+            print(f"🔄 [FETCH] Converting Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) to Python DataFrame...")
+            logging.info(f"🔄 [FETCH] Converting Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) to Python DataFrame...")  
+            fetch_df_flattened = pd.DataFrame(all_records)
+            print(f"✅ [FETCH] Successfully converted Facebook Ads campaign metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")
+            logging.info(f"✅ [FETCH] Successfully converted Facebook Ads campaign metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")        
         except Exception as e:
             print(f"❌ [FETCH] Faled to convert Facebook {len(df)} campaign metadata(s) due to {e}.")
             logging.error(f"❌ [FETCH] Faled to convert Facebook {len(df)} campaign metadata(s) due to {e}.")
             return pd.DataFrame()
 
-        # 2.1.6. Enforce schema
+    # 2.1.6. Enforce schema for Python DataFrame
         try:
-            print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")
-            logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook campaign metadata...")            
-            df = ensure_table_schema(df, "fetch_campaign_metadata")            
-            print(f"✅ [FETCH] Successfully enforced schema for {len(df)} row(s) of Facebook campaign metadata.")
-            logging.info(f"✅ [FETCH] Successfully enforced schema for {len(df)} row(s) of Facebook campaign metadata.")        
+            print(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of Facebook Ads campaign metadata...")
+            logging.info(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of Facebook Ads campaign metadata...")            
+            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_campaign_metadata")            
+            print(f"✅ [FETCH] Successfully enforced schema for {len(fetch_df_enforced)} row(s) of Facebook Ads campaign metadata.")
+            logging.info(f"✅ [FETCH] Successfully enforced schema for {len(fetch_df_enforced)} row(s) of Facebook Ads campaign metadata.")        
         except Exception as e:
-            print(f"❌ [FETCH] Failed to enforce schema for Facebook campaign metadata due to {e}.")
-            logging.error(f"❌ [FETCH] Failed to enforce schema for Facebook campaign metadata due to {e}.")
+            print(f"❌ [FETCH] Failed to enforce schema for Facebook Ads campaign metadata due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to enforce schema for Facebook Ads campaign metadata due to {e}.")
             return pd.DataFrame()
-        if not isinstance(df, pd.DataFrame):
-            print("❌ [FETCH] Final Facebook campaign metadata output is not a DataFrame.")
-            logging.error("❌ [FETCH] Final Facebook campaign metadata output is not a DataFrame.")
-            return pd.DataFrame()
-        print(f"✅ [FETCH] Successfully returned final Facebook campaign metadata dataframe with shape {df.shape}.")
-        logging.info(f"✅ [FETCH] Successfully returned final Facebook campaign metadata dataframe with shape {df.shape}.")
-        return df
+
+    # 2.1.7. Summarize fetch result(s)
+        fetch_df_final = fetch_df_enforced
+        print(f"✅ [FETCH] Successfully fetched Facebook Ads campaign metadata with {len(fetch_df_final)} row(s).")
+        logging.info(f"✅ [FETCH] Successfully fetched Facebook Ads campaign metadata with {len(fetch_df_final)} row(s).")
+        return fetch_df_final
     except Exception as e:
-        print(f"❌ [FETCH] Failed to fetch Facebook campaign metadata due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to fetch Facebook campaign metadata due to {e}.")
+        print(f"❌ [FETCH] Failed to fetch Facebook Ads campaign metadata due to {e}.")
+        logging.error(f"❌ [FETCH] Failed to fetch Facebook Ads campaign metadata due to {e}.")
         return pd.DataFrame()
 
-# 2.2. Fetch metadata for adset in the Facebook Ad Account
-def fetch_adset_metadata(adset_id_list: list[str], fields: list[str] = None) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch Facebook {len(adset_id_list)} adset metadata(s)...")
-    logging.info(f"🚀 [FETCH] Starting to fetch Facebook {len(adset_id_list)} adset metadata(s)...")
+# 2.2. Fetch adset metadata for Facebook Ads
+def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
 
     # 2.2.1. Validate input
     if not adset_id_list:
