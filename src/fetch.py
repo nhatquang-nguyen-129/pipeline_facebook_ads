@@ -179,7 +179,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
         raise ValueError("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
 
-    # 2.1.2. Prepare fields
+    # 2.1.2. Prepare fields for Facebook Ads campaign metadata
     fetch_fields_default = [
         "id", 
         "name", 
@@ -298,8 +298,8 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             print(f"✅ [FETCH] Successfully converted Facebook Ads campaign metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")
             logging.info(f"✅ [FETCH] Successfully converted Facebook Ads campaign metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")        
         except Exception as e:
-            print(f"❌ [FETCH] Faled to convert Facebook {len(df)} campaign metadata(s) due to {e}.")
-            logging.error(f"❌ [FETCH] Faled to convert Facebook {len(df)} campaign metadata(s) due to {e}.")
+            print(f"❌ [FETCH] Faled to convert Facebook Ads campaign metadata to Python DataFrame due to {e}.")
+            logging.error(f"❌ [FETCH] Faled to convert Facebook Ads campaign metadata to Python DataFrame due to {e}.")
             return pd.DataFrame()
 
     # 2.1.6. Enforce schema for Python DataFrame
@@ -329,90 +329,167 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
 
-    # 2.2.1. Validate input
-    if not adset_id_list:
-        print("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
-        logging.warning("⚠️ [FETCH] Empty Facebook adset_id_list provided.")
-        return pd.DataFrame()
+    # 2.2.1. Start timing the Facebook Ads adset metadata fetching process
+    start_time = time.time()
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
-    # 2.2.2. Prepare field(s)
-    default_fields = [
+    # 2.2.2. Validate input for Facebook Ads adset metadata
+    if not adset_id_list:
+        print("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+        logging.warning("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+        raise ValueError("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+    
+    # 2.2.3. Prepare field(s) for Facebook Ads adset metadata
+    fetch_fields_default = [
         "id",
         "name",
         "status",
         "effective_status",
         "campaign_id"
     ]
-    fetch_fields = fields if fields else default_fields
     all_records = []
-    print(f"🔍 [FETCH] Preparing to fetch Facebook adset metadata with {fetch_fields} field(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch Facebook adset metadata with {fetch_fields} field(s)...")
+    print(f"🔍 [FETCH] Preparing to fetch Facebook Ads adset metadata with {fetch_fields_default} field(s)...")
+    logging.info(f"🔍 [FETCH] Preparing to fetch Facebooks Ads adset metadata with {fetch_fields_default} field(s)...")
 
     try:
-        # 2.2.3. Get Facebook ad account ad information
-        print("🔍 [FETCH] Retrieving Facebook ad account information...")
-        logging.info("🔍 [FETCH] Retrieving Facebook ad account information...")        
+
+    # 2.2.4 Initialize Google Secret Manager client
+        try:
+            print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
+            google_secret_client = secretmanager.SecretManagerServiceClient()
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+        except DefaultCredentialsError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to credentials error.") from e
+        except PermissionDenied as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to permission denial.") from e
+        except NotFound as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client because secret not found.") from e
+        except GoogleAPICallError as e:
+            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to API call error.") from e
+        except Exception as e:
+            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client due to unexpected error {e}.") from e
+
+    # 2.2.5. Get Facebook Ads access token from Google Secret Manager
         try: 
-            secret_client = secretmanager.SecretManagerServiceClient()
-            secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
-            secret_name = f"projects/{PROJECT}/secrets/{secret_id}/versions/latest"
-            response = secret_client.access_secret_version(request={"name": secret_name})
-            account_id = response.payload.data.decode("utf-8")
-            account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
-            account_name = account_info.get("name", "Unknown")
+            print(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
+            token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
+            token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
+            token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
+            token_access_user = token_secret_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+
+    # 2.2.6. Initialize Facebook SDK session from access token
+        try:
+            print(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
+            logging.info(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
+            FacebookAdsApi.init(access_token=token_access_user, timeout=180)
+            print(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
+            logging.info(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
+
+    # 2.2.7. Get Facebook Ads account_id from Google Secret Manager
+        try:
+            print(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
+            account_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
+            account_secret_name = f"projects/{PROJECT}/secrets/{account_secret_id}/versions/latest"
+            account_secret_response = google_secret_client.access_secret_version(request={"name": account_secret_name})
+            account_id = account_secret_response.payload.data.decode("utf-8")
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
+
+    # 2.2.8. Make Facebook Ads API call for ad account informatiohn
+        try: 
+            print(f"🔍 [FETCH] Retrieving Facebook Ads ad account name for Facebook Ads ad account id {account_id}...")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad account name for Facebook Ads ad account id {account_id}...")    
+            account_id = token_secret_response.payload.data.decode("utf-8")
+            account_id_prefixed = AdAccount(f"act_{account_id}")
+            account_info = AdAccount(f"act_{account_id_prefixed}").api_get(fields=["name"])
+            account_name = account_info.get("name", "Unknown")       
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads ad account name {account_name} for ad account ID {account_id}.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads ad account name {account_name} for ad account ID {account_id}.")        
+            return account_info.get("name", "")
+        except FacebookRequestError as e:        
+            print(f"⚠️ [FETCH] Failed to retrieved Facebook Ads ad account name due to API Error {e.api_error_message()}.")
+            logging.warning(f"⚠️ [FETCH] Failed to retrieved Facebook Ads ad account name due to API Error {e.api_error_message()}.")
         except Exception as e:
             print(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager: {e}")
-        print(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
-        logging.info(f"✅ [FETCH] Successfully retrieved Facebook account ID {account_id} and account name {account_name} for {ACCOUNT} account.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook ad account ID for {ACCOUNT} account from Google Secret Manager: {e}")    
 
-        # 2.2.4. Loop through all adset_id(s)
+    # 2.2.9. Make Facebook Ads API call for adset metadata
         print(f"🔍 [FETCH] Retrieving metadata for {len(adset_id_list)} Facebook adset(s)...")
         logging.info(f"🔍 [FETCH] Retrieving metadata for {len(adset_id_list)} Facebook adset(s)...")
         for adset_id in adset_id_list:
             try:
-                adset = AdSet(fbid=adset_id).api_get(fields=fetch_fields)
-                record = {f: adset.get(f, None) for f in fetch_fields}
+                adset = AdSet(fbid=adset_id).api_get(fields=fetch_fields_default)
+                record = {f: adset.get(f, None) for f in fetch_fields_default}
                 record["adset_id"] = record.pop("id", None)
                 record["adset_name"] = record.pop("name", None)
                 record["account_id"] = account_id
                 record["account_name"] = account_name
                 all_records.append(record)
-            except FacebookRequestError as fb_err:
-                print(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {fb_err.api_error_message}.")
-                logging.warning(f"⚠️ [FETCH] Facebook API error while fetching adset {adset_id} due to {fb_err.api_error_message}.")
+            except FacebookRequestError as facebook_error_request:
+                print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata while fetching adset_id {adset_id} due to {facebook_error_request.api_error_message}.")
+                logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata while fetching adset_id {adset_id} due to {facebook_error_request.api_error_message}.")
             except Exception as e:
-                print(f"❌ [FETCH] Failed to fetch Facebook adset {adset_id} due to {e}.")
-                logging.error(f"❌ [FETCH] Failed to fetch Facebook adset {adset_id} due to {e}.")
+                print(f"❌ [FETCH] Failed to fetch Facebook Ads adset metadata for adset_id {adset_id} due to {e}.")
+                logging.error(f"❌ [FETCH] Failed to fetch Facebook Ads adset metadata for adset_id {adset_id} due to {e}.")
         if not all_records:
-            print("⚠️ [FETCH] No Facebook adset metadata fetched.")
-            logging.warning("⚠️ [FETCH] No Facebook adset metadata fetched.")
+            print("⚠️ [FETCH] No Facebook adset metadata retrieved then fetching is suspended.")
+            logging.warning("⚠️ [FETCH] No Facebook adset metadata retrieved then fetching is suspended.")
             return pd.DataFrame()
 
-        # 2.2.5. Convert to dataframe
-        print(f"🔄 [FETCH] Converting metadata for {len(adset_id_list)} Facebook adset(s) to DataFrame...")
-        logging.info(f"🔄 [FETCH] Converting metadata for {len(adset_id_list)} Facebook adset(s) to DataFrame...")  
+    # 2.2.10. Convert to Python DataFrame
         try:     
-            df = pd.DataFrame(all_records)       
-            print(f"✅ [FETCH] Successfully converted Facebook adset metadata to dataFrame with {len(df)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully converted Facebook adset metadata to dataFrame with {len(df)} row(s).")       
+            print(f"🔄 [FETCH] Converting Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) to Python DataFrame...")
+            logging.info(f"🔄 [FETCH] Converting Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) to Python DataFrame...")  
+            fetch_df_flattened = pd.DataFrame(all_records)       
+            print(f"✅ [FETCH] Successfully converted Facebook Ads adset metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")
+            logging.info(f"✅ [FETCH] Successfully converted Facebook Ads adset metadata to Python DataFrame with {len(fetch_df_flattened)} row(s).")       
         except Exception as e:
-            print(f"❌ [FETCH] Faled to convert Facebook adset metadata due to {e}.")
-            logging.error(f"❌ [FETCH] Faled to convert Facebook adset metadata due to {e}.")
+            print(f"❌ [FETCH] Faled to convert Facebook Ads adset metadata to Python DataFrame due to {e}.")
+            logging.error(f"❌ [FETCH] Faled to convert Facebook Ads adset metadata to Python DataFrame due to {e}.")
             return pd.DataFrame()
 
-        # 2.2.6. Enforce schema
-        print(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")
-        logging.info(f"🔄 [FETCH] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")        
-        df = ensure_table_schema(df, "fetch_adset_metadata")        
-        print(f"✅ [FETCH] Successfully enforced schema for {len(df)} row(s) of Facebook adset metadata.")
-        logging.info(f" [FETCH] Successfully enforced schema for {len(df)} row(s) of Facebook adset metadata.")
+    # 2.2.11. Enforce schema for Python DataFrame
+        try:
+            print(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of Facebook Ads adset metadata...")
+            logging.info(f"🔄 [FETCH] Enforcing schema for {len(fetch_df_flattened)} row(s) of Facebook Ads adset metadata...")        
+            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_adset_metadata")        
+            print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads adset metadata with {len(fetch_df_enforced)} row(s).")
+            logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads adset metadata with {len(fetch_df_enforced)} row(s).")
+        except Exception as e:
+            print(f"❌ [FETCH] Failed to enforce Facebook adset metadata due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to enforce Facebook adset metadata due to {e}.")
+            return pd.DataFrame()
+
+    # 2.2.12. Summarize fetch result(s)
+        fetch_df_final = fetch_df_enforced
+        elapsed = round(time.time() - start_time, 2)
+        print(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
+        logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
+        return fetch_df_final
     except Exception as e:
-        print(f"❌ [FETCH] Failed to enforce Facebook adset metadata due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to enforce Facebook adset metadata due to {e}.")
+        print(f"❌ [FETCH] Failed to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) due to {e}.")
+        logging.error(f"❌ [FETCH] Failed to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) due to {e}.")
         return pd.DataFrame()
-    return df
 
 # 2.3. Fetch metadata for all ads in the Facebook Ad Account
 def fetch_ad_metadata(ad_id_list: list[str], fields: list[str] = None) -> pd.DataFrame:
