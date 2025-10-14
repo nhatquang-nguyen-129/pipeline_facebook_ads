@@ -51,7 +51,6 @@ from google.api_core.exceptions import (
 )
 from google.auth import default
 from google.auth.exceptions import DefaultCredentialsError
-from google.auth.transport.requests import AuthorizedSession
 
 # Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
