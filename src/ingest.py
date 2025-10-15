@@ -60,7 +60,7 @@ from src.fetch import (
     fetch_campaign_insights, 
     fetch_ad_insights,
 )
-from config.schema import ensure_table_schema
+from src.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 

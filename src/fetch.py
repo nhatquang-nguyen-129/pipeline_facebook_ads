@@ -56,7 +56,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import secretmanager
 
 # Add internal Facebook modules for handling
-from config.schema import ensure_table_schema
+from src.schema import ensure_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
