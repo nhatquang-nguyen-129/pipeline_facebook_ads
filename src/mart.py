@@ -2,34 +2,48 @@
 ==================================================================
 FACEBOOK MATERIALIZATION MODULE
 ------------------------------------------------------------------
-This module builds the MART layer for Facebook Ads by aggregating 
-and transforming data from staging tables generated during the 
-raw layer ingestion process. 
+This module materializes the final layer for Facebook Ads by 
+aggregating and transforming data sourced from staging tables 
+produced during the raw data ingestion process.
 
-It focuses on preparing final analytical tables for cost tracking 
-and campaign performance reporting at a daily granularity.
+It serves as the final transformation stage, consolidating daily 
+performance and cost metrics into analytics-ready BigQuery tables 
+optimized for reporting, dashboarding, and business analysis.
 
-✔️ Dynamically detects all campaign staging tables for the target year  
-✔️ Applies transformation and standardization (type cast, parsing)  
-✔️ Writes partitioned & clustered MART tables to BigQuery for analytics  
+✔️ Dynamically identifies all available Facebook Ads staging tables  
+✔️ Applies data transformation, standardization, and type enforcement  
+✔️ Performs daily-level aggregation of campaign performance metrics  
+✔️ Creates partitioned and clustered MART tables in Google BigQuery  
+✔️ Ensures consistency and traceability across the data pipeline  
 
-⚠️ This module is strictly responsible for *MART layer construction*.  
-It does not handle raw data ingestion, API fetching, or enrichment logic.
+⚠️ This module is exclusively responsible for materialized layer  
+construction*. It does not perform data ingestion, API fetching, 
+or enrichment tasks.
 ==================================================================
 """
+
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging ultilities for integration
+# Add Python logging ultilities for integraton
 import logging
 
-# Add UUID ultilities for integration
-import uuid
+# Add Python time ultilities for integration
+import time
 
 # Add Python Pandas libraries for integraton
 import pandas as pd
+
+# Add Python UUID ultilities for integration
+import uuid
+
+# Add Google API Core modules for integration
+from google.api_core.exceptions import (
+    Forbidden,
+    GoogleAPICallError
+)
 
 # Add Google Authentication modules for integration
 from google.auth import default
@@ -66,29 +80,47 @@ LAYER = os.getenv("LAYER")
 # Get environment variable for Mode
 MODE = os.getenv("MODE")
 
-# 1. BUILD MONTHLY MATERIALIZED TABLE FOR CAMPAIGN PERFORMANCE FROM STAGING TABLE(S)
+# 1. BUILD MONTHLY MATERIALIZED TABLE FOR CAMPAIGN PERFORMANCE
 
 # 1.1. Build materialzed table for Facebook campaign performance by union all staging tables
 def mart_campaign_all() -> None:
     print(f"🚀 [MART] Starting to build materialized table for Facebook campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook campaign performance...")
 
-    # 1.1.1. Prepare table_id
-    try:
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-        print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook campaign performance...")
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
-        print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
-        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook campaign performance...")
+    # 1.1.1. Start timing the Facebook Ads campaign performance materialized table building process
+    start_time = time.time()
+    print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Query all staging table(s)
-        try:
-            client = bigquery.Client(project=PROJECT)
-        except DefaultCredentialsError as e:
-            raise RuntimeError("Cannot initialize BigQuery client. Check your credentials.") from e
+    # 1.1.2. Initialize Google BigQuery client
+    try:
+        print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        google_bigquery_client = bigquery.Client(project=PROJECT)
+        print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+    except DefaultCredentialsError as e:
+        raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to credentials error.") from e
+    except Forbidden as e:
+        raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to permission denial.") from e
+    except GoogleAPICallError as e:
+        raise RuntimeError("❌ [MART] Failed to initialize Google BigQuery client due to API call error.") from e
+    except Exception as e:
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client due to {e}.") from e
+    
+    # 1.1.3. Prepare table_id for Facebook Ads campaign performance
+    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
+    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
+    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+    mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
+    print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+
+    try:
+
+    # 1.1.4. Query all staging table(s) for Facebook Ads campaign performane
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_performance}`
             PARTITION BY ngay
@@ -121,14 +153,16 @@ def mart_campaign_all() -> None:
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
-        client.query(query).result()
+        print(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+        logging.info(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+        google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
-        row_count = list(client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook campaign performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook campaign performance.")
+        row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
+        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
     except Exception as e:
-        print(f"❌ [MART] Failed to build materialized table for Facebook campaign performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook campaign performance due to {e}.")
+        print(f"❌ [MART] Failed to build materialized table for Facebook Ads campaign performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook Ads campaign performance due to {e}.")
 
 # 1.2. Build materialzed table for Facebook supplier campaign performance by union all staging tables
 def mart_campaign_supplier() -> None:
