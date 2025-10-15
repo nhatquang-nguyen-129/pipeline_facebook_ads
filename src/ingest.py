@@ -97,15 +97,15 @@ MODE = os.getenv("MODE")
 
 # 1. INGEST FACEBOOK ADS METADATA
 
-# 1.1. Ingest Facebook campaign metadata from Facebook API to Google BigQuery raw table
+# 1.1. Ingest Facebook Ads campaign metadata from Facebook Ads API to Google BigQuery
 def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
 
     # 1.1.1. Start timing the Facebook Ads campaign metadata ingestion process
     start_time = time.time()
-    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Validate input for Facebook Ads campaign metadata ingestion
     if not campaign_id_list:
@@ -137,8 +137,8 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
 
     # 1.1.5. Enforce schema for Facebook Ads campaign metadata
         try:
-            print(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads campaign metadataw with {len(ingest_df_fetched)} row(s)...")
-            logging.info(f"🔄 [INGEST] Triggering to enforce schema for TikTok Ads campaign metadataw with {len(ingest_df_fetched)} row(s)...")
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads campaign metadataw with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads campaign metadataw with {len(ingest_df_fetched)} row(s)...")
             ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_campaign_metadata")
         except Exception as e:
             print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads campaign metadata due to {e}.")
@@ -186,14 +186,14 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
                         bq_type = "STRING"
                     schema.append(bigquery.SchemaField(col, bq_type))
                 table = bigquery.Table(table_id, schema=schema)
-                effective_partition = "date" if "date" in df.columns else None
+                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
                 if effective_partition:
                     table.time_partitioning = bigquery.TimePartitioning(
                         type_=bigquery.TimePartitioningType.DAY,
                         field=effective_partition
                     )
                 clustering_fields = ["campaign_id", "account_id"]
-                filtered_clusters = [f for f in clustering_fields if f in df.columns]
+                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
                 if filtered_clusters:
                     table.clustering_fields = filtered_clusters
                     print(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
@@ -257,404 +257,485 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         logging.error(f"❌ [INGEST] Failed to ingest Facebook Ads campaign metadata due to {e}.")
         return pd.DataFrame()
 
-# 1.2. Ingest Facebook adset metadata from Facebook API to Google BigQuery raw table
+# 1.2. Ingest Facebook Ads adset metadata from Facebook Ads API to Google BigQuery
 def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
-    print("🚀 [INGEST] Starting to ingest Facebook adset metadata...")
-    logging.info("🚀 [INGEST] Starting Facebook adset metadata...")
+    print(f"🚀 [FETCH] Starting to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
 
-    # 1.2.1. Validate input
+    # 1.2.1. Start timing the Facebook Ads adset metadata ingestion process
+    start_time = time.time()
+    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+    # 1.2.2. Validate input for Facebook Ads adset metadata ingestion
     if not adset_id_list:
-        print("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
-        logging.warning("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook adset_id_list provided.")
+        print("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
+        logging.warning("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
 
-    # 1.2.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Triggering to fetch Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook adset metadata for {len(adset_id_list)} adset_id(s) from API...")
-        df = fetch_adset_metadata(adset_id_list=adset_id_list)
-        if df.empty:
-            print("⚠️ [INGEST] Empty Facebook adset metadata returned.")
-            logging.warning("⚠️ [INGEST] Empty Facebook adset metadata returned.")
+
+    # 1.2.3. Trigger to fetch Facebook Ads adset metadata
+        try:
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s)...")
+            ingest_df_fetched = fetch_adset_metadata(adset_id_list=adset_id_list)
+            if ingest_df_fetched.empty:
+                print("⚠️ [INGEST] Empty Facebook Ads adset metadata returned then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads adset metadata returned then ingestion is suspended.")
+                return pd.DataFrame()
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads adset metadata fetching due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads adset metadata fetching due to {e}.")
             return pd.DataFrame()
+
+    # 1.2.4. Prepare table_id for Facebook Ads adset metadata ingestion
+        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
+        print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) with Google BigQuery table_id {table_id}...")
+        logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata for {len(adset_id_list)} adset_id(s) with Google BigQuery table_id {table_id}...")
+
+    # 1.2.5. Enforce schema for Facebook Ads adset metadata
+        try:
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads adset metadata with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads adset metadata with {len(ingest_df_fetched)} row(s)...")
+            ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_adset_metadata")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads adset metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads adset metadata due to {e}.")
+            raise 
+
+    # 1.2.6. Delete existing row(s) or create new table if it not exist
+        try:
+            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()    
+            try:
+                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                google_bigquery_client = bigquery.Client(project=PROJECT)
+                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            except DefaultCredentialsError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+            except Forbidden as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
+            except GoogleAPICallError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
+            except Exception as e:
+                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+            try:
+                print(f"🔍 [INGEST] Checking Facebook Ads adset metadata table {table_id} existence...")
+                logging.info(f"🔍 [INGEST] Checking Facebook Ads adset metadata table {table_id} existence...")
+                google_bigquery_client.get_table(table_id)
+                table_exists = True
+            except Exception:
+                table_exists = False
+            if not table_exists:
+                print(f"⚠️ [INGEST] Facebook Ads adset metadata table {table_id} not found then table creation will be proceeding...")
+                logging.info(f"⚠️ [INGEST] Facebook Ads adset metadata table {table_id} not found then table creation will be proceeding..")
+                schema = []
+                for col, dtype in ingest_df_deduplicated.dtypes.items():
+                    if dtype.name.startswith("int"):
+                        bq_type = "INT64"
+                    elif dtype.name.startswith("float"):
+                        bq_type = "FLOAT64"
+                    elif dtype.name == "bool":
+                        bq_type = "BOOL"
+                    elif "datetime" in dtype.name:
+                        bq_type = "TIMESTAMP"
+                    else:
+                        bq_type = "STRING"
+                    schema.append(bigquery.SchemaField(col, bq_type))
+                table = bigquery.Table(table_id, schema=schema)
+                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
+                if effective_partition:
+                    table.time_partitioning = bigquery.TimePartitioning(
+                        type_=bigquery.TimePartitioningType.DAY,
+                        field=effective_partition
+                    )
+                clustering_fields = ["adset_id", "account_id"]
+                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
+                if filtered_clusters:
+                    table.clustering_fields = filtered_clusters
+                    print(f"🔍 [INGEST] Creating Facebook Ads adset metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads adset metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
+                table = google_bigquery_client.create_table(table)
+                print(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+                logging.info(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+            else:
+                print(f"🔄 [INGEST] Facebook Ads adset metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Facebook Ads adset metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
+                unique_keys = ingest_df_deduplicated[["adset_id", "account_id"]].dropna().drop_duplicates()
+                if not unique_keys.empty:
+                    temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
+                    join_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in ["adset_id", "account_id"]
+                    ])
+                    delete_query = f"""
+                        DELETE FROM `{table_id}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temp_table_id}` AS temp
+                            WHERE {join_condition}
+                        )
+                    """
+                    result = google_bigquery_client.query(delete_query).result()
+                    google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+                    deleted_rows = result.num_dml_affected_rows
+                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads adset metadata {table_id}.")
+                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads adset metadata {table_id}.")
+                else:
+                    print(f"⚠️ [INGEST] No unique adset_id and account_id keys found in Facebook Ads adset metadata table {table_id} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique adset_id and account_id keys found in Facebook Ads adset metadata table {table_id} then existing row(s) deletion is skipped.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads adset metadata ingestion due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads adset metadata ingestion due to {e}.")
+            raise
+
+    # 1.2.7. Upload Facebook Ads adset metadata to Google BigQuerys
+        try:
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads adset metadata to Google BigQuery table {table_id}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads adset metadata to Google BigQuery table {table_id}...")
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
+            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads adset metadata to Google BigQuery table {table_id}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads adset metadata to Google BigQuery table {table_id}.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to upload Facebok Ads adset metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads adset metadata due to {e}.")
+            raise
+
+    # 1.2.8. Summarize ingestion result(s)
+        ingest_df_final = ingest_df_deduplicated
+        elapsed = round(time.time() - start_time, 2)
+        print(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        return ingest_df_final
     except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger Facebook adset metadata fetch due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger Facebook adset metadata fetch due to {e}.")
+        print(f"❌ [INGEST] Failed to ingest Facebook Ads adset metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to ingest Facebook Ads adset metadata due to {e}.")
         return pd.DataFrame()
 
-    # 1.2.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook adset metadata for {len(adset_id_list)} adset_id(s) with table_id {table_id}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook adset metadata for {len(adset_id_list)} adset_id(s) with table_id {table_id}...")
-
-    # 1.2.4. Enforce schema for Facebook adset metadata
-    try:
-        print(f"🔄 [INGEST] Trigger to enforce schema for {len(df)} row(s) of Facebook adset metadata...")
-        logging.info(f"🔄 [INGEST] Enforcing schema for {len(df)} row(s) of Facebook adset metadata...")
-        df = ensure_table_schema(df, "ingest_adset_metadata")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook adset metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook adset metadata due to {e}.")
-        return df
-
-    # 1.2.5. Delete existing row(s) or create new table if it not exist
-    try:
-        print(f"🔍 [INGEST] Checking Facebook adset metadata table {table_id} existence...")
-        logging.info(f"🔍 [INGEST] Checking Facebook adset metadata table {table_id} existence...")
-        df = df.drop_duplicates()
-        try:
-            client = bigquery.Client(project=PROJECT)
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-        try:
-            client.get_table(table_id)
-            table_exists = True
-        except Exception:
-            table_exists = False
-        if not table_exists:
-            print(f"⚠️ [INGEST] Facebook adset metadata table {table_id} not found then table creation wil be proceeding...")
-            logging.info(f"⚠️ [INGEST] Facebook adset metadata table {table_id} not found then table creation wil be proceeding...")
-            schema = []
-            for col, dtype in df.dtypes.items():
-                if dtype.name.startswith("int"):
-                    bq_type = "INT64"
-                elif dtype.name.startswith("float"):
-                    bq_type = "FLOAT64"
-                elif dtype.name == "bool":
-                    bq_type = "BOOL"
-                elif "datetime" in dtype.name:
-                    bq_type = "TIMESTAMP"
-                else:
-                    bq_type = "STRING"
-                schema.append(bigquery.SchemaField(col, bq_type))
-            table = bigquery.Table(table_id, schema=schema)
-            effective_partition = "date" if "date" in df.columns else None
-            if effective_partition:
-                table.time_partitioning = bigquery.TimePartitioning(
-                    type_=bigquery.TimePartitioningType.DAY,
-                    field=effective_partition
-                )
-            clustering_fields = ["adset_id", "account_id"]
-            filtered_clusters = [f for f in clustering_fields if f in df.columns]
-            if filtered_clusters:
-                table.clustering_fields = filtered_clusters
-                print(f"🔍 [INGEST] Creating Facebook adset metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-                logging.info(f"🔍 [INGEST] Creating Facebook adset metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-            table = client.create_table(table)
-            print(f"✅ [INGEST] Successfully created Facebook adset metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-            logging.info(f"✅ [INGEST] Successfully created Facebook adset metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-        else:
-            print(f"🔄 [INGEST] Facebook adset metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
-            logging.info(f"🔄 [INGEST] Facebook adset metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
-            unique_keys = df[["adset_id", "account_id"]].dropna().drop_duplicates()
-            if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
-                join_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in ["adset_id", "account_id"]
-                ])
-                delete_query = f"""
-                    DELETE FROM `{table_id}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temp_table_id}` AS temp
-                        WHERE {join_condition}
-                    )
-                """
-                result = client.query(delete_query).result()
-                client.delete_table(temp_table_id, not_found_ok=True)
-                deleted_rows = result.num_dml_affected_rows
-                print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook adset metadata {table_id}.")
-                logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook adset metadata {table_id}.")
-            else:
-                print(f"⚠️ [INGEST] No unique (adset_id, account_id) keys found in Facebook adset metadata table {table_id} then existing row(s) deletion is skipped.")
-                logging.warning(f"⚠️ [INGEST] No unique (adset_id, account_id) keys found in Facebook adset metadata table {table_id} then existing row(s) deletion is skipped.")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed during Facebook adset metadata ingestion due to {e}.")
-        logging.error(f"❌ [INGEST] Failed during Facebook adset metadata ingestion due to {e}.")
-        raise
-
-    # 1.2.6. Upload Facebook adset metadata to Google BigQuery raw table
-    try:
-        print(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook adset metadata to {table_id}...")
-        logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook adset metadata to {table_id}...")
-        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-        client.load_table_from_dataframe(df, table_id, job_config=job_config).result()
-        print(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook adset metadata table {table_id}.")
-        logging.info(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook adset metadata table {table_id}.")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to upload Facebook adset metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to upload Facebook adset metadata due to {e}.")
-        raise
-    return df
-
-# 1.3. Ingest Facebook ad metadata from Facebook API to Google BigQuery raw table
+# 1.3. Ingest Facebook Ads ad metadata from Facebook Ads API to Google BigQuery
 def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
-    print("🚀 [INGEST] Starting to ingest Facebook ad metadata...")
-    logging.info("🚀 [INGEST] Starting Facebook ad metadata...")
+    print(f"🚀 [FETCH] Starting to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
 
-    # 1.3.1. Validate input
+    # 1.3.1. Start timing the Facebook Ads ad metadata ingestion process
+    start_time = time.time()
+    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+    # 1.3.2. Validate input for Facebook Ads ad metadata ingestion
     if not ad_id_list:
-        print("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
-        logging.warning("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
+        print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
 
-    # 1.3.2. Call Facebook API
     try:
-        print(f"🔍 [INGEST] Trigger to fetch Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Trigger to fetch Facebook ad metadata for {len(ad_id_list)} of ad_id(s) from API...")
-        df = fetch_ad_metadata(ad_id_list=ad_id_list)
-        if df.empty:
-            print("⚠️ [INGEST] Empty Facebook ad metadata returned.")
-            logging.warning("⚠️ [INGEST] Empty Facebook ad metadata returned.")
+
+    # 1.3.3. Trigger to fetch Facebook Ads ad metadata
+        try:
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+            ingest_df_fetched = fetch_ad_metadata(ad_id_list=ad_id_list)
+            if ingest_df_fetched.empty:
+                print("⚠️ [INGEST] Empty Facebook Ads ad metadata returned then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads ad metadata returned then ingestion is suspended.")
+                return pd.DataFrame()
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata fetching due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata fetching due to {e}.")
             return pd.DataFrame()
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger Facebook ad metadata fetch due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger Facebook ad metadata fetch due to {e}.")
-        return pd.DataFrame()
 
-    # 1.3.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
+    # 1.3.4. Prepare table_id for Facebook Ads ad metadata ingestion
+        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
+        print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
+        logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
 
-    # 1.3.4. Enforce schema for Facebook ad metadata
-    try:
-        print(f"🔄 [INGEST] Trigger to enforce schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
-        logging.info(f"🔄 [INGEST] Trigger to enforce schema for {len(ad_id_list)} row(s) of Facebook ad metadata...")
-        df = ensure_table_schema(df, "ingest_ad_metadata")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad metadata due to {e}.")
-        return df
-
-    # 1.3.5. Delete existing row(s) or create new table if it not exist
-    try:
-        print(f"🔍 [INGEST] Checking Facebook ad metadata table {table_id} existence...")
-        logging.info(f"🔍 [INGEST] Checking Facebook ad metadata table {table_id} existence...")
-        df = df.drop_duplicates()
+    # 1.3.5. Enforce schema for Facebook Ads ad metadata
         try:
-            client = bigquery.Client(project=PROJECT)
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
+            ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_ad_metadata")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad metadata due to {e}.")
+            raise 
+
+    # 1.3.6. Delete existing row(s) or create new table if it not exist
         try:
-            client.get_table(table_id)
-            table_exists = True
-        except Exception:
-            table_exists = False
-        if not table_exists:
-            print(f"⚠️ [INGEST] Facebook ad metadata table {table_id} not found then table creation will be proceeding...")
-            logging.info(f"⚠️ [INGEST] Facebook ad metadata table {table_id} not found then table creation will be proceeding...")
-            schema = []
-            for col, dtype in df.dtypes.items():
-                if dtype.name.startswith("int"):
-                    bq_type = "INT64"
-                elif dtype.name.startswith("float"):
-                    bq_type = "FLOAT64"
-                elif dtype.name == "bool":
-                    bq_type = "BOOL"
-                elif "datetime" in dtype.name:
-                    bq_type = "TIMESTAMP"
-                else:
-                    bq_type = "STRING"
-                schema.append(bigquery.SchemaField(col, bq_type))
-            table = bigquery.Table(table_id, schema=schema)
-            effective_partition = "date" if "date" in df.columns else None
-            if effective_partition:
-                table.time_partitioning = bigquery.TimePartitioning(
-                    type_=bigquery.TimePartitioningType.DAY,
-                    field=effective_partition
-                )
-            clustering_fields = ["ad_id", "account_id"]
-            filtered_clusters = [f for f in clustering_fields if f in df.columns]
-            if filtered_clusters:
-                table.clustering_fields = filtered_clusters
-                print(f"🔍 [INGEST] Creating Facebook ad metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-                logging.info(f"🔍 [INGEST] Creating Facebook ad metadata table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-            table = client.create_table(table)
-            print(f"✅ [INGEST] Successfully created Facebook ad metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-            logging.info(f"✅ [INGEST] Successfully created Facebook ad metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-        else:
-            print(f"🔄 [INGEST] Facebook ad metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
-            logging.info(f"🔄 [INGEST] Facebook ad metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
-            unique_keys = df[["ad_id", "account_id"]].dropna().drop_duplicates()
-            if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
-                join_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in ["ad_id", "account_id"]
-                ])
-                delete_query = f"""
-                    DELETE FROM `{table_id}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temp_table_id}` AS temp
-                        WHERE {join_condition}
+            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()    
+            try:
+                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                google_bigquery_client = bigquery.Client(project=PROJECT)
+                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            except DefaultCredentialsError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+            except Forbidden as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
+            except GoogleAPICallError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
+            except Exception as e:
+                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+            try:
+                print(f"🔍 [INGEST] Checking Facebook Ads ad metadata table {table_id} existence...")
+                logging.info(f"🔍 [INGEST] Checking Facebook Ads ad metadata table {table_id} existence...")
+                google_bigquery_client.get_table(table_id)
+                table_exists = True
+            except Exception:
+                table_exists = False
+            if not table_exists:
+                print(f"⚠️ [INGEST] Facebook Ads ad metadata table {table_id} not found then table creation will be proceeding...")
+                logging.info(f"⚠️ [INGEST] Facebook Ads ad metadata table {table_id} not found then table creation will be proceeding...")
+                schema = []
+                for col, dtype in ingest_df_deduplicated.dtypes.items():
+                    if dtype.name.startswith("int"):
+                        bq_type = "INT64"
+                    elif dtype.name.startswith("float"):
+                        bq_type = "FLOAT64"
+                    elif dtype.name == "bool":
+                        bq_type = "BOOL"
+                    elif "datetime" in dtype.name:
+                        bq_type = "TIMESTAMP"
+                    else:
+                        bq_type = "STRING"
+                    schema.append(bigquery.SchemaField(col, bq_type))
+                table = bigquery.Table(table_id, schema=schema)
+                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
+                if effective_partition:
+                    table.time_partitioning = bigquery.TimePartitioning(
+                        type_=bigquery.TimePartitioningType.DAY,
+                        field=effective_partition
                     )
-                """
-                result = client.query(delete_query).result()
-                client.delete_table(temp_table_id, not_found_ok=True)
-                deleted_rows = result.num_dml_affected_rows
-                print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook ad metadata table {table_id}.")
-                logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook ad metadata table {table_id}.")
+                clustering_fields = ["ad_id", "account_id"]
+                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
+                if filtered_clusters:
+                    table.clustering_fields = filtered_clusters
+                    print(f"🔍 [INGEST] Creating Facebook Ads ad metadata table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads ad metadata table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
+                table = google_bigquery_client.create_table(table)
+                print(f"✅ [INGEST] Successfully created Facebook Ads ad metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+                logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad metadata table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
             else:
-                print(f"⚠️ [INGEST] No unique (ad_id, account_id) keys found in Facebook ad metadata table {table_id} then existing row(s) deletion is skipped.")
-                logging.warning(f"⚠️ [INGEST] No unique (ad_id, account_id) keys found in Facebook ad metadata table {table_id} then existing row(s) deletion is skipped.")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed during Facebook ad metadata ingestion due to {e}.")
-        logging.error(f"❌ [INGEST] Failed during Facebook ad metadata ingestion due to {e}.")
-        raise
+                print(f"🔄 [INGEST] Facebook Ads ad metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Facebook Ads ad metadata table {table_id} exists then existing row(s) deletion will be proceeding...")
+                unique_keys = ingest_df_deduplicated[["ad_id", "account_id"]].dropna().drop_duplicates()
+                if not unique_keys.empty:
+                    temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
+                    join_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in ["ad_id", "account_id"]
+                    ])
+                    delete_query = f"""
+                        DELETE FROM `{table_id}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temp_table_id}` AS temp
+                            WHERE {join_condition}
+                        )
+                    """
+                    result = google_bigquery_client.query(delete_query).result()
+                    google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+                    deleted_rows = result.num_dml_affected_rows
+                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad metadata table {table_id}.")
+                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad metadata table {table_id}.")
+                else:
+                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook ad metadata table {table_id} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook ad metadata table {table_id} then existing row(s) deletion is skipped.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad metadata ingestion due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad metadata ingestion due to {e}.")
+            raise
 
-    # 1.3.6. Upload to Google BigQuery
-    try:
-        print(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad metadata to {table_id}...")
-        logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad metadata to {table_id}...")
-        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-        client.load_table_from_dataframe(df, table_id, job_config=job_config).result()
-        print(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook ad metadata table {table_id}.")
-        logging.info(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook ad metadata table {table_id}.")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to upload Facebook ad metadata due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to upload Facebook ad metadata due to {e}.")
-        raise
-    return df
+    # 1.3.7. Upload Facebook Ads ad metadata to Google BigQuery
+        try:
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {table_id}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {table_id}...")
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
+            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {table_id}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {table_id}.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
+            raise
 
-# 1.4. Ingest Facebook ad creatives for given ad_ids into Google BigQuery raw table
-def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
-    print("🚀 [INGEST] Starting to ingest Facebook ad creative...")
-    logging.info("🚀 [INGEST] Starting to ingest Facebook ad creative...")
-
-    # 1.4.1. Validate input for Facebook ad creative selective fetching
-    if not ad_id_list:
-        print("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
-        logging.warning("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook ad_id_list provided.")
-  
-    # 1.4.2. Call Facebook API
-    try:
-        print(f"🔍 [INGEST] Triggering to fetch Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
-        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook creative metadata for {len(ad_id_list)} ad_id(s) from API...")
-        df = fetch_ad_creative(ad_id_list)
-        if df.empty:
-            print("⚠️ [INGEST] No Facebook ad creative returned.")
-            logging.warning("⚠️ [INGEST] No Facebook ad creative returned.")
-            return pd.DataFrame()
+    # 1.3.8. Summarize ingestion result(s)
+        ingest_df_final = ingest_df_deduplicated
+        elapsed = round(time.time() - start_time, 2)
+        print(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        return ingest_df_final
     except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger Facebook ad creative fetch due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger Facebook ad creative fetch due to {e}.")
+        print(f"❌ [INGEST] Failed to ingest Facebook Ads ad metadata due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to ingest Facebook Ads ad metadata due to {e}.")
         return pd.DataFrame()
 
-    # 1.4.3. Prepare full table_id for raw layer in BigQuery
-    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-    table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad metadata for {len(ad_id_list)} ad_id(s) with table_id {table_id}...")
+# 1.4. Ingest Facebook Ads ad creative from Facebook Ads API into Google BigQuery
+def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
 
-    # 1.4.4 Enforce schema
+    # 1.4.1. Start timing the Facebook Ads ad creative ingestion process
+    start_time = time.time()
+    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+    # 1.4.2. Validate input for Facebook Ads ad creative ingestion
+    if not ad_id_list:
+        print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+
     try:
-        print(f"🔍 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad creative...")
-        logging.info(f"🔍 [INGEST] Triggering to enforce schema for {len(df)} row(s) of Facebook ad creative...")
-        df = ensure_table_schema(df, schema_type="ingest_ad_creative")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook ad creative due to {e}.")
-        return df
+  
+    # 1.4.3. Trigger to fetch Facebook Ads ad creative
+        try:
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+            ingest_df_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
+            if ingest_df_fetched.empty:
+                print("⚠️ [INGEST] Empty Facebook Ads ad creative returned then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads ad creative returned then ingestion is suspended.")
+                return pd.DataFrame()
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching due to {e}.")
+            return pd.DataFrame()
+
+    # 1.4.4. Prepare table_id for Facebook Ads ad creative ingestion
+        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+        print(f"🔍 [INGEST] Proceeding to ingest Facebook ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
+        logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
+
+    # 1.4.5. Enforce schema for Facebook Ads ad creative
+        try:
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+            ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_ad_creative")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative due to {e}.")
+            raise 
 
     # 1.4.5. Delete existing row(s) or create new table if it not exist
-    try:
-        print(f"🔍 [INGEST] Checking Facebook ad creative table {table_id} existence...")
-        logging.info(f"🔍 [INGEST] Checking Facebook ad creative table {table_id} existence...")
-        df = df.drop_duplicates()
         try:
-            client = bigquery.Client(project=PROJECT)
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-        try:
-            client.get_table(table_id)
-            table_exists = True
-        except Exception:
-            table_exists = False
-        if not table_exists:
-            print(f"⚠️ [INGEST] Facebook ad creative table {table_id} not found then table creation will be proceeding...")
-            logging.info(f"⚠️ [INGEST] Facebook ad creative table {table_id} not found then table creation will be proceeding...")
-            schema = []
-            for col, dtype in df.dtypes.items():
-                if dtype.name.startswith("int"):
-                    bq_type = "INT64"
-                elif dtype.name.startswith("float"):
-                    bq_type = "FLOAT64"
-                elif dtype.name == "bool":
-                    bq_type = "BOOL"
-                elif "datetime" in dtype.name:
-                    bq_type = "TIMESTAMP"
-                else:
-                    bq_type = "STRING"
-                schema.append(bigquery.SchemaField(col, bq_type))
-            table = bigquery.Table(table_id, schema=schema)
-            effective_partition = "date" if "date" in df.columns else None
-            if effective_partition:
-                table.time_partitioning = bigquery.TimePartitioning(
-                    type_=bigquery.TimePartitioningType.DAY,
-                    field=effective_partition
-                )
-            clustering_fields = ["ad_id", "account_id"]
-            filtered_clusters = [f for f in clustering_fields if f in df.columns]
-            if filtered_clusters:
-                table.clustering_fields = filtered_clusters
-                print(f"🔍 [INGEST] Creating Facebook ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition})...")
-                logging.info(f" [INGEST] Creating Facebook ad creative table {table_id} using clustering on {filtered_clusters} field(s) and partition on {effective_partition}...")
-            table = client.create_table(table)
-            print(f"✅ [INGEST] Successfully created Facebook ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-            logging.info(f"✅ [INGEST] Successfully created Facebook ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-        else:
-            print(f"🔄 [INGEST] Facebook ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-            logging.info(f"🔄 [INGEST] Facebook ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-            unique_keys = df[["ad_id", "account_id"]].dropna().drop_duplicates()
-            if not unique_keys.empty:
-                temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
-                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
-                join_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in ["ad_id", "account_id"]
-                ])
-                delete_query = f"""
-                    DELETE FROM `{table_id}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temp_table_id}` AS temp
-                        WHERE {join_condition}
+            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+            try:
+                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+                google_bigquery_client = bigquery.Client(project=PROJECT)
+                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            except DefaultCredentialsError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
+            except Forbidden as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
+            except GoogleAPICallError as e:
+                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
+            except Exception as e:
+                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
+            try:
+                print(f"🔍 [INGEST] Checking Facebook Ads ad creative table {table_id} existence...")
+                logging.info(f"🔍 [INGEST] Checking Facebook Ads ad creative table {table_id} existence...")
+                google_bigquery_client.get_table(table_id)
+                table_exists = True
+            except Exception:
+                table_exists = False
+            if not table_exists:
+                print(f"⚠️ [INGEST] Facebook Ads ad creative table {table_id} not found then table creation will be proceeding...")
+                logging.info(f"⚠️ [INGEST] Facebook Ads ad creative table {table_id} not found then table creation will be proceeding...")
+                schema = []
+                for col, dtype in ingest_df_deduplicated.dtypes.items():
+                    if dtype.name.startswith("int"):
+                        bq_type = "INT64"
+                    elif dtype.name.startswith("float"):
+                        bq_type = "FLOAT64"
+                    elif dtype.name == "bool":
+                        bq_type = "BOOL"
+                    elif "datetime" in dtype.name:
+                        bq_type = "TIMESTAMP"
+                    else:
+                        bq_type = "STRING"
+                    schema.append(bigquery.SchemaField(col, bq_type))
+                table = bigquery.Table(table_id, schema=schema)
+                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
+                if effective_partition:
+                    table.time_partitioning = bigquery.TimePartitioning(
+                        type_=bigquery.TimePartitioningType.DAY,
+                        field=effective_partition
                     )
-                """
-                result = client.query(delete_query).result()
-                client.delete_table(temp_table_id, not_found_ok=True)
-                deleted_rows = result.num_dml_affected_rows
-                print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook ad creative table {table_id}.")
-                logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook ad creative table {table_id}.")
+                clustering_fields = ["ad_id", "account_id"]
+                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
+                if filtered_clusters:
+                    table.clustering_fields = filtered_clusters
+                    print(f"🔍 [INGEST] Creating Facebook Ads ad creative table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads ad creative table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
+                table = google_bigquery_client.create_table(table)
+                print(f"✅ [INGEST] Successfully created Facebook Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+                logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
             else:
-                print(f"⚠️ [INGEST] No unique (ad_id, account_id) keys found in Facebook ad creative table {table_id} then existing row(s) deletion is skipped.")
-                logging.warning(f"⚠️ [INGEST] No unique (ad_id, account_id) keys found in Facebook ad creative table {table_id} then existing row(s) deletion is skipped.")
-    except Exception as e:
-        print(f"❌ [INGEST] Failed during Facebook ad creative ingestion due to {e}.")
-        logging.error(f"❌ [INGEST] Failed during Facebook ad creative ingestion due to {e}.")
-        raise
+                print(f"🔄 [INGEST] Facebook Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Facebook Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
+                unique_keys = ingest_df_deduplicated[["ad_id", "account_id"]].dropna().drop_duplicates()
+                if not unique_keys.empty:
+                    temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    google_bigquery_client.load_table_from_dataframe(unique_keys, temp_table_id, job_config=job_config).result()
+                    join_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in ["ad_id", "account_id"]
+                    ])
+                    delete_query = f"""
+                        DELETE FROM `{table_id}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temp_table_id}` AS temp
+                            WHERE {join_condition}
+                        )
+                    """
+                    result = google_bigquery_client.query(delete_query).result()
+                    google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
+                    deleted_rows = result.num_dml_affected_rows
+                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {table_id}.")
+                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {table_id}.")
+                else:
+                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad creative ingestion due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad creative ingestion due to {e}.")
+            raise
 
-    # 1.4.6. Upload to Google BigQuery
-    try:
-        print(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad creative to {table_id}...")
-        logging.info(f"🔍 [INGEST] Uploading {len(df)} row(s) of Facebook ad creative to {table_id}...")
-        job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-        client.load_table_from_dataframe(df, table_id, job_config=job_config).result()
-        print(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook ad creative.")
-        logging.info(f"✅ [INGEST] Successfully uploaded {len(df)} row(s) of Facebook ad creative.")
+    # 1.4.7. Upload Facebook Ads ad creative to Google BigQuery
+        try:
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}...")
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
+            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}.")
+        except Exception as e:
+            print(f"❌ [INGEST] Failed to upload Facebok Ads ad creative due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
+            raise
+
+    # 1.4.8. Summarize ingestion result(s)
+        ingest_df_final = ingest_df_deduplicated
+        elapsed = round(time.time() - start_time, 2)
+        print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
+        return ingest_df_final
     except Exception as e:
-        print(f"❌ [INGEST] Failed to upload Facebook ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to upload Facebook ad creative due to {e}.")
-        raise
-    return df
+        print(f"❌ [INGEST] Failed to ingest Facebook Ads ad creative due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to ingest Facebook Ads ad creative due to {e}.")
+        return pd.DataFrame()
 
 # 2. INGEST FACEBOOK ADS INSIGHTS FROM FACEBOOK MARKETING API TO GOOGLE BIGQUERY RAW TABLES
 
