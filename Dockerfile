@@ -13,5 +13,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy entire project
 COPY . .
 
-# Container entrypoint
+# Container main entrypoint
 ENTRYPOINT ["python", "main.py"]
