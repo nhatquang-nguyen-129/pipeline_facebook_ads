@@ -2,20 +2,22 @@
 ==================================================================
 FACEBOOK FETCHING MODULE
 ------------------------------------------------------------------
-This module is responsible for direct, authenticated access to the 
-Facebook Marketing API, encapsulating all logic required to 
-fetch raw campaign, ad, creative, and metadata records.
+This module handles authenticated data retrieval from the Facebook 
+Marketing API, consolidating all campaign, ad, creative, and metadata 
+fetching logic into a unified, maintainable structure for ingestion.
 
-It provides a clean interface to centralize API-related operations, 
-enabling reusable, testable, and isolated logic for data ingestion 
-pipelines without mixing transformation or storage responsibilities.
+It ensures reliable access to Facebook Ads data with controlled rate 
+limits, standardized field mapping, and structured outputs for 
+downstream enrichment and transformation stages.
 
-✔️ Initializes secure Facebook SDK sessions and retrieves credentials dynamically  
-✔️ Fetches data via API calls (with pagination) and returns structured DataFrames  
-✔️ Does not handle BigQuery upload, schema validation, or enrichment logic
+✔️ Initializes secure Facebook SDK sessions and retrieves credentials  
+✔️ Fetches campaign, ad, and creative data via authenticated API calls  
+✔️ Handles pagination, rate limiting, and error retries automatically  
+✔️ Returns normalized, schema-ready Python DataFrames for processing  
+✔️ Logs detailed runtime information for monitoring and debugging  
 
-⚠️ This module focuses only on *data retrieval from the API*. 
-It does not handle schema validation, data transformation, or 
+⚠️ This module focuses solely on *data retrieval and extraction*.  
+It does **not** perform schema enforcement, data enrichment, or 
 storage operations such as uploading to BigQuery.
 ==================================================================
 """
