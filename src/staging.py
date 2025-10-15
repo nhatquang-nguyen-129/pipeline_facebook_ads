@@ -41,7 +41,7 @@ from google.cloud import bigquery
 
 # Add internal Facebook module for handling
 from config.utils import remove_string_accents
-from config.schema import ensure_table_schema
+from src.schema import ensure_table_schema
 from src.enrich import (
     enrich_campaign_fields,
     enrich_ad_fields
@@ -136,22 +136,52 @@ def staging_campaign_insights() -> None:
                 continue
 
     # 1.1.4. Enrich insights
-            if not df_month.empty:
-                try:
-                    print(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
-                    logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
-                    df_month = enrich_campaign_fields(df_month, table_id=raw_table)
-                    if "nhan_su" in df_month.columns:
-                        df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
-                    all_dfs.append(df_month)
-                except Exception as e:
-                    print(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
-                    logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
-                    continue
+        if not df_month.empty:
+            try:
+                print(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
+                logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook campaign insights field(s) for {len(df_month)} row(s) from {raw_table}...")
+                
+                df_month = enrich_campaign_fields(df_month, table_id=raw_table)
+                
+                # Inline function: remove_string_accents
+                def remove_string_accents(text: str) -> str:
+                    if not isinstance(text, str):
+                        return text
+                    
+                    vietnamese_map = {
+                        'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+                        'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+                        'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+                        'đ': 'd',
+                        'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+                        'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+                        'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+                        'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+                        'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+                        'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+                        'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+                        'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+                        'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+                    }
+                    vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
+                    full_map = {**vietnamese_map, **vietnamese_map_upper}
+                    return ''.join(full_map.get(c, c) for c in text)
+                
+                if "nhan_su" in df_month.columns:
+                    df_month["nhan_su"] = df_month["nhan_su"].apply(remove_string_accents)
+                
+                all_dfs.append(df_month)
+            
+            except Exception as e:
+                print(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
+                logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook campaign insights due to {e}.")
+                continue
+
         if not all_dfs:
             print("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             logging.warning("⚠️ [STAGING] No data found in any raw Facebook campaign insights table(s).")
             return
+
         df_all = pd.concat(all_dfs, ignore_index=True)
         print(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
         logging.info(f"✅ [STAGING] Successfully combined {len(df_all)} row(s) from all Facebook raw campaign insights table(s).")
