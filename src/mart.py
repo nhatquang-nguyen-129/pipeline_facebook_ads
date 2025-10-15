@@ -84,8 +84,8 @@ MODE = os.getenv("MODE")
 
 # 1.1. Build materialzed table for Facebook campaign performance by union all staging tables
 def mart_campaign_all() -> None:
-    print(f"🚀 [MART] Starting to build materialized table for Facebook campaign performance...")
-    logging.info(f"🚀 [MART] Starting to build materialized table Facebook campaign performance...")
+    print(f"🚀 [MART] Starting to build materialized table for Facebook Ads campaign performance...")
+    logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads campaign performance...")
 
     # 1.1.1. Start timing the Facebook Ads campaign performance materialized table building process
     start_time = time.time()
@@ -153,21 +153,29 @@ def mart_campaign_all() -> None:
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
-        print(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
-        logging.info(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
-        google_bigquery_client.query(query).result()
-        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
-        row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
+        try:
+            print(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+            logging.info(f"🔍 [MART] Creating materialized table {mart_table_performance} for Facebook Ads campaign performance...")
+            google_bigquery_client.query(query).result()
+            count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
+            row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
+            print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
+            logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads campaign performance.")
+        except Exception as e:
+            print(f"❌ [MART] Failed to create materialized table for Facebook Ads campaign performance due to {e}.")
+            logging.error(f"❌ [MART] Failed to create materialized table for Facebook Ads campaign performance due to {e}.")
+
+    # 1.1.5. Summarize ingestion result(s)
+        print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization with {row_count} row(s).")
+        logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization with {row_count} row(s).")
     except Exception as e:
         print(f"❌ [MART] Failed to build materialized table for Facebook Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook Ads campaign performance due to {e}.")
 
 # 1.2. Build materialzed table for Facebook supplier campaign performance by union all staging tables
 def mart_campaign_supplier() -> None:
-    print("🚀 [MART] Starting to build materialized table for Facebook supplier campaign performance...")
-    logging.info("🚀 [MART] Starting to build materialized table for Facebook supplier campaign performance...")
+    print("🚀 [MART] Starting to build materialized table for Facebook Ads supplier campaign performance...")
+    logging.info("🚀 [MART] Starting to build materialized table for Facebook Ads supplier campaign performance...")
 
     # 1.2.1. Prepare table_id
     try:
