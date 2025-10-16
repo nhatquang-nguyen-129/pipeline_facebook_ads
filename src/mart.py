@@ -498,13 +498,15 @@ def mart_creative_all() -> None:
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.1.2. Prepare table_id
+    # 2.1.2. Prepare table_id for Facebook Ads creative performance
     staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
     staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+    print(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
+    logging.info(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
     mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_creative = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
-    print(f"🔍 [MART] Using staging table {staging_table_ad} for creative performance (All)...")
-    logging.info(f"🔍 [MART] Using staging table {staging_table_ad} for creative performance (All)...")
+    mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+    print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...")
+    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...") 
 
     # 2.1.3. Initialize Google BigQuery client
     try:
@@ -517,12 +519,14 @@ def mart_creative_all() -> None:
     except Exception as e:
         mart_section_succeeded["2.1.3. Initialize Google BigQuery client"] = False
         mart_section_failed.append("2.1.3. Initialize Google BigQuery client")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client due to {e}.") from e
+        print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
-    # 2.1.2. Query staging table(s) for Facebook Ads creative performance materialization
+    # 2.1.4. Query staging table(s) for Facebook Ads creative performance materialization
     try:
         query = f"""
-            CREATE OR REPLACE TABLE `{mart_table_creative}`
+            CREATE OR REPLACE TABLE `{mart_table_all}`
             PARTITION BY ngay
             CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
             AS
@@ -558,19 +562,33 @@ def mart_creative_all() -> None:
                 END AS trang_thai
             FROM `{staging_table_ad}`
         """
-        print(f"🔄 [MART] Querying staging Facebook Ads ad insights table {staging_table_ad} to build materialized table for campaign performance...")
-        logging.info(f"🔄 [MART] Querying staging Facebook Ads ad insights table {staging_table_ad} to build materialized table for campaign performance...")        
+        print(f"🔄 [MART] Querying staging Facebook Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")
+        logging.info(f"🔄 [MART] Querying staging Facebook Ads ad insights table {staging_table_ad} to create or replace materialized table for creative performance...")       
         google_bigquery_client.query(query).result()
-        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_creative}`"
+        count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_all}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Facebook Ads creative performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_creative} with {row_count} row(s) for Facebook Ads creative performance.")
-        mart_section_succeeded["2.1.2. Query staging table(s) for Facebook Ads creative performance materialization"] = True
+        print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for Facebook Ads creative performance with {row_count} row(s).")
+        logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for Facebook Ads creative performance with {row_count} row(s).")
+        mart_section_succeeded["2.1.4. Query staging table(s) for Facebook Ads creative performance materialization"] = True
     except Exception as e:
-        mart_section_succeeded["2.1.2. Query staging table(s) for Facebook Ads creative performance materialization"] = False
-        mart_section_failed.append("2.1.2. Query staging table(s) for Facebook Ads creative performance materialization")
-        print(f"❌ [MART] Failed to build materialized table for Facebook Ads creative performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook Ads creative performance due to {e}.")
+        mart_section_succeeded["2.1.4. Query staging table(s) for Facebook Ads creative performance materialization"] = False
+        mart_section_failed.append("2.1.4. Query staging table(s) for Facebook Ads creative performance materialization")
+        print(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads creative performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads creative performance due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads creative performance due to {e}.") from e
+
+    # 2.1.5. Summarize ingestion result(s)
+    finally:
+        elapsed = round(time.time() - start_time, 2)
+        if mart_section_failed:
+            print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            mart_status_def = "failed"
+        else:
+            print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
+            mart_status_def = "success"
+        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
 
 # 2.2. Build materialized table for Facebook supplier creative performance by union all staging tables
 def mart_creative_supplier() -> None:
