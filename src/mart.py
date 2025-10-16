@@ -111,7 +111,9 @@ def mart_campaign_all() -> None:
     except Exception as e:
         mart_section_succeeded["1.1.3. Initialize Google BigQuery client"] = False
         mart_section_failed.append("1.1.3. Initialize Google BigQuery client")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client due to {e}.") from e
+        print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
     
     # 1.1.4. Query all staging table(s) for Facebook Ads campaign performane
     try:
@@ -188,20 +190,30 @@ def mart_campaign_supplier() -> None:
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")    
 
-    # 1.2.2 Initialize Google Secret Manager client
+    # 1.2.1. Prepare table_id for Facebook Ads supplier campaign performance
+    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+    mart_table_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_performance"
+    print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
+    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
+
+    # 1.2.3 Initialize Google Secret Manager client
     try:
         print(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [MART] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
         google_secret_client = secretmanager.SecretManagerServiceClient()
         print(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
         logging.info(f"✅ [MART] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-        mart_section_succeeded["1.2.2 Initialize Google Secret Manager client"] = True
+        mart_section_succeeded["1.2.3 Initialize Google Secret Manager client"] = True
     except Exception as e:
-        mart_section_succeeded["1.2.2 Initialize Google Secret Manager client"] = False
-        mart_section_failed.append("1.2.2 Initialize Google Secret Manager client")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google Secret Manager client due to {e}.") from e
+        mart_section_succeeded["1.2.3 Initialize Google Secret Manager client"] = False
+        mart_section_failed.append("1.2.3 Initialize Google Secret Manager client")
+        print(f"❌ [MART] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [MART] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
-    # 1.2.3. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager
+    # 1.2.4. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager
     try:
         print(f"🔍 [MART] Retrieving Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance from Google Secret Manager...")
         logging.info(f"🔍 [MART] Retrieving Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance from Google Secret Manager...")        
@@ -211,15 +223,15 @@ def mart_campaign_supplier() -> None:
         supplier_sheet_id = supplier_secret_response.payload.data.decode("UTF-8")
         print(f"✅ [MART] Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance from Google Secret Manager.")
         logging.info(f"✅ [MART] Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance from Google Secret Manager.")
-        mart_section_succeeded["1.2.3. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager"] = True
+        mart_section_succeeded["1.2.4. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager"] = True
     except Exception as e:
-        mart_section_succeeded["1.2.3. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager"] = False
-        mart_section_failed.append("1.2.3. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager")
+        mart_section_succeeded["1.2.4. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager"] = False
+        mart_section_failed.append("1.2.4. Get Google Sheets sheet_id containing suplier name list from Google Secret Manager")
         print(f"❌ [MART] Failed to retrieve Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance due to {e}.")
         logging.error(f"❌ [MART] Failed to retrieve Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to retrieve Google Sheets sheet_id containing suplier name list for Facebook Ads campaign performance due to {e}.") from e
 
-    # 1.2.4 Initialize Google Sheets client
+    # 1.2.5 Initialize Google Sheets client
     try:
         print(f"🔍 [MART] Initializing Google Sheets client for read-only access...")
         logging.info(f"🔍 [MART] Initializing Google Sheets client for read-only access...")
@@ -229,15 +241,15 @@ def mart_campaign_supplier() -> None:
         google_gspread_client.session = AuthorizedSession(creds)
         print(f"✅ [MART] Successfully initialized Google Sheets client with scopes {scopes}.")
         logging.info(f"✅ [MART] Successfully initialized Google Sheets client with scopes {scopes}.")
-        mart_section_succeeded["1.2.4 Initialize Google Sheets client"] = True
+        mart_section_succeeded["1.2.5. Initialize Google Sheets client"] = True
     except Exception as e:
-        mart_section_succeeded["1.2.4 Initialize Google Sheets client"] = False
-        mart_section_failed.append("1.2.4 Initialize Google Sheets client")
+        mart_section_succeeded["1.2.5. Initialize Google Sheets client"] = False
+        mart_section_failed.append("1.2.5. Initialize Google Sheets client")
         print(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
         logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")        
         raise RuntimeError(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.") from e
 
-    # 1.2.5. Get supplier name list from Google Sheets
+    # 1.2.6. Get supplier name list from Google Sheets
     try:       
         print(f"🔍 [MART] Retrieving suplier name list for Facebook Ads campaign performance from Google Sheets...")
         logging.info(f"🔍 [MART] Retrieving suplier name list for Facebook Ads campaign performance from Google Sheets...")         
@@ -247,34 +259,28 @@ def mart_campaign_supplier() -> None:
         _ = mart_df_supplier["supplier_name"]   
         print(f"✅ [MART] Successfully retrieved suplier name list for Facebook Ads campaign performance from Google Sheets.")
         logging.info(f"✅ [MART] Successfully retrieved suplier name list for Facebook Ads campaign performance from Google Sheets.")
-        mart_section_succeeded["1.2.5. Get supplier name list from Google Sheets"] = True
+        mart_section_succeeded["1.2.6. Get supplier name list from Google Sheets"] = True
     except Exception as e:
-        mart_section_succeeded["1.2.5. Get supplier name list from Google Sheets"] = False
-        mart_section_failed.append("1.2.5. Get supplier name list from Google Sheets")
+        mart_section_succeeded["1.2.6. Get supplier name list from Google Sheets"] = False
+        mart_section_failed.append("1.2.6. Get supplier name list from Google Sheets")
         print(f"❌ [MART] Failed to retrieve suplier name list for Facebook Ads campaign performance from Google Sheets due to {e}.")
         logging.error(f"❌ [MART] Failed to retrieve suplier name list for Facebook Ads campaign performance from Google Sheets due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to retrieve suplier name list for Facebook Ads campaign performance from Google Sheets due to {e}.") from e
     
-    # 1.2.6. Initialize Google BigQuery client
+    # 1.2.7. Initialize Google BigQuery client
     try:
         print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        mart_section_succeeded["1.2.6. Initialize Google BigQuery client"] = True
+        mart_section_succeeded["1.2.7. Initialize Google BigQuery client"] = True
     except Exception as e:
-        mart_section_succeeded["1.2.6. Initialize Google BigQuery client"] = False
-        mart_section_failed.append("1.2.6. Initialize Google BigQuery client")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client due to {e}.") from e
-
-    # 1.2.7. Prepare table_id for Facebook Ads supplier campaign performance
-    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_supplier = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_supplier_campaign_performance"
-    print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
-    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata...")
+        mart_section_succeeded["1.2.7. Initialize Google BigQuery client"] = False
+        mart_section_failed.append("1.2.7. Initialize Google BigQuery client")
+        print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
     # 1.2.8. Query supplier metadata for Facebook Ads campaign performance from Google Sheets
     try: 
@@ -295,8 +301,6 @@ def mart_campaign_supplier() -> None:
     
     # 1.2.9. Query staging table to build materialized table for Facebook Ads supplier campaign performance
     try: 
-        print(f"🔄 [MART] Querying staging Facebook campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")
-        logging.info(f"🔄 [MART] Querying staging Facebook campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_supplier}`
             PARTITION BY ngay
@@ -339,6 +343,8 @@ def mart_campaign_supplier() -> None:
                 END AS trang_thai
             FROM base
         """
+        print(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")
+        logging.info(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to build materialized table for supplier campaign performance...")        
         google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_supplier}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
