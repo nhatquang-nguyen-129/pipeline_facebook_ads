@@ -365,11 +365,12 @@ def mart_campaign_supplier() -> None:
             print(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
             logging.info(f"✅ [MART] Successfully deleted supplier metadata temporary table {temp_table_id}.")
             mart_section_succeeded["1.2.10. Delete temporary supplier metadata table after Facebook Ads campaign materialization"] = True
-        except Exception as cleanup_error:
+        except Exception as e:
             mart_section_succeeded["1.2.10. Delete temporary supplier metadata table after Facebook Ads campaign materialization"] = False
             mart_section_failed.append("1.2.10. Delete temporary supplier metadata table after Facebook Ads campaign materialization")
-            print(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
-            logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {cleanup_error}.")
+            print(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.")
+            logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.")
+            raise RuntimeError(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.") from e
 
     # 1.2.11. Summarize ingestion result(s)
     finally:
@@ -396,30 +397,32 @@ def mart_campaign_festival() -> None:
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads festival campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads festival campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")    
 
-    # 1.3.2. Initialize Google BigQuery client
+    # 1.3.2. Prepare table_id for Facebook Ads festival campaign performance materialization
+    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads festival campaign performance...")        
+    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads festival campaign performance...")
+    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+    mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_campaign_performance"
+    print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook Ads festival campaign performance...")
+    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Facebook Ads festival campaign performance...")
+
+    # 1.3.3. Initialize Google BigQuery client
     try:
         print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        mart_section_succeeded["1.3.2. Initialize Google BigQuery client"] = True
+        mart_section_succeeded["1.3.3. Initialize Google BigQuery client"] = True
     except Exception as e:
-        mart_section_succeeded["1.3.2. Initialize Google BigQuery client"] = False
-        mart_section_failed.append("1.3.2. Initialize Google BigQuery client")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client due to {e}.") from e
+        mart_section_succeeded["1.3.3. Initialize Google BigQuery client"] = False
+        mart_section_failed.append("1.3.3. Initialize Google BigQuery client")
+        print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
-    # 1.3.3. Prepare table_id for Facebook Ads festival campaign performance materialization
-    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign performance...")        
-    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook festival campaign performance...")
-    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_performance = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_marketing_festival_campaign_performance"
-    print(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Festival campaign performance...")
-    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_performance} for Festival campaign performance...")
-
-    # 1.3.2. Query staging table to build materialized table for Facebook Ads festival campaign performance
+    # 1.3.4. Query staging table to build materialized table for Facebook Ads festival campaign performance
     try:
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_performance}`
@@ -454,19 +457,21 @@ def mart_campaign_festival() -> None:
             WHERE date IS NOT NULL
               AND nganh_hang = 'FTV'
         """
+        print(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for festival campaign performance...")
+        logging.info(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for festival campaign performance...")
         google_bigquery_client.query(query).result()
         count_query = f"SELECT COUNT(1) AS row_count FROM `{mart_table_performance}`"
         row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
-        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads festival campaign performance.")
-        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} with {row_count} row(s) for Facebook Ads festival campaign performance.")
-        mart_section_succeeded["1.3.2. Query staging table to build materialized table for Facebook Ads festival campaign performance"] = True
+        print(f"✅ [MART] Successfully created materialized table {mart_table_performance} for Facebook Ads festival campaign performance with {row_count} row(s).")
+        logging.info(f"✅ [MART] Successfully created materialized table {mart_table_performance} for Facebook Ads festival campaign performance with {row_count} row(s).")
+        mart_section_succeeded["1.3.4. Query staging table to build materialized table for Facebook Ads festival campaign performance"] = True
     except Exception as e:
-        mart_section_succeeded["1.3.2. Query staging table to build materialized table for Facebook Ads festival campaign performance"] = False
-        mart_section_failed.append("1.3.2. Query staging table to build materialized table for Facebook Ads festival campaign performance")   
-        print(f"❌ [MART] Failed to build materialized table for Facebook festival campaign performance due to {e}.")
-        logging.error(f"❌ [MART] Failed to build materialized table for Facebook festival campaign performance due to {e}.")
+        mart_section_succeeded["1.3.4. Query staging table to build materialized table for Facebook Ads festival campaign performancee"] = False
+        mart_section_failed.append("1.3.4. Query staging table to build materialized table for Facebook Ads festival campaign performance")   
+        print(f"❌ [MART] Failed to build materialized table for Facebook Ads festival campaign performance due to {e}.")
+        logging.error(f"❌ [MART] Failed to build materialized table for Facebook Ads festival campaign performance due to {e}.")
 
-    # 1.3.4. Summarize ingestion result(s)
+    # 1.3.5. Summarize ingestion result(s)
     finally:
         elapsed = round(time.time() - start_time, 2)
         if mart_section_failed:
