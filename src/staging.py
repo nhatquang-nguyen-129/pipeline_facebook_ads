@@ -178,7 +178,7 @@ def staging_campaign_insights() -> dict:
         try:
             print(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
             logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
-            staging_df_enriched = enrich_campaign_fields(staging_df_concatenated, table_id=raw_table_campaign)
+            staging_df_enriched = enrich_campaign_fields(staging_df_concatenated, enrich_table_id=raw_table_campaign)
             if "nhan_su" in staging_df_enriched.columns:
                 vietnamese_map = {
                     'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
