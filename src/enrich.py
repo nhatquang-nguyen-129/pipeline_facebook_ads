@@ -570,10 +570,11 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
     print(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads ad insights for {len(enrich_df_input)}...")
     logging.info(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads ad insights for {len(enrich_df_input)}...")    
 
-    # 2.2.1. Start timing the Facebook Ads ad insights enrichment process
-    start_time = time.time()
-    print(f"🔍 [FETCH] Proceeding to enrich Facebook Ads ad insights at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to enrich Facebook Ads ad insights at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    # 2.2.1. Start timing the staging Facebook Ads ad insights enrichment process
+    enrich_time_start = time.time()
+    enrich_sections_status = {}
+    print(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
         enrich_df_processing = enrich_df_input.copy()
