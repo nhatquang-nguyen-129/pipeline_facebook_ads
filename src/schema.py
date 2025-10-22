@@ -18,8 +18,11 @@ It only provides schema utilities to support other pipeline components.
 ===================================================================
 """
 
-# Add external logging libraries for integration
+# Add Python logging ultilities for integration
 import logging
+
+# Add Python time ultilities for integration
+import time
 
 # Add external Python Pandas libraries for integration
 import pandas as pd
@@ -30,10 +33,16 @@ import numpy as np
 # 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
 # 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
-def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
-    
-    # 1.1.1. Define schema mapping for Facebook data type
-    mapping_facebook_schema = {
+def ensure_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
+
+    # 1.1.1. Start timing the raw Facebook Ads campaign insights enrichment process
+    schema_time_start = time.time()
+    schema_sections_status = {}
+    print(f"🔍 [SCHEMA] Proceeding to ensure schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [SCHEMA] Proceeding to ensure schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+
+    # 1.1.2. Define schema mapping for Facebook data type
+    schema_types_mapping = {
         "fetch_campaign_metadata": {
             "campaign_id": str,
             "campaign_name": str,
@@ -235,41 +244,77 @@ def ensure_table_schema(df: pd.DataFrame, schema_type: str) -> pd.DataFrame:
         },
     }
     
-    # 1.1.2. Validate that the given schema_type exists
-    if schema_type not in mapping_facebook_schema:
-        raise ValueError(f"❌ Unknown schema_type: {schema_type}")
+    try:
 
-    # 1.1.3. Retrieve the expected schema definition
-    expected_columns = mapping_facebook_schema[schema_type]
-    
-    # 1.1.4. Iterate through each expected column
-    for col, dtype in expected_columns.items():
-        if col not in df.columns:
-            df[col] = pd.NA
-
-    # 1.1.5. Handle numeric type include integer and float
+    # 1.1.3. Validate that the given schema_type_mapping exists
+        if schema_type_mapping not in schema_types_mapping:
+            schema_sections_status["1.1.3. Validate that the given schema_type_mapping exists"] = "failed"
+            print(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
+            logging.error(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
+            raise ValueError(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
+        else:
+            schema_columns_expected = schema_types_mapping[schema_type_mapping]
+            schema_sections_status["1.1.3. Validate that the given schema_type_mapping exists"] = "succeed"
+            print(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")
+            logging.info(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")       
+        
+    # 1.1.4. Enforce schema columns for Facebook Ads
         try:
-            if dtype in [int, float]:
-                df[col] = df[col].apply(
-                    lambda x: x if isinstance(x, (int, float, np.number, type(None))) else np.nan
-                )
-                df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(dtype)
-
-    # 1.1.6. Handle datetime type
-            elif dtype == "datetime64[ns, UTC]":
-                df[col] = pd.to_datetime(df[col], errors="coerce")
-                if df[col].dt.tz is None:
-                    df[col] = df[col].dt.tz_localize("UTC")
-                else:
-                    df[col] = df[col].dt.tz_convert("UTC")
-
-    # 1.1.7. Handle string or other object types
-            else:
-                df[col] = df[col].astype(dtype, errors="ignore")
-    
-    # 1.1.8. Reorder columns
+            print(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")
+            logging.info(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")
+            schema_df_enforced = schema_df_input.copy()
+            for schema_column_expected, schema_data_type in schema_columns_expected.items():
+                if schema_column_expected not in schema_df_enforced.columns: 
+                    schema_df_enforced[schema_column_expected] = pd.NA
+                try:
+                    if schema_data_type in [int, float]:
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].apply(
+                            lambda x: x if isinstance(x, (int, float, np.number, type(None))) else np.nan
+                        )
+                        schema_df_enforced[schema_column_expected] = pd.to_numeric(schema_df_enforced[schema_column_expected], errors="coerce").fillna(0).astype(schema_data_type)
+                    elif schema_data_type == "datetime64[ns, UTC]":
+                        schema_df_enforced[schema_column_expected] = pd.to_datetime(schema_df_enforced[schema_column_expected], errors="coerce")
+                        if schema_df_enforced[schema_column_expected].dt.tz is None:
+                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_localize("UTC")
+                        else:
+                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_convert("UTC")
+                    else:
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].astype(schema_data_type, errors="ignore")
+                except Exception as e:
+                    print(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
+                    logging.warning(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
+            schema_df_enforced = schema_df_enforced[[col for col in schema_column_expected]]        
+            print(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
+            logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
+            schema_sections_status["1.1.4. Enforce schema columns for Facebook Ads"] = "succeed"
         except Exception as e:
-            print(f"⚠️ [SCHEMA] Column '{col}' cannot be coerced to {dtype} due to {e}.")
-            logging.warning(f"⚠️ [SCHEMA] Column '{col}' cannot be coerced to {dtype} due to {e}.")
-    df = df[[col for col in expected_columns]]
-    return df
+            schema_sections_status["1.1.4. Enforce schema columns for Facebook Ads"] = "failed"
+            print(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
+            logging.error(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
+            raise RuntimeError(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
+
+    # 1.1.5. Summarize schema enforcement result(s)
+    finally:
+        schema_time_elapsed = round(time.time() - schema_time_start, 2)
+        schema_df_final = schema_df_enforced.copy() if "schema_df_enforced" in locals() and not schema_df_enforced.empty else pd.DataFrame()
+        schema_sections_total = len(schema_sections_status)
+        schema_sections_failed = [k for k, v in schema_sections_status.items() if v == "failed"]
+        schema_rows_output = len(schema_df_final)      
+        if any(v == "failed" for v in schema_sections_status.values()):
+            print(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            schema_status_final = "schema_failed_all"
+        else:
+            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
+            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
+            schema_status_final = "schema_success_all"
+        return {
+            "schema_df_final": schema_df_final,
+            "schema_status_final": schema_status_final,
+            "schema_summary_final": {
+                "schema_time_elapsed": schema_time_elapsed,
+                "schema_rows_output": schema_rows_output,
+                "schema_sections_total": schema_sections_total,
+                "schema_sections_failed": schema_sections_failed,
+            },
+        }
