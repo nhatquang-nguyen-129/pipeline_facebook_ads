@@ -80,6 +80,10 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
         print("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is skipped.")
         raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is skipped.")
+    else:
+        enrich_sections_status["1.1.2. Validate input for the raw Facebook Ads campaign insights enrichment process"] = "succeed"
+        print("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
+        logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
 
     try:
 
@@ -284,6 +288,10 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
         print("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is skipped.")
         raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is skipped.")
+    else:
+        enrich_sections_status["1.2.2. Validate input for the raw Facebook Ads ad insights enrichment process"] = "succeed"
+        print("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
+        logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
 
     try:
 
@@ -490,6 +498,10 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is skipped.")
         raise ValueError("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is skipped.")
+    else:
+        enrich_sections_status["2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment"] = "succeed"
+        print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
+        logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
 
     try:
 
@@ -582,6 +594,10 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         print("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment is skipped.")
         raise ValueError("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment is skipped.")
+    else:
+        enrich_sections_status["2.2.2. Validate input for the staging Facebook Ads ad insights enrichment"] = "succeed"
+        print("✅ [ENRICH] Successfully validated input for staging Facebook Ads ad insights enrichment.")
+        logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads ad insights enrichment.")
 
     try:
     
