@@ -11,7 +11,7 @@ consistency, and maintainability across the marketing data pipeline to
 build insight-ready tables.
 
 ✔️ Maps `optimization_goal` to its corresponding business action type  
-✔️ Standardizes campaign, ad set, and ad-level naming conventions  
+✔️ Standardizes campaign, ad set and ad-level naming conventions  
 ✔️ Extracts and normalizes key performance metrics across campaigns  
 ✔️ Cleans and validates data to ensure schema and field consistency  
 ✔️ Reduces payload size by removing redundant or raw field(s)
