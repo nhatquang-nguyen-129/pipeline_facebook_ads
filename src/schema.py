@@ -2,19 +2,23 @@
 ===================================================================
 FACEBOOK SCHEMA MODULE
 -------------------------------------------------------------------
-This module defines and manages **schema-related logic** for the  
-Facebook Ads data pipeline, acting as a single source of truth  
-for all required fields across different data layers.
+This module provides a centralized definition and management of  
+schema structures used throughout the Facebook Ads data pipeline.  
+It shares a consistent structure and data type alignment.  
 
-It plays a key role in ensuring schema alignment and preventing  
-data inconsistency between raw → staging → mart layers.
+Its main purpose is to validate, enforce, and standardize field 
+structures across every pipeline stage to support reliable ETL
+execution and seamless data integration.
 
-✔️ Declares expected column names for each entity type   
-✔️ Supports schema enforcement in validation and ETL stages  
-✔️ Prevents schema mismatch when handling dynamic Facebook API fields  
+✔️ Define and store expected field names and data types for each entity  
+✔️ Validate schema integrity before ingestion or transformation  
+✔️ Enforce data type consistency across different processing layers  
+✔️ Automatically handle missing or mismatched columns  
+✔️ Provide schema utilities for debugging and audit logging  
 
-⚠️ This module does *not* fetch or transform data.  
-It only provides schema utilities to support other pipeline components.
+⚠️ This module does *not* perform data fetching or transformation.  
+It serves purely as a utility layer to support schema consistency  
+throughout the Facebook Ads ETL process.
 ===================================================================
 """
 
@@ -33,7 +37,7 @@ import numpy as np
 # 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
 # 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
-def ensure_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
+def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
 
     # 1.1.1. Start timing the raw Facebook Ads campaign insights enrichment process
     schema_time_start = time.time()
