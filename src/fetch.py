@@ -58,7 +58,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from google.cloud import secretmanager
 
 # Add internal Facebook modules for handling
-from src.schema import ensure_table_schema
+from src.schema import enforce_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -225,7 +225,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         try:
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")            
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_campaign_metadata")            
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_campaign_metadata")            
             print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads campaign metadata with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads campaign metadata with {len(fetch_df_enforced)} row(s).")        
         except Exception as e:
@@ -391,7 +391,7 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
         try:
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads adset metadata with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads adset metadata with {len(fetch_df_flattened)} row(s)...")        
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_adset_metadata")        
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_adset_metadata")        
             print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads adset metadata with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads adset metadata with {len(fetch_df_enforced)} row(s).")
         except Exception as e:
@@ -561,7 +561,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
         try:
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad metadata with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad metadata with {len(fetch_df_flattened)} row(s)...")            
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_ad_metadata")            
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_ad_metadata")            
             print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad metadata with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad metadata with {len(fetch_df_enforced)} row(s).")        
         except Exception as e:
@@ -706,7 +706,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         try:
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_ad_creative")
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_ad_creative")
             print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad creative with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad creative with {len(fetch_df_enforced)} row(s).")
         except Exception as e:
@@ -867,7 +867,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         try:     
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads campaign insights for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads campaign insights for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")                
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_campaign_insights")
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_campaign_insights")
             print(f"✅ [FETCH] Successfully enforced Facebook Ads campaign insights schema for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced Facebook Ads campaign insights schema for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_enforced)} row(s).")                
         except Exception as e:
@@ -1026,7 +1026,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         try:     
             print(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad insights for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
             logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad insights for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")                
-            fetch_df_enforced = ensure_table_schema(fetch_df_flattened, "fetch_ad_insights")
+            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_ad_insights")
             print(f"✅ [FETCH] Successfully enforced Facebook Ads ad insights schema for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_enforced)} row(s).")
             logging.info(f"✅ [FETCH] Successfully enforced Facebook Ads ad insights schema for account_id {account_id} from {start_date} to {end_date} with {len(fetch_df_enforced)} row(s).")                
         except Exception as e:
