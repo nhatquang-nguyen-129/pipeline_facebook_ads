@@ -64,7 +64,6 @@ from src.enrich import (
     enrich_ad_insights   
 )
 from src.fetch import (
-    fetch_account_name,
     fetch_campaign_metadata, 
     fetch_adset_metadata,
     fetch_ad_metadata,
@@ -72,7 +71,7 @@ from src.fetch import (
     fetch_campaign_insights, 
     fetch_ad_insights,
 )
-from src.schema import ensure_table_schema
+from src.schema import enforce_table_schema
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
