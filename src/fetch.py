@@ -220,9 +220,9 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         fetch_sections_status["1.1.9. Make Facebook Ads API call for campaign metadata"] = "succeed"
         if not fetch_records_campaign:
             fetch_sections_status["1.1.9. Make Facebook Ads API call for campaign metadata"] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata retrieved for any campaign_id with account_id {account_id}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata retrieved for any campaign_id with account_id {account_id}.")
-            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata retrieved for any campaign_id with account_id {account_id}.")
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
+            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
 
     # 1.1.10. Enforce schema for Facebook Ads campaign metadata
         print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")
@@ -408,9 +408,9 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
         fetch_sections_status["1.2.9. Make Facebook Ads API call for adset metadata"] = "succeed"
         if not fetch_records_adset:
             fetch_sections_status["1.2.9. Make Facebook Ads API call for adset metadata"] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata retrieved for any adset_id with account_id {account_id}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata retrieved for any adset_id with account_id {account_id}.")
-            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata retrieved for any adset_id with account_id {account_id}.")
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata for any adset_id with account_id {account_id}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata for any adset_id with account_id {account_id}.")
+            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata for any adset_id with account_id {account_id}.")
 
     # 1.2.10. Enforce schema for Facebook Ads adset metadata
         print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads adset metadata with {len(fetch_df_flattened)} row(s)...")
@@ -469,10 +469,10 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
     # 1.3.1. Start timing the Facebook Ads ad metadata fetching process
     fetch_time_start = time.time()
     fetch_sections_status = {}
-    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.3.2. Validate input for Facebook Ads ad metadata
+    # 1.3.2. Validate input for Facebook Ads ad metadata fetching process
     if not ad_id_list:
         fetch_sections_status["1.3.2. Validate input for Facebook Ads ad metadata"] = "failed"
         print("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then fetching is suspended.")
@@ -595,9 +595,9 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
         fetch_sections_status["1.3.9. Make Facebook Ads API call for ad metadata"] = "succeed"
         if not fetch_records_ad:
             fetch_sections_status["1.3.9. Make Facebook Ads API call for ad metadata"] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata retrieved for any ad_id with account_id {account_id}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata retrieved for any ad_id with account_id {account_id}.")
-            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata retrieved for any ad_id with account_id {account_id}.")
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata for any ad_id with account_id {account_id}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata for any ad_id with account_id {account_id}.")
+            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads ad metadata for any ad_id with account_id {account_id}.")
 
     # 1.3.10. Enforce schema for Facebook Ads ad metadata
         print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad metadata with {len(fetch_df_flattened)} row(s)...")
@@ -653,37 +653,39 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
 
-    # 1.4.1. Start timing the Facebook Ads adset metadata fetching process
-    start_time = time.time()
-    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative for {len(ad_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative for {len(ad_id_list)} adset_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    # 1.4.1. Start timing the Facebook Ads ad creative fetching process
+    fetch_time_start = time.time()
+    fetch_sections_status = {}
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.4.2. Validate input for Facebook Ads ad creative
+    # 1.4.2. Validate input for Facebook Ads ad creative fetching process
     if not ad_id_list:
+        fetch_sections_status["1.4.2. Validate input for Facebook Ads ad creative fetching process"] = "failed"
         print("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then fetching is suspended.")
         logging.warning("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then fetching is suspended.")
         raise ValueError("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then fetching is suspended.")
-    all_records = []
+    else:
+        fetch_sections_status["1.4.2. Validate input for Facebook Ads ad creative fetching process"] = "succeed"
+        print(f"✅ [FETCH] Successfully validated input for {len(ad_id_list)} ad_id(s) of raw Facebook Ads ad creative fetching process.")
+        logging.info(f"✅ [FETCH] Successfully validated input for {len(ad_id_list)} ad_id(s) of raw Facebook Ads ad creative fetching process.")
+    fetch_records_creative = []
 
     try:
 
-    # 1.4.3 Initialize Google Secret Manager client
+    # 1.4.3. Initialize Google Secret Manager client
         try:
             print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             google_secret_client = secretmanager.SecretManagerServiceClient()
             print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
             logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-        except DefaultCredentialsError as e:
-            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to credentials error.") from e
-        except PermissionDenied as e:
-            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to permission denial.") from e
-        except NotFound as e:
-            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client because secret not found.") from e
-        except GoogleAPICallError as e:
-            raise RuntimeError("❌ [FETCH] Failed to initialize Google Secret Manager client due to API call error.") from e
+            fetch_sections_status["1.4.3. Initialize Google Secret Manager client"] = "succeed"
         except Exception as e:
-            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client due to unexpected error {e}.") from e
+            fetch_sections_status["1.4.3. Initialize Google Secret Manager client"] = "failed"
+            print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.") from e
 
     # 1.4.4. Get Facebook Ads access token from Google Secret Manager
         try: 
@@ -695,7 +697,9 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
             token_access_user = token_secret_response.payload.data.decode("utf-8")
             print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            fetch_sections_status["1.4.4. Get Facebook Ads access token from Google Secret Manager"] = "succeed"
         except Exception as e:
+            fetch_sections_status["1.4.4. Get Facebook Ads access token from Google Secret Manager"] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
@@ -707,7 +711,9 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
             FacebookAdsApi.init(access_token=token_access_user, timeout=180)
             print(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
             logging.info(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
+            fetch_sections_status["1.4.5. Initialize Facebook SDK session from access token"] = "succeed"
         except Exception as e:
+            fetch_sections_status["1.4.5. Initialize Facebook SDK session from access token"] = "failed"
             print(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
             raise RuntimeError(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
@@ -722,76 +728,89 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
             account_id = account_secret_response.payload.data.decode("utf-8")
             print(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
+            fetch_sections_status["1.4.6. Get Facebook Ads account_id from Google Secret Manager"] = "succeed"
         except Exception as e:
+            fetch_sections_status["1.4.6. Get Facebook Ads account_id from Google Secret Manager"] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
             raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
 
     # 1.4.7. Make Facebook Ads API call for ad creative
-        print(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-        logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")    
+        print(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for account_id {account_id} with {len(ad_id_list)} ad_id(s)...")
+        logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for account_id {account_id} with {len(ad_id_list)} ad_id(s)...")    
         for ad_id in ad_id_list:
             try:
                 ad = Ad(fbid=ad_id).api_get(fields=["creative"])
                 creative_id = ad.get("creative", {}).get("id", None)
-                if not creative_id:
-                    print(f"⚠️ [FETCH] Failed to retrieve creative ID for Facebook Ads ad_id {ad_id}.")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve creative ID for Facebook Ads ad_id {ad_id}.")
-                    raise ValueError(f"⚠️ [FETCH] Failed to retrieve creative ID for Facebook Ads ad_id {ad_id}.")
                 creative = AdCreative(fbid=creative_id).api_get(fields=["thumbnail_url"])
                 thumbnail_url = creative.get("thumbnail_url", "")
-                all_records.append({
+                fetch_records_creative.append({
                     "ad_id": ad_id,
                     "creative_id": creative_id,
                     "thumbnail_url": thumbnail_url,
                     "account_id": account_id,
                 })
-                break
-            except FacebookRequestError as facebook_error_request:
-                print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {facebook_error_request.api_error_message}.")
-                logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {facebook_error_request.api_error_message}.")
             except Exception as e:
-                print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {e}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {e}.")
-        if not all_records:
-            print("⚠️ [FETCH] No Facebook Ads ad creative retrieved then fetching is suspended.")
-            logging.warning(" [FETCH] No Facebook Ads ad creative retrieved then fetching is suspended.")
-            return pd.DataFrame()
+                print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {e}.")
+                logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {ad_id} due to {e}.")
+        fetch_df_flattened = pd.DataFrame(fetch_records_creative)
+        print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} ad creative record(s) for account_id {account_id}.")
+        logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} ad creative record(s) for account_id {account_id}.")
+        fetch_sections_status["1.4.7. Make Facebook Ads API call for ad creative"] = "succeed"
+        if not fetch_records_creative:
+            fetch_sections_status["1.4.7. Make Facebook Ads API call for ad creative"] = "failed"
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad creative for any ad_id with account_id {account_id}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad creative for any ad_id with account_id {account_id}.")
+            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads ad creative for any ad_id with account_id {account_id}.")
     
-    # 1.4.8. Convert to Python DataFrame
-        try:
-            print(f"🔄 [FETCH] Converting Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) to Python DataFrame...")
-            logging.info(f"🔄 [FETCH] Converting Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) to Python DataFrame...")  
-            fetch_df_flattened = pd.DataFrame(all_records)    
-            print(f"✅ [FETCH] Successfully converted Facebook Ads ad creative to Python DataFrame with {len(fetch_df_flattened)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully converted Facebook Ads ad creative to Python DataFrame with {len(fetch_df_flattened)} row(s).")
-        except Exception as e:
-            print(f"❌ [FETCH] Faled to convert Facebook Ads ad creative to Python DataFrame due to {e}.")
-            logging.error(f"❌ [FETCH] Faled to convert Facebook Ads ad creative to Python DataFrame due to {e}.")
-            return pd.DataFrame()
+    # 1.4.8. Enforce schema for Facebook Ads ad creative
+        print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")
+        logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")            
+        fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_creative")            
+        fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
+        fetch_status_enforced = fetch_results_schema["schema_status_final"]
+        fetch_df_enforced = fetch_results_schema["schema_df_final"]    
+        if fetch_status_enforced == "schema_success_all":
+            print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+            logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+            fetch_sections_status["1.4.8. Enforce schema for Facebook Ads ad creative"] = "succeed"
+        else:
+            fetch_sections_status["1.4.8. Enforce schema for Facebook Ads ad creative"] = "failed"
+            print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+            raise RuntimeError(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
 
-    # 1.4.9. Enforce schema for Python DataFrame
-        try:
-            print(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Enforcing schema for Facebook Ads ad creative with {len(fetch_df_flattened)} row(s)...")
-            fetch_df_enforced = enforce_table_schema(fetch_df_flattened, "fetch_ad_creative")
-            print(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad creative with {len(fetch_df_enforced)} row(s).")
-            logging.info(f"✅ [FETCH] Successfully enforced schema for Facebook Ads ad creative with {len(fetch_df_enforced)} row(s).")
-        except Exception as e:
-            print(f"❌ [FETCH] Failed to enforce Facebook Ads ad creative due to {e}.")
-            logging.error(f"❌ [FETCH] Failed to enforce Facebook Ads ad creative due to {e}.")
-            return pd.DataFrame()
-
-    # 1.2.10. Summarize fetch result(s)
-        fetch_df_final = fetch_df_enforced
-        elapsed = round(time.time() - start_time, 2)
-        print(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
-        logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching with {len(fetch_df_final)} row(s) in {elapsed}s.")
-        return fetch_df_final
-    except Exception as e:
-        print(f"❌ [FETCH] Failed to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) due to {e}.")
-        logging.error(f"❌ [FETCH] Failed to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) due to {e}.")
-        return pd.DataFrame()
+    # 1.4.9. Summarize fetch result(s) for Facebook Ads ad metadata
+    finally:
+        fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
+        fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
+        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"]
+        fetch_sections_total = len(fetch_sections_status)
+        fetch_rows_input = len(ad_id_list)
+        fetch_rows_output = len(fetch_df_final)
+        if fetch_sections_failed:
+            print(f"❌ [FETCH] Failed to complete Facebook Ads ad creative fetching process due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads ad creative fetching process due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_failed_all"
+        elif fetch_rows_output < fetch_rows_input:
+            print(f"⚠️ [FETCH] Completed Facebook Ads ad creative fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Completed Facebook Ads ad creative fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_success_partial"
+        else:
+            print(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
+            fetch_status_final = "fetch_success_all"
+        return {
+            "fetch_df_final": fetch_df_final,
+            "fetch_status_final": fetch_status_final,
+            "fetch_summary_final": {
+                "fetch_time_elapsed": fetch_time_elapsed,
+                "fetch_rows_input": fetch_rows_input,
+                "fetch_rows_output": fetch_rows_output,
+                "fetch_sections_total": fetch_sections_total,
+                "fetch_sections_failed": fetch_sections_failed,
+            },
+        }
 
 # 2. FETCH FACEBOOK ADS INSIGHTS
 
