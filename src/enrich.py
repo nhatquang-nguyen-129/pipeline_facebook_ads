@@ -690,12 +690,12 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         enrich_sections_failed = [k for k, v in enrich_sections_status.items() if v == "failed"]
         enrich_rows_output = len(enrich_df_final)
         if any(v == "failed" for v in enrich_sections_status.values()):
-            print(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            print(f"❌ [ENRICH] Failed to complete staging Facebook Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete staging Facebook Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_failed_all"        
         else:
-            print(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
+            print(f"🏆 [ENRICH] Successfully completed staging Facebook Ads ad insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed staging Facebook Ads ad insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_success_all"
         return {
             "enrich_df_final": enrich_df_final,
