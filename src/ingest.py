@@ -972,7 +972,8 @@ def ingest_campaign_insights(
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
 
     # 2.1.1. Start timing the Facebook Ads campaign insight ingestion process
-    start_time = time.time()
+    ingest_time_start = time.time()
+    ingest_sections_status = {}
     print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
