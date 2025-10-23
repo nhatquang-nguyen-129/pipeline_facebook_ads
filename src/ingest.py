@@ -572,7 +572,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["1.3.3. Trigger to fetch Facebook Ads ad metadata"] = "failed"
             print(f"❌ [INGEST] Failed to fetch Facebook Ads ad metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.error(f"❌ [INGEST] Failed to fetch Facebook Ads ad metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            raise RuntimeError("❌ [INGEST] Failed to fetch Facebook Ads ad metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to fetch Facebook Ads ad metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
     # 1.3.4. Prepare table_id for Facebook Ads ad metadata ingestion
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -750,77 +750,102 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
     print(f"🚀 [FETCH] Starting to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
     logging.info(f"🚀 [FETCH] Starting to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
 
-    # 1.4.1. Start timing the Facebook Ads ad creative ingestion process
-    start_time = time.time()
-    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    # 1.4.1. Start timing the Facebook Ads ad creative ingestion
+    ingest_time_start = time.time()
+    ingest_sections_status = {}
+    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.4.2. Validate input for Facebook Ads ad creative ingestion
     if not ad_id_list:
-        print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        ingest_sections_status["1.4.2. Validate input for Facebook Ads ad creative ingestion"] = "failed"
+        print("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        logging.warning("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        raise ValueError("⚠️ [FETCH] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+    else:
+        ingest_sections_status["1.4.2. Validate input for Facebook Ads ad creative ingestion"] = "succeed"
+        print(f"✅ [FETCH] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
+        logging.info(f"✅ [FETCH] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
 
     try:
   
     # 1.4.3. Trigger to fetch Facebook Ads ad creative
-        try:
-            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-            ingest_df_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
-            if ingest_df_fetched.empty:
-                print("⚠️ [INGEST] Empty Facebook Ads ad creative returned then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty Facebook Ads ad creative returned then ingestion is suspended.")
-                return pd.DataFrame()
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching due to {e}.")
-            return pd.DataFrame()
+        print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+        logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+        ingest_results_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
+        ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
+        ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+        ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+        if ingest_status_fetched == "fetch_success_all":
+            print(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            ingest_sections_status["1.4.3. Trigger to fetch Facebook Ads ad creative"] = "succeed"
+        elif ingest_status_fetched == "fetch_success_partial":
+            print(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad creative {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.warning(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad creative {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            ingest_sections_status["1.4.3. Trigger to fetch Facebook Ads ad creative"] = "partial"
+        else:
+            ingest_sections_status["1.4.3. Trigger to fetch Facebook Ads ad creative"] = "failed"
+            print(f"❌ [INGEST] Failed to fetch Facebook Ads ad creative due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to fetch Facebook Ads ad creative due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to fetch Facebook Ads ad creative due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
     # 1.4.4. Prepare table_id for Facebook Ads ad creative ingestion
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-        print(f"🔍 [INGEST] Proceeding to ingest Facebook ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
-        logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {table_id}...")
+        raw_table_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+        print(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
+        logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
 
     # 1.4.5. Enforce schema for Facebook Ads ad creative
-        try:
-            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
-            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
-            ingest_df_enforced = ensure_table_schema(ingest_df_fetched, "ingest_ad_creative")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative due to {e}.")
-            raise 
+        print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+        logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+        ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_creative")
+        ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
+        ingest_status_enforced = ingest_results_enforced["schema_status_final"]
+        ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
+        if ingest_status_enforced == "schema_success_all":
+            print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad creative "f"with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            ingest_sections_status["1.4.5. Enforce schema for Facebook Ads ad creative"] = "succeed"
+        else:
+            ingest_sections_status["1.4.5. Enforce schema for Facebook Ads ad creative"] = "failed"
+            print(f"❌ [INGEST] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+            logging.error(f"❌ [INGEST] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+            raise RuntimeError(f"❌ [INGEST] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
 
-    # 1.4.5. Delete existing row(s) or create new table if it not exist
+    # 1.4.6. Initialize Google BigQuery client
+        try:
+            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            ingest_sections_status["1.4.6. Initialize Google BigQuery client"] = "succeed"
+        except Exception as e:
+            ingest_sections_status["1.4.6. Initialize Google BigQuery client"] = "failed"
+            print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+
+    # 1.4.7. Delete existing row(s) or create new table if it not exist
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+            table_clusters_filtered = []
+            table_schemas_defined = []    
             try:
-                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                google_bigquery_client = bigquery.Client(project=PROJECT)
-                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            except DefaultCredentialsError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-            except Forbidden as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-            except GoogleAPICallError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-            except Exception as e:
-                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
-            try:
-                print(f"🔍 [INGEST] Checking Facebook Ads ad creative table {table_id} existence...")
-                logging.info(f"🔍 [INGEST] Checking Facebook Ads ad creative table {table_id} existence...")
-                google_bigquery_client.get_table(table_id)
-                table_exists = True
+                print(f"🔍 [INGEST] Checking Facebook Ads ad creative table {raw_table_creative} existence...")
+                logging.info(f"🔍 [INGEST] Checking Facebook Ads ad creative table {raw_table_creative} existence...")
+                google_bigquery_client.get_table(raw_table_creative)
+                ingest_table_existed = True
+            except NotFound:
+                ingest_table_existed = False
             except Exception:
-                table_exists = False
-            if not table_exists:
-                print(f"⚠️ [INGEST] Facebook Ads ad creative table {table_id} not found then table creation will be proceeding...")
-                logging.info(f"⚠️ [INGEST] Facebook Ads ad creative table {table_id} not found then table creation will be proceeding...")
-                schema = []
+                print(f"❌ [INGEST] Failed to check Facebook Ads ad creative table {raw_table_creative} existence due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to check Facebook Ads ad creative table {raw_table_creative} existence due to {e}.")
+                raise RuntimeError(f"❌ [INGEST] Failed to check Facebook Ads ad creative table {raw_table_creative} existence due to {e}.") from e
+            if not ingest_table_existed:
+                print(f"⚠️ [INGEST] Facebook Ads ad creative table {raw_table_creative} not found then table creation will be proceeding...")
+                logging.info(f"⚠️ [INGEST] Facebook Ads ad creative table {raw_table_creative} not found then table creation will be proceeding...")
                 for col, dtype in ingest_df_deduplicated.dtypes.items():
                     if dtype.name.startswith("int"):
                         bq_type = "INT64"
@@ -832,26 +857,31 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                         bq_type = "TIMESTAMP"
                     else:
                         bq_type = "STRING"
-                    schema.append(bigquery.SchemaField(col, bq_type))
-                table = bigquery.Table(table_id, schema=schema)
-                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
-                if effective_partition:
-                    table.time_partitioning = bigquery.TimePartitioning(
+                    table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
+                table_configuration_defined = bigquery.Table(raw_table_creative, schema=table_schemas_defined)
+                table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
+                if table_partition_effective:
+                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
                         type_=bigquery.TimePartitioningType.DAY,
-                        field=effective_partition
+                        field=table_partition_effective
                     )
-                clustering_fields = ["ad_id", "account_id"]
-                filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
-                if filtered_clusters:
-                    table.clustering_fields = filtered_clusters
-                    print(f"🔍 [INGEST] Creating Facebook Ads ad creative table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
-                    logging.info(f"🔍 [INGEST] Creating Facebook Ads ad creative table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
-                table = google_bigquery_client.create_table(table)
-                print(f"✅ [INGEST] Successfully created Facebook Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-                logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad creative table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
+                table_clusters_defined = ["ad_id", "account_id"]
+                table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                if table_clusters_filtered:
+                    table_configuration_defined.clustering_fields = table_clusters_filtered
+                try:    
+                    print(f"🔍 [INGEST] Creating Facebook Ads ad creative table defined name {raw_table_creative} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads ad creative table defined name {raw_table_creative} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
+                    print(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to create Facebook Ads ad creative table {raw_table_creative} due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to create Facebook Ads ad creative table {raw_table_creative} due to {e}.")
+                    raise RuntimeError(f"❌ [INGEST] Failed to create Facebook Ads ad creative table {raw_table_creative} due to {e}.") from e
             else:
-                print(f"🔄 [INGEST] Facebook Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
-                logging.info(f"🔄 [INGEST] Facebook Ads ad creative table {table_id} exists then existing row(s) deletion will be proceeding...")
+                print(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion will be proceeding...")
+                logging.info(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion will be proceeding...")
                 unique_keys = ingest_df_deduplicated[["ad_id", "account_id"]].dropna().drop_duplicates()
                 if not unique_keys.empty:
                     temp_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
@@ -862,7 +892,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                         for col in ["ad_id", "account_id"]
                     ])
                     delete_query = f"""
-                        DELETE FROM `{table_id}` AS main
+                        DELETE FROM `{raw_table_creative}` AS main
                         WHERE EXISTS (
                             SELECT 1 FROM `{temp_table_id}` AS temp
                             WHERE {join_condition}
@@ -871,39 +901,65 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                     result = google_bigquery_client.query(delete_query).result()
                     google_bigquery_client.delete_table(temp_table_id, not_found_ok=True)
                     deleted_rows = result.num_dml_affected_rows
-                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {table_id}.")
-                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {table_id}.")
+                    print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
+                    logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                 else:
-                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
-                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {table_id} then existing row(s) deletion is skipped.")
+                    print(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+                    logging.warning(f"⚠️ [INGEST] No unique ad_id and account_id keys found in Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
+            ingest_sections_status["1.4.7. Delete existing row(s) or create new table if it not exist"] = "succeed"
         except Exception as e:
-            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad creative ingestion due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad creative ingestion due to {e}.")
-            raise
+            ingest_sections_status["1.4.7. Delete existing row(s) or create new table if it not exist"] = "failed"
+            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
+            raise RuntimeError(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.") from e
 
-    # 1.4.7. Upload Facebook Ads ad creative to Google BigQuery
+    # 1.4.8. Upload Facebook Ads ad creative to Google BigQuery
         try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}...")
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
             job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, table_id, job_config=job_config).result()
-            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}.")
-            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {table_id}.")
+            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, raw_table_creative, job_config=job_config).result()
+            ingest_df_uploaded = ingest_df_deduplicated.copy()
+            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}.")
+            ingest_sections_status["1.4.8. Upload Facebook Ads ad creative to Google BigQuery"] = "succeed"
         except Exception as e:
-            print(f"❌ [INGEST] Failed to upload Facebok Ads ad creative due to {e}.")
+            ingest_sections_status["1.4.8. Upload Facebook Ads ad creative to Google BigQuery"] = "failed"
+            print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
-            raise
+            raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
 
-    # 1.4.8. Summarize ingestion result(s)
-        ingest_df_final = ingest_df_deduplicated
-        elapsed = round(time.time() - start_time, 2)
-        print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
-        logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {len(ingest_df_final)} row(s) in {elapsed}s.")
-        return ingest_df_final
-    except Exception as e:
-        print(f"❌ [INGEST] Failed to ingest Facebook Ads ad creative due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to ingest Facebook Ads ad creative due to {e}.")
-        return pd.DataFrame()
+    # 1.4.9. Summarize ingestion result(s)
+    finally:
+        ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
+        ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
+        ingest_sections_failed = [k for k, v in ingest_sections_status.items() if v == "failed"]
+        ingest_sections_total = len(ingest_sections_status)
+        ingest_rows_input = len(ad_id_list)
+        ingest_rows_output = len(ingest_df_final)
+        if ingest_sections_failed:
+            print(f"❌ [INGEST] Failed to complete Facebook Ads ad creative ingestion due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad creative ingestion due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            ingest_status_final = "ingest_failed_all"
+        elif ingest_rows_output < ingest_rows_input:
+            print(f"⚠️ [INGEST] Partially completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
+            ingest_status_final = "ingest_success_partial"
+        else:
+            print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
+            ingest_status_final = "ingest_success_all"
+        return {
+            "ingest_df_final": ingest_df_final,
+            "ingest_status_final": ingest_status_final,
+            "ingest_summary_final": {
+                "ingest_time_elapsed": ingest_time_elapsed,
+                "ingest_rows_input": ingest_rows_input,
+                "ingest_rows_output": ingest_rows_output,
+                "ingest_sections_total": ingest_sections_total,
+                "ingest_sections_failed": ingest_sections_failed,
+            },
+        }
 
 # 2. INGEST FACEBOOK ADS INSIGHTS
 
