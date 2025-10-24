@@ -30,9 +30,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.
 # Add Python datetime utilities for integration
 from datetime import datetime
 
-# Add Python JSON ultilities for integration
-import json 
-
 # Add Python logging ultilities forintegration
 import logging
 
@@ -1023,7 +1020,6 @@ def ingest_campaign_insights(
         print(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_enriched)} row(s)...")
         logging.info(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_enriched)} row(s)...")
         ingest_df_enforced = ingest_df_enriched.copy()
-        ingest_df_enforced["actions"] = ingest_df_enforced["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
         ingest_results_enforced = enforce_table_schema(schema_df_input=ingest_df_enforced,schema_type_mapping="ingest_campaign_insights")
         ingest_df_enforced = ingest_results_enforced["schema_df_final"]
         ingest_status_enforced = ingest_results_enforced["schema_status_final"]
@@ -1034,9 +1030,9 @@ def ingest_campaign_insights(
             ingest_sections_status["2.1.4. Trigger to enforce schema for Facebook Ads campaign insights"] = "succeed"
         else:
             ingest_sections_status["2.1.4. Enforce schema for Facebook Ads campaign insights"] = "failed"
-            print(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            print(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
         
     # 2.1.5. Prepare table_id for Facebook Ads campaign insights ingestion 
         first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
@@ -1046,7 +1042,7 @@ def ingest_campaign_insights(
         print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} with Google BigQuery table_id {table_id}...")
         logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} with Google BigQuery table_id {table_id}...")
 
-    # 2.1.6s. Parse date column(s) for Facebook campaign insights
+    # 2.1.6. Parse date column(s) for Facebook campaign insights
         try:
             print(f"🔁 [INGEST] Parsing Facebook Ads campaign insights date column(s) for {len(ingest_df_enforced)} row(s)...")
             logging.info(f"🔁 [INGEST] Parsing Facebook Ads campaign insights date column(s) for {len(ingest_df_enforced)} row(s)...")
