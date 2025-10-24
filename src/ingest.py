@@ -980,20 +980,65 @@ def ingest_campaign_insights(
     try:
 
     # 2.1.2. Trigger to fetch Facebook Ads campaign insights
-        try: 
-            print(f"🔍 [INGEST] Triggering to fetch Facebook Ads campaigns insights from {start_date} to {end_date}...")
-            logging.info(f"🔍 [INGEST] Triggering to fetch Facebook Ads campaigns insights from {start_date} to {end_date}...")
-            ingest_df_fetched = fetch_campaign_insights(start_date, end_date)    
-            if ingest_df_fetched.empty:
-                print("⚠️ [INGEST] Empty Facebook Ads campaign insights returned then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty Facebook Ads campaign insights returned then ingestion is suspended.")    
-                return pd.DataFrame()
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights {start_date} to {end_date} fetching due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights {start_date} to {end_date} fetching due to {e}.")
-            return pd.DataFrame()
+        print(f"🔍 [INGEST] Triggering to fetch Facebook Ads campaigns insights from {start_date} to {end_date}...")
+        logging.info(f"🔍 [INGEST] Triggering to fetch Facebook Ads campaigns insights from {start_date} to {end_date}...")
+        ingest_results_fetched = fetch_campaign_insights(start_date=start_date, end_date=end_date)
+        ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
+        ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+        ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+        if ingest_status_fetched == "fetch_success_all":
+            print(f"✅ [INGEST] Successfully triggered Facebook Ads campaign insights fetch from {start_date} to {end_date} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads campaign insights fetch from {start_date} to {end_date} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            ingest_sections_status["2.1.2. Trigger to fetch Facebook Ads campaign insights"] = "succeed"
+        elif ingest_status_fetched == "fetch_success_partial":
+            print(f"⚠️ [INGEST] Partially triggered Facebook Ads campaign insights fetch from {start_date} to {end_date} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads campaign insights fetch from {start_date} to {end_date} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            ingest_sections_status["2.1.2. Trigger to fetch Facebook Ads campaign insights"] = "partial"
+        else:
+            ingest_sections_status["2.1.2. Trigger to fetch Facebook Ads campaign insights"] = "failed"
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching from {start_date} to {end_date} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching from {start_date} to {end_date} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching from {start_date} to {end_date} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
-    # 2.1.3. Prepare table_id for Facebook Ads campaign insights ingestion 
+    # 2.1.3. Trigger to enrich Facebook Ads campaign insights
+        print(f"🔁 [INGEST] Trigger to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
+        logging.info(f"🔁 [INGEST] Trigger to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
+        ingest_results_enriched = enrich_campaign_insights(enrich_df_input=ingest_df_fetched)
+        ingest_df_enriched = ingest_results_enriched["enrich_df_final"]
+        ingest_status_enriched = ingest_results_enriched["enrich_status_final"]
+        ingest_summary_enriched = ingest_results_enriched["enrich_summary_final"]
+        if ingest_status_enriched == "enrich_success_all":        
+            ingest_df_enriched["date_range"] = f"{start_date}_to_{end_date}"
+            ingest_df_enriched["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
+            print(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+            logging.info(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+            ingest_sections_status["2.1.3. Enrich Facebook Ads campaign insights"] = "succeed"
+        elif ingest_status_enriched == "enrich_failed_all":
+            ingest_sections_status["2.1.3. Enrich Facebook Ads campaign insights"] = "failed"
+            print(f"❌ [INGEST] Failed to enrich Facebook Ads campaign insights due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to enrich Facebook Ads campaign insights due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to enrich Facebook Ads campaign insights due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+
+    # 2.1.4. Trigger to enforce schema for Facebook Ads campaign insights
+        print(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_enriched)} row(s)...")
+        logging.info(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_enriched)} row(s)...")
+        ingest_df_enforced = ingest_df_enriched.copy()
+        ingest_df_enforced["actions"] = ingest_df_enforced["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
+        ingest_results_enforced = enforce_table_schema(schema_df_input=ingest_df_enforced,schema_type_mapping="ingest_campaign_insights")
+        ingest_df_enforced = ingest_results_enforced["schema_df_final"]
+        ingest_status_enforced = ingest_results_enforced["schema_status_final"]
+        ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
+        if ingest_status_enforced == "schema_success_all":
+            print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign insights with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign insights with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            ingest_sections_status["2.1.4. Trigger to enforce schema for Facebook Ads campaign insights"] = "succeed"
+        else:
+            ingest_sections_status["2.1.4. Enforce schema for Facebook Ads campaign insights"] = "failed"
+            print(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for Facebook Ads campaign insights due to section(s): {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+        
+    # 2.1.5. Prepare table_id for Facebook Ads campaign insights ingestion 
         first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
         y, m = first_date.year, first_date.month
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -1001,56 +1046,7 @@ def ingest_campaign_insights(
         print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} with Google BigQuery table_id {table_id}...")
         logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} with Google BigQuery table_id {table_id}...")
 
-    # 2.1.4. Enrich Facebook Ads campaign insights
-        try:
-            print(f"🔁 [INGEST] Trigger to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
-            logging.info(f"🔁 [INGEST] Trigger to enrich Facebook Ads campaign insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
-            ingest_df_enriched = enrich_campaign_insights(ingest_df_fetched)
-            ingest_df_enriched["date_range"] = f"{start_date}_to_{end_date}"
-            ingest_df_enriched["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights enrichment from {start_date} to {end_date} due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights enrichment from {start_date} to {end_date} due to {e}.")
-            raise
-
-    # 2.1.5. Safe cast Facebook Ads campaign insights numeric field(s) to float
-        try:
-            ingest_fields_numeric = [
-                "spend",
-                "reach",
-                "impressions",
-                "clicks",
-                "result",
-                "purchase",
-                "messaging_conversations_started"
-            ]
-            print(f"🔁 [INGEST] Casting Facebook Ads campaign insights {ingest_fields_numeric} numeric field(s) to float...")
-            logging.info(f"🔁 [INGEST] Casting Facebook Ads campaign insights {ingest_fields_numeric} numeric field(s) to float...")
-            ingest_df_casted = ingest_df_enriched.copy()
-            for col in ingest_fields_numeric:
-                if col in ingest_df_casted.columns:
-                    ingest_df_casted[col] = pd.to_numeric(ingest_df_casted[col], errors="coerce")
-            print(f"✅ [INGEST] Successfully casted Facebook Ads campaign insights {ingest_fields_numeric} numeric field(s) to float.")
-            logging.info(f"✅ [INGEST] Successfully casted Facebook Ads campaign insights {ingest_fields_numeric} numeric field(s) to float.")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to cast Facebook Ads numeric field(s) to float due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to cast Facebook Ads numeric field(s) to float due to {e}.")
-            raise
-
-    # 2.1.6. Enforce schema for Facebook Ads campaign insights
-        try:
-            print(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_casted)} row(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads campaign insights with {len(ingest_df_casted)} row(s)...")
-            ingest_df_enforced = ingest_df_casted.copy()
-            if "actions" in ingest_df_enforced.columns:
-                ingest_df_enforced["actions"] = ingest_df_enforced["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
-            ingest_df_enforced = ensure_table_schema(ingest_df_enforced, schema_type="ingest_campaign_insights")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads campaign insights due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads campaign insights due to {e}.")
-            raise
-
-    # 2.1.7. Parse date column(s) for Facebook campaign insights
+    # 2.1.6s. Parse date column(s) for Facebook campaign insights
         try:
             print(f"🔁 [INGEST] Parsing Facebook Ads campaign insights date column(s) for {len(ingest_df_enforced)} row(s)...")
             logging.info(f"🔁 [INGEST] Parsing Facebook Ads campaign insights date column(s) for {len(ingest_df_enforced)} row(s)...")
