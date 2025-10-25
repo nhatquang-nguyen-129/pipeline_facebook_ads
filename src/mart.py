@@ -41,9 +41,6 @@ import uuid
 
 # Add Google Authentication modules for integration
 from google.auth import default
-from google.auth.exceptions import (
-    DefaultCredentialsError,
-)
 from google.auth.transport.requests import AuthorizedSession
 
 # Add Google Cloud modules for integration
@@ -84,7 +81,7 @@ def mart_campaign_all() -> None:
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads campaign performance...")
 
     # 1.1.1. Start timing the Facebook Ads campaign performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -165,18 +162,26 @@ def mart_campaign_all() -> None:
             logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.")
             raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.") from e
 
-    # 1.1.5. Summarize ingestion result(s)
+    # 1.1.5. Summarize materialization result(s) for Facebook Ads campaign performance
     finally:
-        elapsed = round(time.time() - start_time, 2)
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
             print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,  # không xử lý dataframe
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
 
 # 1.2. Build materialzed table for Facebook supplier campaign performance by union all staging table(s)
 def mart_campaign_supplier() -> None:
