@@ -1,12 +1,36 @@
-pandas==2.3.2
-numpy==2.3.1
-facebook-business==23.0.1
+"""
+==================================================================
+FACEBOOK REQUIREMENTS MODULE
+# ---------------------------------------------------------------------
+This file consolidates all Python dependencies required for the  
+Facebook Ads → BigQuery ETL data pipeline. It provides a stable and  
+standardized foundation for data ingestion, transformation, and  
+synchronization between Meta and Google Cloud Platform services.
+
+Updated to ensure compatibility with the latest library releases  
+as of October 25, 2025, maintaining alignment with API changes,  
+authentication protocols, and optimized data transfer performance.
+
+✔️ Centralized declaration of libraries and version locking  
+✔️ Supports API integration, ETL execution, and schema validation  
+✔️ Enables secure access to GCP services (BigQuery, Secret Manager)  
+✔️ Ensures timezone-safe data transformations and Arrow optimization  
+✔️ Facilitates seamless connectivity with Google Sheets for reporting
+
+⚠️ This file does *not* contain executable logic.  
+It serves solely as a dependency manifest supporting the ETL framework.  
+==================================================================
+"""
+
+pandas==2.3.3
+numpy==2.3.4
+facebook-business==24.0.0
 pytz==2025.2
 google-auth==2.40.3
-google-api-core==2.25.1
-google-cloud-bigquery==3.36.0
-google-cloud-secret-manager==2.24.0
-google-cloud-bigquery-storage==2.32.0
-pyarrow==21.0.0
+google-api-core==2.27.0
+google-cloud-bigquery==3.38.0
+google-cloud-secret-manager==2.25.0
+google-cloud-bigquery-storage==2.33.1
+pyarrow==22.0.0
 pandas-gbq==0.29.2
 gspread==6.2.1
