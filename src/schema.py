@@ -152,11 +152,9 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "result_type": str,
             "purchase": float,
             "messaging_conversations_started": float,
-            "date_range": str,
             "date_start": str,
             "date_stop": str,
             "actions": str,
-            "last_updated_at": "datetime64[ns, UTC]"
         },
         "ingest_ad_insights": {
             "account_id": str,
@@ -176,7 +174,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "date_start": str,
             "date_stop": str,
             "actions": str,
-            "last_updated_at": "datetime64[ns, UTC]"
         },
         "staging_campaign_insights": {
             "account_id": str,
@@ -194,6 +191,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "result_type": str,
             "purchase": float,
             "messaging_conversations_started": float,
+
+            # Enriched dimensions
             "hinh_thuc": str,
             "ma_ngan_sach_cap_1": str,
             "ma_ngan_sach_cap_2": str,
@@ -202,11 +201,17 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "nganh_hang": str,
             "chuong_trinh": str,
             "noi_dung": str,
-            "thang": str,
+
+            # Standardized time columns
+            "date": "datetime64[ns, UTC]",       # chuẩn hóa timezone UTC
+            "year": int,                         # tách năm để phân tích nhanh
+            "month": int,                        # thay cho trường “thang”
+            "last_updated_at": "datetime64[ns, UTC]",  # thời điểm enrich để trace pipeline
+
+            # Metadata
             "nen_tang": str,
             "phong_ban": str,
-            "tai_khoan": str,
-            "date": "datetime64[ns, UTC]"
+            "tai_khoan": str
         },
         "staging_ad_insights": {
             "ad_id": str,

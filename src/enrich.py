@@ -26,6 +26,12 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
+# Add Python datetime utilities for integration
+from datetime import (
+    datetime,
+    timedelta
+)
+
 # Add Python JSON ultilities for integration
 import json 
 
@@ -34,6 +40,9 @@ import logging
 
 # Add Python Pandas libraries for integration
 import pandas as pd
+
+# Add Python timezone ultilities for integration
+import pytz
 
 # Add Python "re" libraries for integraton
 import re
@@ -125,10 +134,11 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             print(f"🔄 [ENRICH] Enriching date column(s) for raw Facebook Ads campaign insights with {len(enrich_df_spend)} row(s)...")
             logging.info(f"🔄 [ENRICH] Enriching date column(s) for raw Facebook Ads campaign insights with {len(enrich_df_spend)} row(s)...")
             enrich_df_date = enrich_df_spend.copy()
-            enrich_df_date["date"] = pd.to_datetime(enrich_df_date["date_start"], errors="coerce", utc=True)
-            enrich_df_date["year"] = enrich_df_date["date"].dt.year
-            enrich_df_date["month"] = enrich_df_date["date"].dt.month
-            enrich_df_date["date_start"] = enrich_df_date["date"].dt.strftime("%Y-%m-%d")    
+            enrich_df_date["date_start"] = pd.to_datetime(enrich_df_date["date_start"], errors="coerce", utc=True)
+            enrich_df_date["date_stop"]  = pd.to_datetime(enrich_df_date["date_stop"],  errors="coerce", utc=True)
+            enrich_df_date["date_start"] = enrich_df_date["date_start"].dt.floor("D")  # 00:00:00
+            enrich_df_date["date_stop"]  = enrich_df_date["date_stop"].dt.ceil("D") - pd.Timedelta(seconds=1)  # 23:59:59
+            enrich_df_date["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)  
             print(f"✅ [ENRICH] Successfully enriched date column(s) for Facebook Ads campaign insights with {len(enrich_df_date)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched date column(s) for Facebook Ads campaign insights with {len(enrich_df_date)} row(s).")
             enrich_sections_status["1.1.5. Enrich date columns for raw Facebook Ads campaign insights"] = "succeed"
@@ -578,7 +588,12 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_campaign["nhan_su"] = enrich_df_campaign["campaign_name"].str.split("_").str[5]
             enrich_df_campaign["chuong_trinh"] = enrich_df_campaign["campaign_name"].str.split("_").str[7]
             enrich_df_campaign["noi_dung"] = enrich_df_campaign["campaign_name"].str.split("_").str[8]
-            enrich_df_campaign["thang"] = pd.to_datetime(enrich_df_campaign["date_start"]).dt.strftime("%Y-%m")
+            enrich_df_campaign["date_start"] = pd.to_datetime(enrich_df_campaign["date_start"], errors="coerce", utc=True).dt.floor("D")
+            enrich_df_campaign["date_stop"] = pd.to_datetime(enrich_df_campaign["date_stop"], errors="coerce", utc=True).dt.floor("D") + timedelta(hours=23, minutes=59, seconds=59)
+            enrich_df_campaign["date"] = enrich_df_campaign["date_start"]
+            enrich_df_campaign["year"] = enrich_df_campaign["date"].dt.strftime("%Y")
+            enrich_df_campaign["month"] = enrich_df_campaign["date"].dt.strftime("%Y-%m")
+            enrich_df_campaign["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
             print(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             enrich_sections_status["2.1.4. Enrich campaign-level field(s) for staging Facebook Ads campaign insights"] = "succeed"
