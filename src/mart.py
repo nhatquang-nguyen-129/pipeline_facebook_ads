@@ -189,7 +189,7 @@ def mart_campaign_supplier() -> None:
     logging.info("🚀 [MART] Starting to build materialized table for Facebook Ads supplier campaign performance...")
 
     # 1.2.1. Start timing the Facebook Ads supplier campaign performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -377,18 +377,26 @@ def mart_campaign_supplier() -> None:
             logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.")
             raise RuntimeError(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.") from e
 
-    # 1.2.11. Summarize ingestion result(s)
+    # 1.2.11. Summarize materialization result(s) for Facebook Ads supplier campaign performance
     finally:
-        elapsed = round(time.time() - start_time, 2)
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
             print(f"❌ [MART] Failed to completed Facebook Ads supplier campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads supplier campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,  # không xử lý dataframe
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
 
 # 1.3. Build materialzed table for Facebook Ads festival campaign performance by union all staging tables
 def mart_campaign_festival() -> None:
@@ -396,7 +404,7 @@ def mart_campaign_festival() -> None:
     logging.info("🚀 [MART] Starting to build materialized table for Facebook Ads festival campaign performance...")
 
     # 1.3.1. Start timing the Facebook Ads festival campaign performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads festival campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -477,18 +485,26 @@ def mart_campaign_festival() -> None:
         logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads festival campaign performance due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads festival campaign performance due to {e}.") from e
 
-    # 1.3.5. Summarize ingestion result(s)
+    # 1.1.5. Summarize materialization result(s) for Facebook Ads festival campaign performance
     finally:
-        elapsed = round(time.time() - start_time, 2)
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
             print(f"❌ [MART] Failed to completed Facebook Ads festival campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads festival campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads festival campaign performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads festival campaign performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads festival campaign performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads festival campaign performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
 
 # 2. BUILD MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
 
@@ -498,7 +514,7 @@ def mart_creative_all() -> None:
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads creative performance...")
 
     # 2.1.1. Start timing the Facebook Ads campaign performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -583,18 +599,26 @@ def mart_creative_all() -> None:
         logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads creative performance due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads creative performance due to {e}.") from e
 
-    # 2.1.5. Summarize ingestion result(s)
+    # 2.1.5. Summarize materialization result(s) for Facebook Ads creative performance
     finally:
-        elapsed = round(time.time() - start_time, 2)
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
-            print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            print(f"❌ [MART] Failed to completed Facebook Ads creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            logging.error(f"❌ [MART] Failed to completed Facebook Ads creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads creative performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads creative performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
 
 # 2.2. Build materialized table for Facebook supplier creative performance by union all staging tables
 def mart_creative_supplier() -> None:
@@ -602,7 +626,7 @@ def mart_creative_supplier() -> None:
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads supplier creative performance...")
 
     # 2.2.1. Start timing the Facebook Ads campaign performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads supplier creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -798,18 +822,26 @@ def mart_creative_supplier() -> None:
         logging.warning(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to delete supplier metadata temporary table {temp_table_id} due to {e}.") from e
 
-    # 2.2.11. Summarize ingestion result(s)
+    # 2.2.11. Summarize materialization result(s) for Facebook Ads supplier creative performance
     finally:
-        elapsed = round(time.time() - start_time, 2)
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
             print(f"❌ [MART] Failed to completed Facebook Ads supplier creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads supplier creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads supplier creative performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads supplier creative performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads supplier creative performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads supplier creative performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
 
 # 2.3. Build materialized table for Facebook Ads festival creative performance by union all staging tables
 def mart_creative_festival() -> None:
@@ -817,7 +849,7 @@ def mart_creative_festival() -> None:
     logging.info("🚀 [MART] Starting to build materialized table for Facebook Ads festival creative performance...")
 
     # 2.3.1. Start timing the Facebook Ads festival creative performance materialized table building process
-    start_time = time.time()
+    mart_time_start = time.time()
     mart_section_succeeded = {}
     mart_section_failed = [] 
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads festival creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -902,15 +934,22 @@ def mart_creative_festival() -> None:
         print(f"❌ [MART] Failed to build materialized table for Facebook Ads festival creative performance due to {e}.")
         logging.error(f"❌ [MART] Failed to build materialized table for Facebook Ads festival creative performance due to {e}.")
 
-    # 2.3.5. Summarize ingestion result(s)
-    finally:
-        elapsed = round(time.time() - start_time, 2)
+    # 2.3.5. Summarize materialization result(s) for Facebook Ads festival creative performance
+        mart_time_elapsed = round(time.time() - mart_time_start, 2)
         if mart_section_failed:
             print(f"❌ [MART] Failed to completed Facebook Ads festival creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads festival creative performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            mart_status_def = "failed"
+            mart_status_final = "mart_failed_all"
         else:
-            print(f"🏆 [MART] Successfully completed Facebook Ads festival creative performance materialization in {elapsed}s.")
-            logging.info(f"🏆 [MART] Successfully completed Facebook Ads festival creative performance materialization in {elapsed}s.")
-            mart_status_def = "success"
-        return {"status": mart_status_def, "elapsed_seconds": elapsed, "failed_sections": mart_section_failed}
+            print(f"🏆 [MART] Successfully completed Facebook Ads festival creative performance materialization in {mart_time_elapsed}s.")
+            logging.info(f"🏆 [MART] Successfully completed Facebook Ads festival creative performance materialization in {mart_time_elapsed}s.")
+            mart_status_final = "mart_succeed_all"
+        mart_results_final = {
+            "mart_df_final": None,
+            "mart_status_final": mart_status_final,
+            "mart_summary_final": {
+                "mart_time_elapsed": mart_time_elapsed,
+                "mart_section_failed": mart_section_failed,
+            },
+        }
+    return mart_results_final
