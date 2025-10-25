@@ -1163,15 +1163,15 @@ def ingest_campaign_insights(
         if len(ingest_dates_uploaded) == 0:
             print(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "failed_all"
+            ingest_status_final = "ingest_failed_all"
         elif ingest_dates_failed > 0:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "partial_failed"
+            ingest_status_final = "ingest_failed_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "success"
+            ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
