@@ -213,16 +213,27 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "tai_khoan": str
         },
         "staging_ad_insights": {
+            # Original ad fields
             "ad_id": str,
             "ad_name": str,
-            "campaign_id": str,
             "adset_id": str,
             "adset_name": str,
+            "campaign_id": str,
             "campaign_name": str,
             "date_start": str,
             "date_stop": str,
             "spend": float,
             "delivery_status": str,
+            "result": float,
+            "result_type": str,
+            "purchase": float,
+            "messaging_conversations_started": float,
+            "reach": int,
+            "impressions": int,
+            "clicks": int,
+            "thumbnail_url": str,
+
+            # Enriched dimensions (bổ sung giống campaign insights)
             "hinh_thuc": str,
             "ma_ngan_sach_cap_1": str,
             "ma_ngan_sach_cap_2": str,
@@ -231,25 +242,23 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "nganh_hang": str,
             "chuong_trinh": str,
             "noi_dung": str,
-            "thang": str,
-            "campaign_name_invalid": bool,
             "vi_tri": str,
             "doi_tuong": str,
             "dinh_dang": str,
+            "campaign_name_invalid": bool,
             "adset_name_invalid": bool,
+
+            # Standardized time columns
+            "date": "datetime64[ns, UTC]",       # chuẩn hóa timezone UTC
+            "year": int,                          # tách năm để phân tích nhanh
+            "month": int,                         # thay cho trường “thang”
+            "last_updated_at": "datetime64[ns, UTC]",  # thời điểm enrich để trace pipeline
+
+            # Metadata
             "nen_tang": str,
             "phong_ban": str,
-            "tai_khoan": str,
-            "thumbnail_url": str,
-            "result": int,
-            "result_type": str,
-            "purchase": int,
-            "reach": int,
-            "impressions": int,
-            "clicks": int,
-            "messaging_conversations_started": int,
-            "date": "datetime64[ns, UTC]",
-        },
+            "tai_khoan": str
+        }
     }
     
     try:
