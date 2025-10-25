@@ -42,17 +42,7 @@ from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adcreative import AdCreative
-from facebook_business.exceptions import FacebookRequestError
 from facebook_business.api import FacebookAdsApi
-
-# Add Google Authentication libraries for integration
-from google.api_core.exceptions import (
-    GoogleAPICallError,
-    NotFound,
-    PermissionDenied, 
-)
-from google.auth import default
-from google.auth.exceptions import DefaultCredentialsError
 
 # Add Google Secret Manager modules for integration
 from google.cloud import secretmanager
@@ -261,7 +251,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -272,6 +262,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
                 "fetch_sections_failed": fetch_sections_failed,
             },
         }
+    return fetch_results_final
 
 # 1.2. Fetch adset metadata for Facebook Ads
 def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
@@ -449,7 +440,7 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -460,6 +451,7 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
                 "fetch_sections_failed": fetch_sections_failed,
             },
         }
+    return fetch_results_final
 
 # 1.3. Fetch ad metadata for Facebook Ads
 def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
@@ -636,7 +628,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -647,6 +639,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
                 "fetch_sections_failed": fetch_sections_failed,
             },
         }
+    return fetch_results_final
 
 # 1.4. Fetch ad creative for Facebook Ads
 def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
@@ -800,7 +793,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -811,6 +804,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
                 "fetch_sections_failed": fetch_sections_failed,
             },
         }
+    return fetch_results_final
 
 # 2. FETCH FACEBOOK ADS INSIGHTS
 
@@ -984,7 +978,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -996,6 +990,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 "fetch_rows_output": fetch_rows_output,
             },
         }
+    return fetch_results_final
 
 # 2.2. Fetch ad insights for Facebook Ads
 def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
@@ -1167,7 +1162,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_success_all"
-        return {
+        fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
@@ -1179,3 +1174,4 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 "fetch_rows_output": fetch_rows_output,
             },
         }
+    return fetch_results_final
