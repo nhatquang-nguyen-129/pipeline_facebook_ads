@@ -36,8 +36,6 @@ import logging
 # Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Python timezone ultilities for integration
-import pytz
 
 # Add Python time ultilities for integration
 import time
@@ -45,13 +43,8 @@ import time
 # Add Python UUID ultilities for integration
 import uuid
 
-# Add Google Authentication modules for integration
-from google.api_core.exceptions import (
-    Forbidden,
-    GoogleAPICallError,
-    NotFound
-)
-from google.auth.exceptions import DefaultCredentialsError
+# Add Google API core modules for integration
+from google.api_core.exceptions import NotFound
 
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
@@ -278,7 +271,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata due to {e}.")
             raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata due to {e}.")
 
-    # 1.1.9. Summarize ingestion result(s)
+    # 1.1.9. Summarize ingestion result(s) for Facebook Ads campaign metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
@@ -298,7 +291,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_success_all"
-        return {
+        ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
             "ingest_summary_final": {
@@ -309,6 +302,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
                 "ingest_sections_failed": ingest_sections_failed,
             },
         }
+    return ingest_results_final
 
 # 1.2. Ingest Facebook Ads adset metadata to Google BigQuery
 def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
@@ -494,7 +488,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata due to {e}.")
             raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata due to {e}.")
 
-    # 1.2.9. Summarize ingestion result(s)
+    # 1.2.9. Summarize ingestion result(s) for Facebook Ads adset metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
@@ -514,7 +508,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} adset_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} adset_id(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_success_all"
-        return {
+        ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
             "ingest_summary_final": {
@@ -525,6 +519,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
                 "ingest_sections_failed": ingest_sections_failed,
             },
         }
+    return ingest_results_final
 
 # 1.3. Ingest Facebook Ads ad metadata to Google BigQuery
 def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
@@ -710,7 +705,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
             raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
 
-    # 1.3.9. Summarize ingestion result(s)
+    # 1.3.9. Summarize ingestion result(s) for Facebook Ads ad metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
@@ -730,7 +725,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_success_all"
-        return {
+        ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
             "ingest_summary_final": {
@@ -741,6 +736,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
                 "ingest_sections_failed": ingest_sections_failed,
             },
         }
+    return ingest_results_final
 
 # 1.4. Ingest Facebook Ads ad creative to Google BigQuery
 def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
@@ -926,7 +922,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
             raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
 
-    # 1.4.9. Summarize ingestion result(s)
+    # 1.4.9. Summarize ingestion result(s) for Facebook Ads ad creative
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
@@ -946,7 +942,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_success_all"
-        return {
+        ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
             "ingest_summary_final": {
@@ -957,6 +953,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                 "ingest_sections_failed": ingest_sections_failed,
             },
         }
+    return ingest_results_final
 
 # 2. INGEST FACEBOOK ADS INSIGHTS
 
@@ -1181,7 +1178,7 @@ def ingest_campaign_insights(
             print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             ingest_status_final = "success"
-        return {
+        ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
             "ingest_summary_final": {
@@ -1193,6 +1190,7 @@ def ingest_campaign_insights(
                 
             }
         }
+    return ingest_results_final
 
 # 2.2. Ingest Facebook Ad ad insight to Google BigQuery raw tables
 def ingest_ad_insights(
