@@ -1284,140 +1284,97 @@ def ingest_ad_insights(
                 raise RuntimeError(f"❌ [INGEST] Failed to enforce schema for Facebook Ads ad insights for {ingest_date_separated} due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
 
     # 2.2.7. Prepare table_id for Facebook Ads ad insights ingestion
-        first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
-        y, m = first_date.year, first_date.month
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        table_id = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
-        print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {table_id}...")
-        logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {table_id}...")
-
- 
-    # 2.2.4. Enrich Facebook Ads ad insights
-        try:
-            print(f"🔁 [INGEST] Trigger to enrich Facebook Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
-            logging.info(f"🔁 [INGEST] Trigger to enrich Facebook Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
-            ingest_df_enriched = enrich_ad_insights(ingest_df_fetched)
-            ingest_df_enriched["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights enrichment from {start_date} to {end_date} due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights enrichment from {start_date} to {end_date} due to {e}.")
-            raise
-
-    # 2.2.6. Enforce schema for Facebook Ads ad insights
-        try:
-            print(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads ad insights with {len(ingest_df_casted)} row(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to enforce schema for Facebook Ads ad insights with {len(ingest_df_casted)} row(s)...")
-            ingest_df_enforced = ingest_df_casted.copy()
-            if "actions" in ingest_df_enforced.columns:
-                ingest_df_enforced["actions"] = ingest_df_enforced["actions"].apply(lambda x: json.dumps(x) if isinstance(x, (list, dict)) else None)
-            ingest_df_enforced = ensure_table_schema(ingest_df_enforced, "ingest_ad_insights")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad insights due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad insights due to {e}.")
-            raise
-
-    # 2.2.7. Parse date column(s) for Facebook Ads ad insights
-        try:
-            print(f"🔁 [INGEST] Parsing Facebook Ads ad insights date column(s) for {len(ingest_df_enforced)} row(s)...")
-            logging.info(f"🔁 [INGEST] Parsing Facebook Ads ad insights date column(s) for {len(ingest_df_enforced)} row(s)...")
-            ingest_df_parsed = ingest_df_enforced.copy()
-            ingest_df_parsed["date"] = pd.to_datetime(ingest_df_parsed["date_start"])
-            ingest_df_parsed["date_start"] = ingest_df_parsed["date"].dt.strftime("%Y-%m-%d")
-            print(f"✅ [INGEST] Successfully parsed Facebook Ads ad insights date column(s) for {len(ingest_df_parsed)} row(s).")
-            logging.info(f"✅ [INGEST] Successfully parsed Facebook Ads ad insights date column(s) for {len(ingest_df_parsed)} row(s).")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to parse date column(s) for Facebook Ads ad insights due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to parse date column(s) for Facebook Ads ad insights due to {e}.")
-            raise
+            first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
+            y, m = first_date.year, first_date.month
+            raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+            raw_table_ad = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m{m:02d}{y}"
+            print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {raw_table_ad}...")
+            logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {raw_table_ad}...")
 
     # 2.2.8. Delete existing row(s) or create new table if not exist
-        try:
-            ingest_df_deduplicated = ingest_df_parsed.drop_duplicates()
             try:
-                print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-                google_bigquery_client = bigquery.Client(project=PROJECT)
-                print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-                logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            except DefaultCredentialsError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to credentials error.") from e
-            except Forbidden as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to permission denial.") from e
-            except GoogleAPICallError as e:
-                raise RuntimeError("❌ [INGEST] Failed to initialize Google BigQuery client due to API call error.") from e
-            except Exception as e:
-                raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client due to {e}.") from e
-            try:
-                print(f"🔍 [INGEST] Checking Facebook Ads ad insights table {table_id} existence...")
-                logging.info(f"🔍 [INGEST] Checking Facebook Ads ad insights table {table_id} existence...")
-                google_bigquery_client.get_table(table_id)
-                table_exists = True
-            except Exception:
-                table_exists = False
-            if not table_exists:
-                print(f"⚠️ [INGEST] Facebook Ads ad insights table {table_id} not found then table creation will be proceeding...")
-                logging.info(f"⚠️ [INGEST] Facebook Ads ad insights table {table_id} not found then table creation will be proceeding...")
-                schema = []
-                for col, dtype in ingest_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        bq_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        bq_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        bq_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        bq_type = "TIMESTAMP"
-                    else:
-                        bq_type = "STRING"
-                    schema.append(bigquery.SchemaField(col, bq_type))
-                table = bigquery.Table(table_id, schema=schema)
-                effective_partition = "date" if "date" in ingest_df_deduplicated.columns else None
-                if effective_partition:
-                    table.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=effective_partition
-                    )
-                    clustering_fields = None
-                    if clustering_fields:
-                        filtered_clusters = [f for f in clustering_fields if f in ingest_df_deduplicated.columns]
-                        if filtered_clusters:
-                            table.clustering_fields = filtered_clusters
-                    print(f"🔍 [INGEST] Creating Facebook Ads ad insights table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
-                    logging.info(f"🔍 [INGEST] Creating Facebook Ads ad insights table {table_id} using clustering on {filtered_clusters} and partition on {effective_partition}...")
-                table = google_bigquery_client.create_table(table)
-                print(f"✅ [INGEST] Successfully created Facebook Ads ad insights table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-                logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad insights table {table_id} with clustering on {filtered_clusters} field(s) and partition on {effective_partition}.")
-            else:
-                new_dates = ingest_df_deduplicated["date_start"].dropna().unique().tolist()
-                query_existing = f"SELECT DISTINCT date_start FROM `{table_id}`"
-                existing_dates = [row.date_start for row in google_bigquery_client.query(query_existing).result()]
-                overlap = set(new_dates) & set(existing_dates)
-                if overlap:
-                    print(f"⚠️ [INGEST] Found {len(overlap)} overlapping date(s) {overlap} in Faceboo Ads ad insights {table_id} table then deletion will be proceeding...")
-                    logging.warning(f"⚠️ [INGEST] Found {len(overlap)} overlapping date(s) {overlap} in Facebook Ads ad insights {table_id} table then deletion will be proceeding...")
-                    for date_val in overlap:
-                        query = f"""
-                            DELETE FROM `{table_id}`
-                            WHERE date_start = @date_value
-                        """
-                        job_config = bigquery.QueryJobConfig(
-                            query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", date_val)]
+                ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+                table_clusters_defined = None
+                table_clusters_filtered = []
+                table_schemas_defined = []  
+                try:
+                    print(f"🔍 [INGEST] Checking Facebook Ads ad insights table {raw_table_ad} existence...")
+                    logging.info(f"🔍 [INGEST] Checking Facebook Ads ad insights table {raw_table_ad} existence...")
+                    google_bigquery_client.get_table(raw_table_ad)
+                    ingest_table_existed = True
+                except NotFound:
+                    ingest_table_existed = False
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to check Facebook Ads ad insights table {raw_table_ad} existence due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to check Facebook Ads ad insights table {raw_table_ad} existence due to {e}.")
+                    raise RuntimeError(f"❌ [INGEST] Failed to check Facebook Ads campaign insights table {raw_table_ad} existence due to {e}.") from e
+                if not ingest_table_existed:
+                    print(f"⚠️ [INGEST] Facebook Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
+                    logging.info(f"⚠️ [INGEST] Facebook Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
+                    for col, dtype in ingest_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            bq_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            bq_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            bq_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            bq_type = "TIMESTAMP"
+                        else:
+                            bq_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
+                    table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
                         )
-                        try:
-                            result = google_bigquery_client.query(query, job_config=job_config).result()
-                            deleted_rows = result.num_dml_affected_rows
-                            print(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad insights for {date_val} in Google BigQuery table {table_id}.")
-                            logging.info(f"✅ [INGEST] Successfully deleted {deleted_rows} existing row(s) of Facebook Ads ad insights for {date_val} in Google BigQuery table {table_id}.")
-                        except Exception as e:
-                            print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad insights for {date_val} in Google BigQuery table {table_id} due to {e}.")
-                            logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad insights for {date_val} in Google BigQuery table {table_id} due to {e}.")
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                    if table_clusters_filtered:
+                        table_configuration_defined.clustering_fields = table_clusters_filtered
+                        table_configuration_defined.clustering_fields = table_clusters_filtered
+                    try:
+                        print(f"🔍 [INGEST] Creating Facebook Ads ad insights table {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                        logging.info(f"🔍 [INGEST] Creating Facebook Ads ad insights table {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                        table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
+                        print(f"✅ [INGEST] Successfully created Facebook Ads ad insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                        logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad insights table {table_metadata_defined.full_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to create Facebook Ads ad insights table {raw_table_ad} due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to create Facebook Ads ad insights table {raw_table_ad} due to {e}.")
+                        raise RuntimeError(f"❌ [INGEST] Failed to create Facebook Ads ad insights table {raw_table_ad} due to {e}.") from e
                 else:
-                    print(f"⚠️ [INGEST] No overlapping date(s) of Facebook Ads ad insights found in Google BigQuery {table_id} table then deletion is skipped.")
-                    logging.info(f"⚠️ [INGEST] No overlapping date(s) of Facebook Ads ad insights found in Google BigQuery {table_id} table then deletion is skipped.")
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
-            raise
+                    ingest_dates_new = ingest_df_deduplicated["date_start"].dropna().unique().tolist()
+                    ingest_query_existed = f"SELECT DISTINCT date_start FROM `{raw_table_ad}`"
+                    ingest_dates_existed = [row.date_start for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
+                    if ingest_dates_overlapped:
+                        print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
+                        logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
+                        for ingest_date_overlapped in ingest_dates_overlapped:
+                            query = f"""
+                                DELETE FROM `{raw_table_ad}`
+                                WHERE date_start = @date_value
+                            """
+                            job_config = bigquery.QueryJobConfig(
+                                query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
+                            )
+                            try:
+                                ingest_result_deleted = google_bigquery_client.query(query, job_config=job_config).result()
+                                ingest_rows_deleted = ingest_result_deleted.num_dml_affected_rows
+                                print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
+                                logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}.")
+                            except Exception as e:
+                                print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                                logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad} due to {e}.")
+                    else:
+                        print(f"⚠️ [INGEST] No overlapping date(s) of Facebook Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+                        logging.info(f"⚠️ [INGEST] No overlapping date(s) of Facebook Ads ad insights found in Google BigQuery {raw_table_ad} table then deletion is skipped.")
+            except Exception as e:
+                print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
+                raise
 
     # 2.2.9. Upload Facebook Ads ad insights to Google BigQuery
         try:
