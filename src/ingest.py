@@ -1180,8 +1180,7 @@ def ingest_campaign_insights(
                 "ingest_rows_uploaded": ingest_rows_uploaded,
                 "ingest_dates_input": ingest_dates_input,
                 "ingest_dates_output": ingest_dates_output,
-                "ingest_dates_failed": ingest_dates_failed,
-                
+                "ingest_dates_failed": ingest_dates_failed,                
             }
         }
     return ingest_results_final

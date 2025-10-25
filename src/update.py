@@ -108,22 +108,34 @@ def update_campaign_insights(start_date: str, end_date: str):
 
     # 1.1.1. Start timing Facebook Ads campaign insights
     update_time_start = time.time()
+    update_sections_status = {}
     print(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
     logging.info(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
     try:
 
     # 1.1.2. Trigger to ingest Facebook Ads campaign insights
-        try:
-            print(f"🔄 [UPDATE] Triggering to ingest Facebook Ads campaign insights ingestion from {start_date} to {end_date}...")
-            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook Ads campaign insights ingestion from {start_date} to {end_date}...")
-            update_results_ingested = ingest_campaign_insights(start_date=start_date, end_date=end_date)
-            update_df_ingested = update_results_ingested["ingest_df_final"]
-            updated_campaign_ids = set()
-            updated_campaign_ids.update(update_df_ingested["campaign_id"].dropna().unique())
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to ingest Facebook campaign insights for {day_str} due to {e}.")
+        print(f"🔄 [UPDATE] Triggering to ingest Facebook Ads campaign insights ingestion from {start_date} to {end_date}...")
+        logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook Ads campaign insights ingestion from {start_date} to {end_date}...")
+        update_results_ingested = ingest_campaign_insights(start_date=start_date, end_date=end_date)
+        update_df_ingested = update_results_ingested["ingest_df_final"]
+        update_status_ingested = update_results_ingested["ingest_status_final"]
+        update_summary_ingested = update_results_ingested["ingest_summary_final"]
+        updated_campaign_ids = set()
+        updated_campaign_ids.update(update_df_ingested["campaign_id"].dropna().unique())
+        if update_status_ingested == "ingest_succeed_all":
+            print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {update_summary_ingested['ingest_dates_output']} uploaded day(s) on {update_summary_ingested['ingest_dates_input']} total day(s) and {update_summary_ingested['ingest_rows_uploaded']} uploaded row(s) in {update_summary_ingested['ingest_time_elapsed']}s.")
+            logging.info(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {update_summary_ingested['ingest_dates_output']}/{update_summary_ingested['ingest_dates_input']} day(s) and {update_summary_ingested['ingest_rows_uploaded']} uploaded row(s) in {update_summary_ingested['ingest_time_elapsed']}s.")
+            update_sections_status["1.1.2. Trigger to ingest Facebook Ads campaign insights"] = "succeed"
+        elif update_status_ingested == "fetch_success_partial":
+            print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {update_summary_ingested['ingest_dates_failed']} failed day(s) on {update_summary_ingested['ingest_dates_input']} total day(s) and {update_summary_ingested['ingest_rows_uploaded']} uploaded row(s) in {update_summary_ingested['ingest_time_elapsed']}s.")
+            logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {update_summary_ingested['ingest_dates_failed']} failed day(s) on {update_summary_ingested['ingest_dates_input']} total day(s) and {update_summary_ingested['ingest_rows_uploaded']} uploaded row(s) in {update_summary_ingested['ingest_time_elapsed']}s.")
+            ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "partial"
+        else:
+            ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "failed"
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+            raise RuntimeError(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
     # 1.1.7. Ingest Facebook campaign metadata
     if updated_campaign_ids:
