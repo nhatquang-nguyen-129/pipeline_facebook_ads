@@ -344,7 +344,7 @@ def staging_campaign_insights() -> dict:
             print(f"🏆 [STAGING] Successfully completed Facebook Ads campaign insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads campaign insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             staging_status_final = "staging_success_all"
-        return {
+        staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
             "staging_summary_final": {
@@ -356,6 +356,7 @@ def staging_campaign_insights() -> dict:
                 "staging_section_failed": staging_section_failed,
             }
         }
+    return staging_results_final
 
 # 1.2. Transform Facebook Ads ad insights from raw tables into cleaned staging tables
 def staging_ad_insights() -> dict:
@@ -640,7 +641,7 @@ def staging_ad_insights() -> dict:
             print(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             staging_status_final = "staging_success_all"
-        return {
+        staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
             "staging_summary_final": {
@@ -651,4 +652,5 @@ def staging_ad_insights() -> dict:
                 "staging_tables_failed": staging_tables_failed,
                 "staging_section_failed": staging_section_failed,
             }
-        }     
+        }
+    return staging_results_final     
