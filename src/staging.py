@@ -343,7 +343,7 @@ def staging_campaign_insights() -> dict:
         else:
             print(f"🏆 [STAGING] Successfully completed Facebook Ads campaign insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads campaign insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
-            staging_status_final = "staging_success_all"
+            staging_status_final = "staging_succeed_all"
         staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
@@ -640,7 +640,7 @@ def staging_ad_insights() -> dict:
         else:
             print(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
             logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
-            staging_status_final = "staging_success_all"
+            staging_status_final = "staging_succeed_all"
         staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
