@@ -325,7 +325,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             print(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
             logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
             schema_status_final = "schema_success_all"
-        return {
+        schema_results_final = {
             "schema_df_final": schema_df_final,
             "schema_status_final": schema_status_final,
             "schema_summary_final": {
@@ -335,3 +335,4 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "schema_sections_failed": schema_sections_failed,
             },
         }
+    return schema_results_final
