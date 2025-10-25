@@ -997,7 +997,7 @@ def ingest_campaign_insights(
     # 2.1.4. Trigger to fetch Facebook Ads campaign insights 
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaigns insights for {ingest_date_separated}...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaigns insights for {ingest_date_separated}...")
-            ingest_results_fetched = fetch_ad_insights(ingest_date_separated, ingest_date_separated)
+            ingest_results_fetched = fetch_campaign_insights(ingest_date_separated, ingest_date_separated)
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
@@ -1202,26 +1202,52 @@ def ingest_ad_insights(
     print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
 
-    # 2.2.1. Start timing the Facebook Ads ad insight ingestion process
-    start_time = time.time()
+    # 2.2.1. Start timing the Facebook Ads ad insights ingestion process
+    ingest_time_start = time.time()
+    ingest_sections_status = {}
+    ingest_dates_uploaded = []
     print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
+    # 2.2.2. Initialize Google BigQuery client
     try:
+        print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+        google_bigquery_client = bigquery.Client(project=PROJECT)
+        print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+        ingest_sections_status["2.2.2. Initialize Google BigQuery client"] = "succeed"
+    except Exception as e:
+        ingest_sections_status["2.2.2. Initialize Google BigQuery client"] = "failed"
+        print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+    
+    # 2.2.3. Loop through all date(s) of Facebook Ads ad insights ingestion process
+    try:
+        ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
+        for ingest_date_separated in ingest_date_list:
 
-    # 2.2.2. Trigger to fetch Facebook Ads ad insights
-        try: 
-            print(f"🔍 [INGEST] Triggering to fetch Facebook Ads ad insights from {start_date} to {end_date}...")
-            logging.info(f"🔍 [INGEST] Triggering to fetch Facebook Ads ad insights from {start_date} to {end_date}...")
-            ingest_df_fetched = fetch_ad_insights(start_date, end_date)    
-            if ingest_df_fetched.empty:
-                print("⚠️ [INGEST] Empty Facebook Ads ad insights returned then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty Facebook Ads ad insights returned then ingestion is suspended.")    
-                return pd.DataFrame()
-        except Exception as e:
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights {start_date} to {end_date} fetching due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights {start_date} to {end_date} fetching due to {e}.")
-            return pd.DataFrame()
+    # 2.2.4. Trigger to fetch Facebook Ads ad insights 
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad insights for {ingest_date_separated}...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad insights for {ingest_date_separated}...")
+            ingest_results_fetched = fetch_ad_insights(ingest_date_separated, ingest_date_separated)
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            if ingest_status_fetched == "fetch_success_all":
+                print(f"✅ [INGEST] Successfully triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "succeed"
+            elif ingest_status_fetched == "fetch_success_partial":
+                print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "partial"
+            else:
+                ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "failed"
+                print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                raise RuntimeError(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for for {ingest_date_separated} due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
     # 2.2.3. Prepare table_id for Facebook Ads ad insights
         first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
@@ -1237,7 +1263,6 @@ def ingest_ad_insights(
             print(f"🔁 [INGEST] Trigger to enrich Facebook Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
             logging.info(f"🔁 [INGEST] Trigger to enrich Facebook Ads ad insights from {start_date} to {end_date} with {len(ingest_df_fetched)} row(s)...")
             ingest_df_enriched = enrich_ad_insights(ingest_df_fetched)
-            ingest_df_enriched["date_range"] = f"{start_date}_to_{end_date}"
             ingest_df_enriched["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
         except Exception as e:
             print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights enrichment from {start_date} to {end_date} due to {e}.")

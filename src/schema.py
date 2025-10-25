@@ -170,7 +170,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "result_type": str,
             "purchase": float,
             "messaging_conversations_started": float,
-            "date_range": str,
             "date_start": str,
             "date_stop": str,
             "actions": str,

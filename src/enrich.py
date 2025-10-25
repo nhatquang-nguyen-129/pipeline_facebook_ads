@@ -724,7 +724,12 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             print(f"🔍 [ENRICH] Enriching ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_adset)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_adset)} row(s)...")
             enrich_df_ad = enrich_df_adset.copy()
-            enrich_df_ad["thang"] = pd.to_datetime(enrich_df_ad["date_start"]).dt.strftime("%Y-%m")
+            enrich_df_ad["date_start"] = pd.to_datetime(enrich_df_ad["date_start"], errors="coerce", utc=True).dt.floor("D")
+            enrich_df_ad["date_stop"] = pd.to_datetime(enrich_df_ad["date_stop"], errors="coerce", utc=True).dt.floor("D") + timedelta(hours=23, minutes=59, seconds=59)
+            enrich_df_ad["date"] = enrich_df_ad["date_start"]
+            enrich_df_ad["year"] = enrich_df_ad["date"].dt.strftime("%Y")
+            enrich_df_ad["month"] = enrich_df_ad["date"].dt.strftime("%Y-%m")
+            enrich_df_ad["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
             print(f"✅ [ENRICH] Successfully enriched ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_ad)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_ad)} row(s).")
             enrich_sections_status["2.2.6. Enrich other ad-level field(s) for Facebook Ads ad insights"] = "succeed"
