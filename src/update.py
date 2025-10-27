@@ -38,6 +38,9 @@ import pandas as pd
 # Add Python "re" libraries for integration
 import re
 
+# Add Python Tabulate for integration
+from tabulate import tabulate
+
 # Add Python 'time' libraries for integration
 import time
 
@@ -109,8 +112,8 @@ def update_campaign_insights(start_date: str, end_date: str):
     # 1.1.1. Start timing Facebook Ads campaign insights
     update_time_start = time.time()
     update_sections_status = {}
-    print(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
-    logging.info(f"🔍 [UPDATE] Proceeding to update TikTok campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    print(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
+    logging.info(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
     try:
 
@@ -121,13 +124,13 @@ def update_campaign_insights(start_date: str, end_date: str):
         ingest_df_insights = ingest_results_insights["ingest_df_final"]
         ingest_status_insights = ingest_results_insights["ingest_status_final"]
         ingest_summary_insights = ingest_results_insights["ingest_summary_final"]
-        updated_campaign_ids = set()
-        updated_campaign_ids.update(ingest_df_insights["campaign_id"].dropna().unique())
+        updated_ids_campaign = set()
+        updated_ids_campaign.update(ingest_df_insights["campaign_id"].dropna().unique())
         if ingest_status_insights == "ingest_succeed_all":
             print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
             logging.info(f" [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
             update_sections_status["1.1.2. Trigger to ingest Facebook Ads campaign insights"] = "succeed"
-        elif ingest_status_insights == "ingest_failed_partial":
+        elif ingest_status_insights == "ingest_succeed_partial":
             print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} failed day(s) and {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
             logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} failed day(s) and {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
             update_sections_status["1.1.2. Trigger to ingest Facebook Ads campaign insights"] = "partial"
@@ -137,119 +140,169 @@ def update_campaign_insights(start_date: str, end_date: str):
             logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights ingestion from {start_date} to {end_date} {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
 
     # 1.1.3. Trigger to ingest Facebook Ads campaign metadata
-        if updated_campaign_ids:
-            print(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
-            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_campaign_ids)} campaign_id(s)...")
-            ingest_results_metadata = ingest_campaign_metadata(campaign_id_list=list(updated_campaign_ids))
+        if updated_ids_campaign:
+            print(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_ids_campaign)} campaign_id(s)...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_ids_campaign)} campaign_id(s)...")
+            ingest_results_metadata = ingest_campaign_metadata(campaign_id_list=list(updated_ids_campaign))
             ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
             ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
-            if ingest_status_metadata == "ingest_success_all":
-                print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign metadata ingestion with {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
-                logging.info(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign metadata ingestion for {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
+            if ingest_status_metadata == "ingest_succeed_all":
+                print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                 update_sections_status["1.1.3. Trigger to ingest Facebook Ads campaign metadata"] = "succeed"
-            elif update_status_metadata == "ingest_success_partial":
-                print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign metadata ingestion with {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
-                logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign metadata ingestion with {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
+            elif ingest_status_metadata == "ingest_success_partial":
+                print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                 update_sections_status["1.1.3. Trigger to ingest Facebook Ads campaign metadata"] = "partial"
             else:
-                print(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign metadata ingestion with {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
-                logging.error(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign metadata ingestion with {update_summary_metadata['ingest_rows_output']} uploaded row(s) on {update_summary_metadata['ingest_rows_input']} campaign_id(s) in {update_summary_metadata['ingest_time_elapsed']}s.")
+                print(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
+                logging.error(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign metadata ingestion with {ingest_summary_metadata['ingest_rows_output']} uploaded row(s) on {ingest_summary_metadata['ingest_rows_input']} campaign_id(s) in {ingest_summary_metadata['ingest_time_elapsed']}s.")
                 update_sections_status["1.1.3. Trigger to ingest Facebook Ads campaign metadata"] = "failed"
         else:
             print("⚠️ [UPDATE] No updates for any campaign_id then Facebook Ads campaign metadata ingestion is skipped.")
             logging.warning("⚠️ [UPDATE] No updates for any campaign_id then Facebook Ads campaign metadata ingestion is skipped.")
+            update_sections_status["1.1.3. Trigger to ingest Facebook Ads campaign metadata"] = "skipped"
 
     # 1.1.4 Trigger to transform Facebook Ads campaign performance into staging table
-        if updated_campaign_ids:
+        if updated_ids_campaign:
             print("🔄 [UPDATE] Triggering to create or overwrite staging Facebook campaign insights table...")
             logging.info("🔄 [UPDATE] Triggering to create or overwrite staging Facebook campaign insights table...")
-            update_results_staging = staging_campaign_insights()
-            update_status_staging = update_results_staging["staging_status_final"]
-            update_summary_staging = update_results_staging["staging_summary_final"]
-            if update_status_staging == "staging_succeed_all":
-                print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_succeeded']} table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
-                logging.info(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_succeeded']} table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
+            staging_results_campaign = staging_campaign_insights()
+            staging_status_campaign = staging_results_campaign["staging_status_final"]
+            staging_summary_campaign = staging_results_campaign["staging_summary_final"]
+
+            if staging_status_campaign == "staging_succeed_all":
+                print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_succeeded']} table(s) on {staging_summary_campaign['staging_tables_input']} total table(s) and {staging_summary_campaign['staging_rows_uploaded']} row(s) uploaded in {staging_summary_campaign['staging_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_succeeded']} table(s) on {staging_summary_campaign['staging_tables_input']} total table(s) and {staging_summary_campaign['staging_rows_uploaded']} row(s) uploaded in {staging_summary_campaign['staging_time_elapsed']}s.")
                 update_sections_status["1.1.4 Trigger to transform Facebook Ads campaign performance into staging table"] = "succeed"
-            elif update_status_staging == "staging_failed_partial":
-                print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_failed']} failed table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
-                logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_failed']} failed table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
+
+            elif staging_status_campaign == "staging_failed_partial":
+                print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_failed']} failed table(s) on {staging_summary_campaign['staging_tables_input']} total table(s) and {staging_summary_campaign['staging_rows_uploaded']} row(s) uploaded in {staging_summary_campaign['staging_time_elapsed']}s.")
+                logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_failed']} failed table(s) on {staging_summary_campaign['staging_tables_input']} total table(s) and {staging_summary_campaign['staging_rows_uploaded']} row(s) uploaded in {staging_summary_campaign['staging_time_elapsed']}s.")
                 update_sections_status["1.1.4 Trigger to transform Facebook Ads campaign performance into staging table"] = "partial"
+
             else:
-                print(f"❌ [STAGING] Failed to trigger Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_succeeded']} table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
-                logging.error(f"❌ [STAGING] Failed to trigger Facebook Ads campaign performance staging with {update_summary_staging['staging_tables_succeeded']} table(s) on {update_summary_staging['staging_tables_input']} total table(s) and {update_summary_staging['staging_rows_uploaded']} row(s) uploaded in {update_summary_staging['staging_time_elapsed']}s.")
+                print(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_succeeded']} succeeded table(s) on {staging_summary_campaign['staging_tables_input']} total table(s).")
+                logging.error(f"❌ [UPDATE] Failed to trigger Facebook Ads campaign performance staging with {staging_summary_campaign['staging_tables_succeeded']} succeeded table(s) on {staging_summary_campaign['staging_tables_input']} total table(s).")
                 update_sections_status["1.1.4 Trigger to transform Facebook Ads campaign performance into staging table"] = "failed"
+
         else:
-            print("⚠️ [UPDATE] No updates for any campaign_id then Facebook Ads campaign performance staging is skipped.")
-            logging.warning("⚠️ [UPDATE] No updates for any campaign_id then Facebook Ads campaign performance staging is skipped.")
+            print("❌ [UPDATE] No updates for any campaign_id — staging is skipped and marked as failed.")
+            logging.error("❌ [UPDATE] No updates for any campaign_id — staging is skipped and marked as failed.")
+            update_sections_status["1.1.4 Trigger to transform Facebook Ads campaign performance into staging table"] = "failed"
 
     # 1.1.5 Trigger to build materialized Facebook Ads campaign performance table
-        if update_status_staging == "staging_succeed_all":
-            print("🔄 [MART] Triggering to rebuild materialized Facebook campaign performance table...")
-            logging.info("🔄 [MART] Triggering to rebuild materialized Facebook campaign performance table...")
-            update_results = mart_campaign_all()
-            mart_status = mart_results["mart_status_final"]
-            mart_summary = mart_results["mart_summary_final"]
+        if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
+            print("🔄 [UPDATE] Triggering to build materialized Facebook ads campaign performance table...")
+            logging.info("🔄 [UPDATE] Triggering to build materialized Facebook ads campaign performance table...")
+            
+            mart_results_all = mart_campaign_all()
+            mart_status_all = mart_results_all["mart_status_final"]
+            mart_summary_all = mart_results_all["mart_summary_final"]
+            
+            if mart_status_all == "mart_succeed_all":
+                print(f"✅ [UPDATE] Successfully completed Facebook Ads campaign performance materialization in {mart_summary_all['mart_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads campaign performance materialization in {mart_summary_all['mart_time_elapsed']}s.")
+                update_sections_status["1.1.5 Trigger to build materialized Facebook Ads campaign performance table"] = "succeed"
+            
+            elif mart_status_all == "mart_failed_all":
+                print(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_section_failed']) if mart_summary_all['mart_section_failed'] else 'unknown'}.")
+                logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_section_failed']) if mart_summary_all['mart_section_failed'] else 'unknown'}.")
+                update_sections_status["1.1.5 Trigger to build materialized Facebook Ads campaign performance table"] = "failed"
+        
+        else:
+            print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then materialization is skipped.")
+            logging.warning("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then materialization is skipped.")
+            update_sections_status["1.1.5 Trigger to build materialized Facebook Ads campaign performance table"] = "skipped"
 
-            if mart_status == "mart_succeed_all":
-                print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization "
-                    f"in {mart_summary['mart_time_elapsed']}s.")
-                logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization "
-                            f"in {mart_summary['mart_time_elapsed']}s.")
-                update_sections_status["1.1.5. Trigger to materialize Facebook Ads campaign performance table"] = "succeed"
+    # 1.1.6 Trigger to build materialized Facebook Ads supplier campaign performance table
+        if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
+            print("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier campaign performance table...")
+            logging.info("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier campaign performance table...")
 
-            elif mart_status == "mart_failed_all":
-                failed_sections = ', '.join(mart_summary['mart_section_failed']) if mart_summary['mart_section_failed'] else 'unknown'
-                print(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization "
-                    f"due to unsuccessful section(s): {failed_sections}.")
-                logging.error(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization "
-                            f"due to unsuccessful section(s): {failed_sections}.")
-                update_sections_status["1.1.5. Trigger to materialize Facebook Ads campaign performance table"] = "failed"
+            mart_results_supplier = mart_campaign_supplier()
+            mart_status_supplier = mart_results_supplier["mart_status_final"]
+            mart_summary_supplier = mart_results_supplier["mart_summary_final"]
 
-            else:
-                print(f"⚠️ [MART] Completed Facebook Ads campaign performance materialization with unknown or partial status "
-                    f"in {mart_summary['mart_time_elapsed']}s.")
-                logging.warning(f"⚠️ [MART] Completed Facebook Ads campaign performance materialization with unknown or partial status "
-                                f"in {mart_summary['mart_time_elapsed']}s.")
-                update_sections_status["1.1.5. Trigger to materialize Facebook Ads campaign performance table"] = "partial"
+            if mart_status_supplier == "mart_succeed_all":
+                print(f"✅ [UPDATE] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
+                update_sections_status["1.1.6 Trigger to build materialized Facebook Ads supplier campaign performance table"] = "succeed"
 
-        elif update_status_staging == "staging_failed_partial":
-            print(f"⚠️ [MART] Skipping materialization because staging completed with partial failure "
-                f"({update_summary_staging['staging_tables_failed']} failed out of {update_summary_staging['staging_tables_input']} table(s)).")
-            logging.warning(f"⚠️ [MART] Skipping materialization because staging completed with partial failure "
-                f"({update_summary_staging['staging_tables_failed']} failed out of {update_summary_staging['staging_tables_input']} table(s)).")
-            update_sections_status["1.1.5. Trigger to materialize Facebook Ads campaign performance table"] = "skipped_partial"
+            elif mart_status_supplier == "mart_failed_all":
+                print(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_section_failed']) if mart_summary_supplier['mart_section_failed'] else 'unknown'}.")
+                logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_section_failed']) if mart_summary_supplier['mart_section_failed'] else 'unknown'}.")
+                update_sections_status["1.1.6 Trigger to build materialized Facebook Ads supplier campaign performance table"] = "failed"
 
         else:
-            print("⚠️ [MART] Skipping materialization because staging failed completely or returned no data.")
-            logging.warning("⚠️ [MART] Skipping materialization because staging failed completely or returned no data.")
-            update_sections_status["1.1.5. Trigger to materialize Facebook Ads campaign performance table"] = "skipped_failed"
+            print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then supplier materialization is skipped.")
+            logging.warning("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then supplier materialization is skipped.")
+            update_sections_status["1.1.6 Trigger to build materialized Facebook Ads supplier campaign performance table"] = "skipped"
 
 
-    # 1.1.10. Rebuild materialized Facebook supplier campaign performance table
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign performance table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook supplier campaign performance table...")
-        try:
-            mart_campaign_supplier()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign performance due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook supplier campaign performance due to {e}.")
+    # 1.1.7 Trigger to build materialized Facebook Ads festival campaign performance table
+        if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
+            print("🔄 [UPDATE] Triggering to build materialized Facebook Ads festival campaign performance table...")
+            logging.info("🔄 [UPDATE] Triggering to build materialized Facebook Ads festival campaign performance table...")
 
-    # 1.1.11. Rebuild materialized Facebook festival campaign performance table
-        print("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
-        logging.info("🔄 [UPDATE] Triggering to rebuild materialized Facebook festival campaign performance table...")
-        try:
-            mart_campaign_festival()
-        except Exception as e:
-            print(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
-            logging.error(f"❌ [UPDATE] Failed to trigger materialized table rebuild for Facebook festival campaign performance due to {e}.")
-    else:
-        print("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized table(s).")
-        logging.warning("⚠️ [UPDATE] No updates for Facebook campaign insights then skip building materialized table(s).")
+            mart_results_festival = mart_campaign_festival()
+            mart_status_festival = mart_results_festival["mart_status_final"]
+            mart_summary_festival = mart_results_festival["mart_summary_final"]
 
-    # 1.1.11. Measure the total execution time
-    elapsed = round(time.time() - start_time, 2)
-    print(f"✅ [UPDATE] Successfully completed Facebook Ads campaign insights update in {elapsed}s.")
-    logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads campaign insights update in {elapsed}s.")
+            if mart_status_festival == "mart_succeed_all":
+                print(f"✅ [UPDATE] Successfully completed Facebook Ads festival campaign performance materialization in {mart_summary_festival['mart_time_elapsed']}s.")
+                logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads festival campaign performance materialization in {mart_summary_festival['mart_time_elapsed']}s.")
+                update_sections_status["1.1.7 Trigger to build materialized Facebook Ads festival campaign performance table"] = "succeed"
+
+            elif mart_status_festival == "mart_failed_all":
+                print(f"❌ [UPDATE] Failed to complete Facebook Ads festival campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_festival['mart_section_failed']) if mart_summary_festival['mart_section_failed'] else 'unknown'}.")
+                logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads festival campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_festival['mart_section_failed']) if mart_summary_festival['mart_section_failed'] else 'unknown'}.")
+                update_sections_status["1.1.7 Trigger to build materialized Facebook Ads festival campaign performance table"] = "failed"
+
+        else:
+            print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then festival materialization is skipped.")
+            logging.warning("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then festival materialization is skipped.")
+            update_sections_status["1.1.7 Trigger to build materialized Facebook Ads festival campaign performance table"] = "skipped"
+
+    # 1.1.8. Summarize update result(s) for Facebook Ads campaign performance
+    finally:
+        update_time_end = time.time()
+        update_time_elapsed = round(update_time_end - update_time_start, 2)
+
+        print("\n📊 [UPDATE] FACEBOOK ADS CAMPAIGN PERFORMANCE UPDATE SUMMARY")
+        print("=" * 100)
+        print(f"{'Step':<75} | {'Status':<10} | {'Time (s)':>8}")
+        print("-" * 100)
+
+        sorted_steps = sorted(update_sections_status.items(), key=lambda x: x[0])
+
+        for step_name, step_status in sorted_steps:
+            indent_level = step_name.count(".") - 1
+            indent = " " * (indent_level * 2)
+
+            if "campaign insights" in step_name and 'ingest_summary_insights' in locals():
+                step_time = ingest_summary_insights.get("ingest_time_elapsed", "-")
+            elif "campaign metadata" in step_name and 'ingest_summary_metadata' in locals():
+                step_time = ingest_summary_metadata.get("ingest_time_elapsed", "-")
+            elif "staging" in step_name and 'staging_summary_campaign' in locals():
+                step_time = staging_summary_campaign.get("staging_time_elapsed", "-")
+            elif "performance materialization" in step_name and 'mart_summary_all' in locals():
+                step_time = mart_summary_all.get("mart_time_elapsed", "-")
+            elif "supplier" in step_name and 'mart_summary_supplier' in locals():
+                step_time = mart_summary_supplier.get("mart_time_elapsed", "-")
+            elif "festival" in step_name and 'mart_summary_festival' in locals():
+                step_time = mart_summary_festival.get("mart_time_elapsed", "-")
+            else:
+                step_time = "-"
+
+            print(f"{indent}{step_name:<73} | {step_status:<10} | {str(step_time):>8}")
+
+        print("-" * 100)
+        print(f"{'Total execution time':<75} | {'-':<10} | {update_time_elapsed:>8}s")
+        print("=" * 100)
+
+        logging.info(f"📊 [UPDATE] Completed Facebook Ads Campaign Insights update in {update_time_elapsed}s.")
+        logging.info(f"📊 [UPDATE] Section results {update_sections_status}.")
 
 # 1.2. Update Facebook ad insights data for a given date range
 def update_ad_insights(start_date: str, end_date: str):
