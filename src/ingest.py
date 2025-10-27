@@ -95,6 +95,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     # 1.1.1. Start timing the Facebook Ads campaign metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
+    ingest_sections_status["1.1.1. Start timing the Facebook Ads campaign metadata ingestion"] = "succeed"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -130,7 +131,6 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
             ingest_sections_status["1.1.3. Trigger to fetch Facebook Ads campaign metadata"] = "failed"
             print(f"❌ [INGEST] Failed to fetch Facebook Ads campaign metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.error(f"❌ [INGEST] Failed to fetch Facebook Ads campaign metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            raise RuntimeError(f"❌ [INGEST] Failed to fetch Facebook Ads campaign metadata due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
 
     # 1.1.4. Prepare table_id for Facebook Ads campaign metadata ingestion
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -171,7 +171,8 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
 
     # 1.1.7. Delete existing row(s) or create new table if it not exist
         try:
-            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+            ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()           
+            table_clusters_defined = ["account_id", "campaign_id"]
             table_clusters_filtered = []
             table_schemas_defined = []
             try:
@@ -207,7 +208,6 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
                         type_=bigquery.TimePartitioningType.DAY,
                         field=table_partition_effective
                     )
-                table_clusters_defined = ["campaign_id", "account_id"]
                 table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
                 if table_clusters_filtered:  
                     table_configuration_defined.clustering_fields = table_clusters_filtered  

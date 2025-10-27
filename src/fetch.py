@@ -978,6 +978,14 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_all"
+                
+        # 🧾 [FETCH] Display sample of final DataFrame result
+        if not fetch_df_final.empty:
+            print(f"\n📊 [FETCH] Sample of final fetched DataFrame ({len(fetch_df_final)} row(s)):\n")
+            print(fetch_df_final.head(10).to_markdown(index=False))
+        else:
+            print("\n⚠️ [FETCH] Final fetched DataFrame is empty — no records retrieved.\n")
+
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
