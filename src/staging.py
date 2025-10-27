@@ -46,7 +46,7 @@ from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
 
 # Add internal Facebook module for handling
-from src.schema import ensure_table_schema
+from src.schema import enforce_table_schema
 from src.enrich import (
     enrich_campaign_fields,
     enrich_ad_fields
@@ -214,7 +214,7 @@ def staging_campaign_insights() -> dict:
         try:
             print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads campaign insights...")
             logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads campaign insights...")
-            staging_df_enforced = ensure_table_schema(staging_df_enriched, "staging_campaign_insights")
+            staging_df_enforced = enforce_table_schema(staging_df_enriched, "staging_campaign_insights")
         except Exception as e:
             print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads campaign insights due to {e}.")
@@ -511,7 +511,7 @@ def staging_ad_insights() -> dict:
         try:
             print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads ad insights...")
             logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads ad insights...")
-            staging_df_enforced = ensure_table_schema(staging_df_enriched, "staging_ad_insights")
+            staging_df_enforced = enforce_table_schema(staging_df_enriched, "staging_ad_insights")
         except Exception as e:
             print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights due to {e}.")
