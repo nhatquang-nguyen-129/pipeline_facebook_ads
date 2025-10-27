@@ -221,7 +221,7 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign metadata with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign metadata "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["1.1.10. Enforce schema for Facebook Ads campaign metadata"] = "succeed"
@@ -246,11 +246,11 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
         elif fetch_rows_output < fetch_rows_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads campaign metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads campaign metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -410,7 +410,7 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads adset metadata with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads adset metadata "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["1.2.10. Enforce schema for Facebook Ads adset metadata"] = "succeed"
@@ -435,11 +435,11 @@ def fetch_adset_metadata(adset_id_list: list[str]) -> pd.DataFrame:
         elif fetch_rows_output < fetch_rows_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads adset metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads adset metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} adset_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -598,7 +598,7 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad metadata with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad metadata "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["1.3.10. Enforce schema for Facebook Ads ad metadata"] = "succeed"
@@ -623,11 +623,11 @@ def fetch_ad_metadata(ad_id_list: list[str]) -> pd.DataFrame:
         elif fetch_rows_output < fetch_rows_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads ad metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads ad metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -763,7 +763,7 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["1.4.8. Enforce schema for Facebook Ads ad creative"] = "succeed"
@@ -788,11 +788,11 @@ def fetch_ad_creative(ad_id_list: list[str]) -> pd.DataFrame:
         elif fetch_rows_output < fetch_rows_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads ad creative fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads ad creative fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad creative fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} ad_id(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -947,7 +947,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["2.1.9. Enforce schema for Facebook Ads campaign insights"] = "succeed"
@@ -973,11 +973,11 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         elif fetch_days_output < fetch_days_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} with partial failure of {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} with partial failure of {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -1131,7 +1131,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
         fetch_status_enforced = fetch_results_schema["schema_status_final"]
         fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_success_all":
+        if fetch_status_enforced == "schema_succeed_all":
             print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             fetch_sections_status["2.2.9. Enforce schema for Facebook Ads ad insights"] = "succeed"
@@ -1157,11 +1157,11 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         elif fetch_days_output < fetch_days_input:
             print(f"⚠️ [FETCH] Completed Facebook Ads ad insights fetching process from {start_date} to {end_date} with partial failure of {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.warning(f"⚠️ [FETCH] Completed Facebook Ads ad insights fetching process from {start_date} to {end_date} with partial failure of {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_partial"
+            fetch_status_final = "fetch_succeed_partial"
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching process from {start_date} to {end_date} for {len(fetch_sections_status)} section(s) with {fetch_days_output}/{fetch_days_input} day(s) succeeded in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_success_all"
+            fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,

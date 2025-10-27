@@ -969,8 +969,8 @@ def ingest_campaign_insights(
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_dates_uploaded = []
-    print(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 2.1.2. Initialize Google BigQuery client
     try:
