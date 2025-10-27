@@ -118,11 +118,11 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
         ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
         ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_success_all":
+        if ingest_status_fetched == "fetch_succeed_all":
             print(f"✅ [INGEST] Successfully triggered Facebook Ads campaign metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} campaign_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads campaign metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} campaign_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.1.3. Trigger to fetch Facebook Ads campaign metadata"] = "succeed"
-        elif ingest_status_fetched == "fetch_success_partial":
+        elif ingest_status_fetched == "fetch_succeed_partial":
             print(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads campaign metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} campaign_id(s)) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.warning(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads campaign metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} campaign_id(s)) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.1.3. Trigger to fetch Facebook Ads campaign metadata"] = "partial"
@@ -145,7 +145,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
         ingest_status_enforced = ingest_results_enforced["schema_status_final"]
         ingest_df_enforced = ingest_results_enforced["schema_df_final"]    
-        if ingest_status_enforced == "schema_success_all":
+        if ingest_status_enforced == "schema_succeed_all":
             print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign metadata with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign metadata "f"with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             ingest_sections_status["1.1.5. Enforce schema for Facebook Ads campaign metadata"] = "succeed"
@@ -286,11 +286,11 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
         elif ingest_rows_output < ingest_rows_input:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_partial"
+            ingest_status_final = "ingest_succeed_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} campaign_id(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_all"
+            ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -335,11 +335,11 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
         ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
         ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
         ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_success_all":
+        if ingest_status_fetched == "fetch_succeed_all":
             print(f"✅ [INGEST] Successfully triggered Facebook Ads adset metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} adset_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads adset metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} adset_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.2.3. Trigger to fetch Facebook Ads adset metadata"] = "succeed"
-        elif ingest_status_fetched == "fetch_success_partial":
+        elif ingest_status_fetched == "fetch_succeed_partial":
             print(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads adset metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} adset_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.warning(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads adset metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} adset_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.2.3. Trigger to fetch Facebook Ads adset metadata"] = "partial"
@@ -362,7 +362,7 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
         ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
         ingest_status_enforced = ingest_results_enforced["schema_status_final"]
         ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
-        if ingest_status_enforced == "schema_success_all":
+        if ingest_status_enforced == "schemas_succeed_all":
             print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads adset metadata with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads adset metadata "f"with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             ingest_sections_status["1.2.5. Enforce schema for Facebook Ads adset metadata"] = "succeed"
@@ -503,11 +503,11 @@ def ingest_adset_metadata(adset_id_list: list) -> pd.DataFrame:
         elif ingest_rows_output < ingest_rows_input:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads adset metadata ingestion with {ingest_rows_output}/{ingest_rows_input} adset_id(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads adset metadata ingestion with {ingest_rows_output}/{ingest_rows_input} adset_id(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_partial"
+            ingest_status_final = "ingest_succeed_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} adset_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads adset metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} adset_id(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_all"
+            ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -552,11 +552,11 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
         ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
         ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_success_all":
+        if ingest_status_fetched == "fetch_succeed_all":
             print(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.3.3. Trigger to fetch Facebook Ads ad metadata"] = "succeed"
-        elif ingest_status_fetched == "fetch_success_partial":
+        elif ingest_status_fetched == "fetch_succeed_partial":
             print(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.warning(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad metadata {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.3.3. Trigger to fetch Facebook Ads ad metadataa"] = "partial"
@@ -579,7 +579,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
         ingest_status_enforced = ingest_results_enforced["schema_status_final"]
         ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
-        if ingest_status_enforced == "schema_success_all":
+        if ingest_status_enforced == "schema_succeed_all":
             print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad metadata "f"with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             ingest_sections_status["1.3.5. Enforce schema for Facebook Ads ad metadata"] = "succeed"
@@ -720,11 +720,11 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
         elif ingest_rows_output < ingest_rows_input:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_partial"
+            ingest_status_final = "ingest_succeed_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_all"
+            ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -769,11 +769,11 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
         ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
         ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_success_all":
+        if ingest_status_fetched == "fetch_succeed_all":
             print(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetch for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.4.3. Trigger to fetch Facebook Ads ad creative"] = "succeed"
-        elif ingest_status_fetched == "fetch_success_partial":
+        elif ingest_status_fetched == "fetch_succeed_partial":
             print(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad creative {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             logging.warning(f"⚠️ [INGEST] Partially triggered to fetch Facebook Ads ad creative {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} ad_id(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             ingest_sections_status["1.4.3. Trigger to fetch Facebook Ads ad creative"] = "partial"
@@ -796,7 +796,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
         ingest_status_enforced = ingest_results_enforced["schema_status_final"]
         ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
-        if ingest_status_enforced == "schema_success_all":
+        if ingest_status_enforced == "schema_succeed_all":
             print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad creative "f"with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
             ingest_sections_status["1.4.5. Enforce schema for Facebook Ads ad creative"] = "succeed"
@@ -937,11 +937,11 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
         elif ingest_rows_output < ingest_rows_input:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ad_id(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_partial"
+            ingest_status_final = "ingest_succeeds_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion for {ingest_sections_total} section(s) with {ingest_rows_output}/{ingest_rows_input} ad_id(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_success_all"
+            ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -998,11 +998,11 @@ def ingest_campaign_insights(
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-            if ingest_status_fetched == "fetch_success_all":
+            if ingest_status_fetched == "fetch_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered Facebook Ads campaign insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads campaign insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status["2.1.4. Trigger to fetch Facebook Ads campaign insights"] = "succeed"
-            elif ingest_status_fetched == "fetch_success_partial":
+            elif ingest_status_fetched == "fetch_succeed_partial":
                 print(f"⚠️ [INGEST] Partially triggered Facebook Ads campaign insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads campaign insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status["2.1.4. Trigger to fetch Facebook Ads campaign insights"] = "partial"
@@ -1018,7 +1018,7 @@ def ingest_campaign_insights(
             ingest_df_enriched = ingest_results_enriched["enrich_df_final"]
             ingest_status_enriched = ingest_results_enriched["enrich_status_final"]
             ingest_summary_enriched = ingest_results_enriched["enrich_summary_final"]
-            if ingest_status_enriched == "enrich_success_all":
+            if ingest_status_enriched == "enrich_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads campaign insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads campaign insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
                 ingest_sections_status["2.1.5. Enrich Facebook Ads campaign insights"] = "succeed"
@@ -1034,7 +1034,7 @@ def ingest_campaign_insights(
             ingest_df_enforced = ingest_results_enforced["schema_df_final"]
             ingest_status_enforced = ingest_results_enforced["schema_status_final"]
             ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-            if ingest_status_enforced == "schema_success_all":
+            if ingest_status_enforced == "schema_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign insights for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads campaign insights for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 ingest_sections_status["2.1.6. Trigger to enforce schema for Facebook Ads campaign insights"] = "succeed"
@@ -1167,7 +1167,7 @@ def ingest_campaign_insights(
         elif ingest_dates_failed > 0:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_failed_partial"
+            ingest_status_final = "ingest_succeed_partial"
         else:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output} day(s) and {ingest_rows_uploaded} row(s) uploaded in {ingest_time_elapsed}s.")
@@ -1226,11 +1226,11 @@ def ingest_ad_insights(
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-            if ingest_status_fetched == "fetch_success_all":
+            if ingest_status_fetched == "fetch_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "succeed"
-            elif ingest_status_fetched == "fetch_success_partial":
+            elif ingest_status_fetched == "fetch_succeed_partial":
                 print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad insights fetch for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} day(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status["2.2.4. Trigger to fetch Facebook Ads ad insights "] = "partial"
@@ -1247,7 +1247,7 @@ def ingest_ad_insights(
             ingest_df_enriched = ingest_results_enriched["enrich_df_final"]
             ingest_status_enriched = ingest_results_enriched["enrich_status_final"]
             ingest_summary_enriched = ingest_results_enriched["enrich_summary_final"]
-            if ingest_status_enriched == "enrich_success_all":
+            if ingest_status_enriched == "enrich_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered to enrich Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']} row(s) in {ingest_summary_enriched['enrich_time_elapsed']}s.")
                 ingest_sections_status["2.2.5. Trigger to enrich Facebook Ads ad insights"] = "succeed"
@@ -1264,7 +1264,7 @@ def ingest_ad_insights(
             ingest_df_enforced = ingest_results_enforced["schema_df_final"]
             ingest_status_enforced = ingest_results_enforced["schema_status_final"]
             ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-            if ingest_status_enforced == "schema_success_all":
+            if ingest_status_enforced == "schema_succeed_all":
                 print(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [INGEST] Successfully triggered to enforce schema for Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']} row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 ingest_sections_status["2.2.6. Trigger to enforce schema for Facebook Ads ad insights"] = "succeed"
