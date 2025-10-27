@@ -39,14 +39,17 @@ import numpy as np
 # 1.1. Enforce that the given DataFrame contains all required columns with correct datatypes
 def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
 
-    # 1.1.1. Start timing the raw Facebook Ads campaign insights enrichment process
+    # 1.1.1. Start timing the raw Facebook Ads enrichment
     schema_time_start = time.time()
     schema_sections_status = {}
+    schema_sections_status["[SCHEMA] Start timing the raw Facebook Ads enrichment"] = "succeed"
+    
     print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Define schema mapping for Facebook data type
+    # 1.1.2. Define schema mapping for Facebook Ads data type
     schema_types_mapping = {
+        
         "fetch_campaign_metadata": {
             "campaign_id": str,
             "campaign_name": str,
@@ -58,6 +61,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "account_name": str,
         },
+        
         "fetch_adset_metadata": {
             "adset_id": str,
             "adset_name": str,
@@ -67,6 +71,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "account_name": str,
         },
+        
         "fetch_ad_metadata": {
             "ad_id": str,
             "ad_name": str,
@@ -77,11 +82,13 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "account_name": str,
         },
+        
         "fetch_ad_creative": {
             "ad_id": str,
             "thumbnail_url": str,
             "account_id": str,
         },
+        
         "fetch_campaign_insights": {
             "account_id": str,
             "campaign_id": str,
@@ -94,6 +101,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "date_stop": str,
             "actions": object,
         },
+        
         "fetch_ad_insights": {
             "account_id": str,
             "ad_id": str,
@@ -109,6 +117,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "delivery_status": str,
             "actions": object
         },
+        
         "ingest_campaign_metadata": {
             "campaign_id": str,
             "campaign_name": str,
@@ -125,6 +134,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "account_name": str,
         },
+        
         "ingest_ad_metadata": {
             "ad_id": str,
             "ad_name": str,
@@ -135,11 +145,13 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "account_name": str,
         },
+        
         "ingest_ad_creative": {
             "ad_id": str,
             "thumbnail_url": str,
             "account_id": str,
         },
+        
         "ingest_campaign_insights": {
             "account_id": str,
             "campaign_id": str,
@@ -156,6 +168,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "date_stop": str,
             "actions": str,
         },
+        
         "ingest_ad_insights": {
             "account_id": str,
             "campaign_id": str,
@@ -194,13 +207,19 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "purchase": float,
             "messaging_conversations_started": float,
 
-            # Enriched dimensions from campaign_ name
+            # Enriched dimensions from campaign_name and specific to campaign settings
             "enrich_campaign_objective": str,
-            "enrich_budget_group": str,
-            "enrich_budget_type": str,
             "enrich_campaign_region": str,
             "enrich_campaign_personnel": str,
+            
+            # Enriched dimensions from campaign_name and specific to budget classfication
+            "enrich_budget_group": str,
+            "enrich_budget_type": str,
+
+            # Enriched dimensions from campaign_name and specific to category classification
             "enrich_category_group": str,
+            
+            # Enriched dimensions from campaign_name and specific to advertising strategy
             "enrich_program_group": str,
             "enrich_program_type": str,
 
@@ -210,13 +229,14 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "month": int,
             "last_updated_at": "datetime64[ns, UTC]",
 
-            # Enriched metadata from table_id
+            # Enriched dimensions from table_id and specific to internal company structure
             "enrich_account_platform": str,
             "enrich_account_department": str,
             "enrich_account_name": str
         },
         
         "staging_ad_insights": {
+            
             # Original staging ad fields
             "ad_id": str,
             "ad_name": str,
@@ -268,24 +288,26 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "enrich_company_account": str,
 
             # Standardized time columns
-            "date": "datetime64[ns, UTC]",       # chuẩn hóa timezone UTC
-            "year": int,                          # tách năm để phân tích nhanh
-            "month": int,                         # thay cho trường “thang”
-            "last_updated_at": "datetime64[ns, UTC]"  # thời điểm enrich để trace pipeline
+            "date": "datetime64[ns, UTC]",
+            "year": int,
+            "month": int,
+            "last_updated_at": "datetime64[ns, UTC]"
         }
     }
     
+    schema_sections_status["[SCHEMA] Define schema mapping for Facebook Ads data type"] = "succeed"
+
     try:
 
     # 1.1.3. Validate that the given schema_type_mapping exists
         if schema_type_mapping not in schema_types_mapping:
-            schema_sections_status["1.1.3. Validate that the given schema_type_mapping exists"] = "failed"
+            schema_sections_status["[SCHEMA] Validate that the given schema_type_mapping exists"] = "failed"
             print(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
             logging.error(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
             raise ValueError(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
         else:
             schema_columns_expected = schema_types_mapping[schema_type_mapping]
-            schema_sections_status["1.1.3. Validate that the given schema_type_mapping exists"] = "succeed"
+            schema_sections_status["[SCHEMA] Validate that the given schema_type_mapping exists"] = "succeed"
             print(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")
             logging.info(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")       
         
@@ -293,7 +315,9 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         try:
             print(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")
             logging.info(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")
+            
             schema_df_enforced = schema_df_input.copy()
+            
             for schema_column_expected, schema_data_type in schema_columns_expected.items():
                 if schema_column_expected not in schema_df_enforced.columns: 
                     schema_df_enforced[schema_column_expected] = pd.NA
@@ -317,20 +341,25 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             schema_df_enforced = schema_df_enforced[list(schema_columns_expected.keys())]       
             print(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
             logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
-            schema_sections_status["1.1.4. Enforce schema columns for Facebook Ads"] = "succeed"
+            schema_sections_status["[SCHEMA] Enforce schema columns for Facebook Ads"] = "succeed"
+        
         except Exception as e:
-            schema_sections_status["1.1.4. Enforce schema columns for Facebook Ads"] = "failed"
+            schema_sections_status["[SCHEMA] Enforce schema columns for Facebook Ads"] = "failed"
             print(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
             logging.error(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
-            raise RuntimeError(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
 
-    # 1.1.5. Summarize schema enforcement result(s)
+    # 1.1.5. Summarize schema enforcement result(s) for Facebook Ads
     finally:
         schema_time_elapsed = round(time.time() - schema_time_start, 2)
         schema_df_final = schema_df_enforced.copy() if "schema_df_enforced" in locals() and not schema_df_enforced.empty else pd.DataFrame()
+        
         schema_sections_total = len(schema_sections_status)
+        schema_sections_succeed = [k for k, v in schema_sections_status.items() if v == "succeed"]
         schema_sections_failed = [k for k, v in schema_sections_status.items() if v == "failed"]
+        
+        schema_rows_input = len(schema_df_input)
         schema_rows_output = len(schema_df_final)      
+        
         if any(v == "failed" for v in schema_sections_status.values()):
             print(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
@@ -339,14 +368,19 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             print(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
             logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
             schema_status_final = "schema_succeed_all"
+        
         schema_results_final = {
             "schema_df_final": schema_df_final,
             "schema_status_final": schema_status_final,
             "schema_summary_final": {
                 "schema_time_elapsed": schema_time_elapsed,
-                "schema_rows_output": schema_rows_output,
                 "schema_sections_total": schema_sections_total,
+                "schema_sections_succeed": schema_sections_succeed,
                 "schema_sections_failed": schema_sections_failed,
+                "schema_sections_detail": schema_sections_status,
+                "schema_rows_input": schema_rows_input,
+                "schema_rows_output": schema_rows_output,
             },
         }
+    
     return schema_results_final
