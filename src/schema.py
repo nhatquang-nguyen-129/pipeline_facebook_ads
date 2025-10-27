@@ -174,7 +174,10 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "date_stop": str,
             "actions": str,
         },
+        
         "staging_campaign_insights": {
+            
+            # Original staging campaign fields
             "account_id": str,
             "campaign_id": str,
             "campaign_name": str,
@@ -191,29 +194,30 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "purchase": float,
             "messaging_conversations_started": float,
 
-            # Enriched dimensions
-            "hinh_thuc": str,
-            "ma_ngan_sach_cap_1": str,
-            "ma_ngan_sach_cap_2": str,
-            "khu_vuc": str,
-            "nhan_su": str,
-            "nganh_hang": str,
-            "chuong_trinh": str,
-            "noi_dung": str,
+            # Enriched dimensions from campaign_ name
+            "enrich_campaign_objective": str,
+            "enrich_budget_group": str,
+            "enrich_budget_type": str,
+            "enrich_campaign_region": str,
+            "enrich_campaign_personnel": str,
+            "enrich_category_group": str,
+            "enrich_program_group": str,
+            "enrich_program_type": str,
 
             # Standardized time columns
-            "date": "datetime64[ns, UTC]",       # chuẩn hóa timezone UTC
-            "year": int,                         # tách năm để phân tích nhanh
-            "month": int,                        # thay cho trường “thang”
-            "last_updated_at": "datetime64[ns, UTC]",  # thời điểm enrich để trace pipeline
+            "date": "datetime64[ns, UTC]",
+            "year": int,
+            "month": int,
+            "last_updated_at": "datetime64[ns, UTC]",
 
-            # Metadata
-            "nen_tang": str,
-            "phong_ban": str,
-            "tai_khoan": str
+            # Enriched metadata from table_id
+            "enrich_account_platform": str,
+            "enrich_account_department": str,
+            "enrich_account_name": str
         },
+        
         "staging_ad_insights": {
-            # Original ad fields
+            # Original staging ad fields
             "ad_id": str,
             "ad_name": str,
             "adset_id": str,
@@ -233,31 +237,41 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "clicks": int,
             "thumbnail_url": str,
 
-            # Enriched dimensions (bổ sung giống campaign insights)
-            "hinh_thuc": str,
-            "ma_ngan_sach_cap_1": str,
-            "ma_ngan_sach_cap_2": str,
-            "khu_vuc": str,
-            "nhan_su": str,
-            "nganh_hang": str,
-            "chuong_trinh": str,
-            "noi_dung": str,
-            "vi_tri": str,
-            "doi_tuong": str,
-            "dinh_dang": str,
-            "campaign_name_invalid": bool,
-            "adset_name_invalid": bool,
+            # Enriched dimensions from campaign_name and specific to campaign settings
+            "enrich_campaign_objective": str,
+            "enrich_campaign_region": str,
+            "enrich_campaign_personnel": str,
+
+            # Enriched dimensions from campaign_name and specific to budget classfication
+            "enrich_budget_group": str,
+            "enrich_budget_type": str,
+
+            # Enriched dimensions from campaign_name and specific to category classification
+            "enrich_category_group": str,
+
+            # Enriched dimensions from campaign_name and specific to advertising strategy
+            "enrich_program_group": str,
+            "enrich_program_type": str,
+
+            # Enriched dimensions from adset_name and specific to advertising strategy
+            "enrich_program_subtype": str,
+            "enrich_program_strategy": str,
+            
+            # Enriched dimensions from adset_name and specific to targeting
+            "enrich_adset_location": str,
+            "enrich_adset_audience": str,
+            "enrich_adset_format": str,
+
+            # Enriched dimensions from table_id and specific to internal company structure
+            "enrich_company_platform": str,
+            "enrich_company_department": str,
+            "enrich_company_account": str,
 
             # Standardized time columns
             "date": "datetime64[ns, UTC]",       # chuẩn hóa timezone UTC
             "year": int,                          # tách năm để phân tích nhanh
             "month": int,                         # thay cho trường “thang”
-            "last_updated_at": "datetime64[ns, UTC]",  # thời điểm enrich để trace pipeline
-
-            # Metadata
-            "nen_tang": str,
-            "phong_ban": str,
-            "tai_khoan": str
+            "last_updated_at": "datetime64[ns, UTC]"  # thời điểm enrich để trace pipeline
         }
     }
     
