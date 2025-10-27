@@ -300,7 +300,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 except Exception as e:
                     print(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
                     logging.warning(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
-            schema_df_enforced = schema_df_enforced[[col for col in schema_column_expected]]        
+            schema_df_enforced = schema_df_enforced[list(schema_columns_expected.keys())]       
             print(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
             logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
             schema_sections_status["1.1.4. Enforce schema columns for Facebook Ads"] = "succeed"
