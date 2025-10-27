@@ -34,16 +34,16 @@ import pandas as pd
 # Add external Python NumPy libraries for integration
 import numpy as np
 
-# 1. ENSURE SCHEMA FOR GIVEN PYTHON DATAFRAME
+# 1. ENFORCE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
-# 1.1. Ensure that the given DataFrame contains all required columns with correct datatypes
+# 1.1. Enforce that the given DataFrame contains all required columns with correct datatypes
 def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
 
     # 1.1.1. Start timing the raw Facebook Ads campaign insights enrichment process
     schema_time_start = time.time()
     schema_sections_status = {}
-    print(f"🔍 [SCHEMA] Proceeding to ensure schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [SCHEMA] Proceeding to ensure schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Define schema mapping for Facebook data type
     schema_types_mapping = {
