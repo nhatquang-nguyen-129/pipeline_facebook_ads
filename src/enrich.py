@@ -607,6 +607,26 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_campaign["ma_ngan_sach_cap_2"] = enrich_df_campaign["campaign_name"].str.split("_").str[3]
             enrich_df_campaign["nganh_hang"] = enrich_df_campaign["campaign_name"].str.split("_").str[4]
             enrich_df_campaign["nhan_su"] = enrich_df_campaign["campaign_name"].str.split("_").str[5]
+            vietnamese_map = {
+                'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+                'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+                'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+                'đ': 'd',
+                'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+                'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+                'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+                'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+                'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+                'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+                'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+                'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+                'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            }
+            vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
+            full_map = {**vietnamese_map, **vietnamese_map_upper}
+            enrich_df_campaign["nhan_su"] = enrich_df_campaign["nhan_su"].apply(
+                lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x
+            )
             enrich_df_campaign["chuong_trinh"] = enrich_df_campaign["campaign_name"].str.split("_").str[7]
             enrich_df_campaign["noi_dung"] = enrich_df_campaign["campaign_name"].str.split("_").str[8]
             enrich_df_campaign["date_start"] = pd.to_datetime(enrich_df_campaign["date_start"], errors="coerce", utc=True).dt.floor("D")

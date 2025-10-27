@@ -175,40 +175,27 @@ def staging_campaign_insights() -> dict:
         staging_section_succeeded["1.1.5. Query all raw Facebook Ads campaign insights table(s)"] = True
 
     # 1.1.6. Enrich Facebook Ads campaign insights
-        try:
-            print(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
-            logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
-            staging_df_enriched = enrich_campaign_fields(staging_df_concatenated, enrich_table_id=raw_table_campaign)
-            if "nhan_su" in staging_df_enriched.columns:
-                vietnamese_map = {
-                    'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-                    'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-                    'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-                    'đ': 'd',
-                    'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-                    'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-                    'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-                    'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-                    'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-                    'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-                    'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-                    'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-                    'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-                }
-                vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
-                full_map = {**vietnamese_map, **vietnamese_map_upper}
-                staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(
-                    lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x
-                )
-            print(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) from all raw Facebook Ads campaign insights table(s).")
-            logging.info(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) from all raw Facebook Ads campaign insights table(s).")
+        print(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
+        logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads campaign insights field(s) for {len(staging_df_concatenated)} row(s)...")
+        staging_results_enriched = enrich_campaign_fields(staging_df_concatenated, enrich_table_id=raw_table_campaign)
+        staging_df_enriched = staging_results_enriched.get("enrich_df_final")
+        staging_status_enriched = staging_results_enriched.get("enrich_status_final", "unknown")
+        staging_summary_enriched = staging_results_enriched.get("enrich_summary_final", {})
+
+        # Log kết quả enrich
+        if enrich_status_final == "enrich_success_all":
+            print(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) "
+                f"from all raw Facebook Ads campaign insights table(s) in "
+                f"{enrich_summary_final.get('enrich_time_elapsed', '?')}s.")
+            logging.info(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) "
+                        f"from all raw Facebook Ads campaign insights table(s) in "
+                        f"{enrich_summary_final.get('enrich_time_elapsed', '?')}s.")
             staging_section_succeeded["1.1.6. Enrich Facebook Ads campaign insights"] = True
-        except Exception as e:
+        else:
+            failed_sections = ", ".join(enrich_summary_final.get("enrich_sections_failed", []))
+            print(f"⚠️ [STAGING] Enrichment completed with partial failure in section(s): {failed_sections}")
+            logging.warning(f"⚠️ [STAGING] Enrichment completed with partial failure in section(s): {failed_sections}")
             staging_section_succeeded["1.1.6. Enrich Facebook Ads campaign insights"] = False
-            staging_section_failed.append("1.1.6. Enrich Facebook Ads campaign insights")
-            print(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads campaign insights due to {e}.")
-            logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads campaign insights due to {e}.")
-            raise RuntimeError(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads campaign insights due to {e}.") from e
 
     # 1.1.7. Enforce schema for Facebook Ads campaign insights
         try:
