@@ -81,16 +81,16 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
     # 1.1.1. Start timing the Facebook Ads campaign metadata fetching
     fetch_time_start = time.time()
     fetch_sections_status = {}
-    fetch_sections_status["[FETCH] Start timing the Facebook Ads campaign metadata fetching"] = "succeed"
+    fetch_sections_status["[FETCH] Start timing the Facebook Ads campaign metadata fetching"] = "succeed"    
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Validate input for the Facebook Ads campaign metadata fetching
     if not campaign_id_list:
-        fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "failed"
+        fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "failed"        
         print("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
         logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
-        raise ValueError("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
+        raise ValueError("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")    
     else:
         fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "succeed"
         print(f"✅ [FETCH] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of raw Facebook Ads campaign metadata fetching process.")
