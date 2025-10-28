@@ -237,31 +237,34 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
-        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"]
-        fetch_sections_total = len(fetch_sections_status)
+        fetch_sections_total = len(fetch_sections_status) 
+        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
+        fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
         fetch_rows_input = len(campaign_id_list)
         fetch_rows_output = len(fetch_df_final)
         if fetch_sections_failed:
-            print(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching process due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching process due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            print(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching with {fetch_rows_input}/{fetch_rows_output} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching with {fetch_rows_input}/{fetch_rows_output} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_failed_all"
         elif fetch_rows_output < fetch_rows_input:
-            print(f"⚠️ [FETCH] Completed Facebook Ads campaign metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Completed Facebook Ads campaign metadata fetching process with partial failure of {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
+            print(f"⚠️ [FETCH] Partially completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_partial"
         else:
-            print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching process for {len(fetch_sections_status)} section(s) with {fetch_rows_output}/{fetch_rows_input} campaign_id(s) in {fetch_time_elapsed}s.")
+            print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_all"
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
             "fetch_summary_final": {
-                "fetch_time_elapsed": fetch_time_elapsed,
-                "fetch_rows_input": fetch_rows_input,
-                "fetch_rows_output": fetch_rows_output,
-                "fetch_sections_total": fetch_sections_total,
-                "fetch_sections_failed": fetch_sections_failed,
+            "fetch_time_elapsed": fetch_time_elapsed, 
+            "fetch_sections_total": fetch_sections_total,
+            "fetch_sections_succeed": fetch_sections_succeeded, 
+            "fetch_sections_failed": fetch_sections_failed, 
+            "fetch_sections_detail": fetch_sections_status, 
+            "fetch_rows_input": fetch_rows_input, 
+            "fetch_rows_output": fetch_rows_output,
             },
         }
     return fetch_results_final
