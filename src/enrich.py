@@ -87,14 +87,14 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     print(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Validate input for the raw Facebook Ads campaign insights enrichment process
+    # 1.1.2. Validate input for the raw Facebook Ads campaign insights enrichment
     if enrich_df_input.empty:
-        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment process"] = "failed"
+        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment"] = "failed"
         print("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
         raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
     else:
-        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment process"] = "succeed"
+        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment"] = "succeed"
         print("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
         logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
 
@@ -318,24 +318,35 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_finalized.copy() if not enrich_df_finalized.empty else pd.DataFrame()
+
+        enrich_sections_total = len(enrich_sections_status)
         enrich_sections_failed = [k for k, v in enrich_sections_status.items() if v == "failed"]
+        enrich_sections_succeeded = [k for k, v in enrich_sections_status.items() if v == "succeed"]
+
+        enrich_rows_input = len(enrich_df_input)
         enrich_rows_output = len(enrich_df_final)
+
         if any(v == "failed" for v in enrich_sections_status.values()):
-            print(f"❌ [ENRICH] Failed to complete raw Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete raw Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            print(f"❌ [ENRICH] Failed to complete raw Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to unsuccessful section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete raw Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to unsuccessful section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_failed_all"        
         else:
-            print(f"🏆 [ENRICH] Successfully completed raw Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed raw Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
+            print(f"🏆 [ENRICH] Successfully completed raw Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed raw Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_success_all"
+        
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
             "enrich_summary_final": {
                 "enrich_time_elapsed": enrich_time_elapsed,
+                "enrich_sections_total": enrich_sections_total,
+                "enrich_sections_succeed": enrich_sections_succeeded,
+                "enrich_sections_failed": enrich_sections_failed,
+                "enrich_sections_detail": enrich_sections_status,
+                "enrich_rows_input": enrich_rows_input,
                 "enrich_rows_output": enrich_rows_output,
-                "enrich_sections_total": len(enrich_sections_status),
-                "enrich_sections_failed": [k for k, v in enrich_sections_status.items() if v == "failed"],
+
             },
         }
     return enrich_results_final   
@@ -345,20 +356,21 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     print(f"🚀 [ENRICH] Starting to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s)...")
     logging.info(f"🚀 [ENRICH] Starting to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s)....")
 
-    # 1.2.1. Start timing the raw Facebook Ads ad insights enrichment process
+    # 1.2.1. Start timing the raw Facebook Ads ad insights enrichment
     enrich_time_start = time.time()
     enrich_sections_status = {}
+    enrich_sections_status["[ENRICH] Start timing the raw Facebook Ads ad insights enrichment"] = "succeed"
     print(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.2.2. Validate input for the raw Facebook Ads ad insights enrichment process
+    # 1.2.2. Validate input for the raw Facebook Ads ad insights enrichment
     if enrich_df_input.empty:
-        enrich_sections_status["1.2.2. Validate input for the raw Facebook Ads ad insights enrichment process"] = "failed"
+        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"] = "failed"
         print("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
         raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
     else:
-        enrich_sections_status["1.2.2. Validate input for the raw Facebook Ads ad insights enrichment process"] = "succeed"
+        enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"] = "succeed"
         print("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
         logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
 
@@ -372,9 +384,9 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_spend["spend"] = pd.to_numeric(enrich_df_spend["spend"], errors="coerce").fillna(0)
             print(f"✅ [ENRICH] Successfully enriched spend metric(s) for raw Facebook Ads ad insights with {len(enrich_df_spend)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched spend metric(s) for raw Facebook Ads ad insights with {len(enrich_df_spend)} row(s).")
-            enrich_sections_status["1.2.3. Enrich spend metric for raw Facebook Ads ad insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich spend metric for raw Facebook Ads ad insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["1.2.3. Enrich spend metric for raw Facebook Ads ad insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich spend metric for raw Facebook Ads ad insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich spend metric(s) for raw Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich spend metric(s) for raw Facebook Ads ad insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich spend metric(s) for raw Facebook Ads ad insights due to {e}.")
@@ -434,9 +446,9 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_goal["enrich_results_type"] = enrich_results_type
             print(f"✅ [ENRICH] Successfully enriched goal-to-action metrics for raw Facebook Ads ad insights with {len(enrich_df_goal)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched goal-to-action metrics for raw Facebook Ads ad insights with {len(enrich_df_goal)} row(s).")
-            enrich_sections_status["1.2.4. Enrich goal to action for raw Facebook Ads ad insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich goal to action for raw Facebook Ads ad insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["1.2.4. Enrich goal to action for raw Facebook Ads ad insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich goal to action for raw Facebook Ads ad insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich goal-to-action metrics for raw Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich goal-to-action metrics for raw Facebook Ads ad insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich goal-to-action metrics for raw Facebook Ads ad insights due to {e}.")
@@ -464,9 +476,9 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_purchase["enrich_purchases_value"] = enrich_purchases_value
             print(f"✅ [ENRICH] Successfully enriched purchase result(s) for raw Facebook Ads ad insights with {len(enrich_df_purchase)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched purchase result(s) for raw Facebook Ads ad insights with {len(enrich_df_purchase)} row(s).")
-            enrich_sections_status["1.2.5. Enrich purchase result(s) for raw Facebook Ads ad insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich purchase result(s) for raw Facebook Ads ad insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["1.2.5. Enrich purchase result(s) for raw Facebook Ads ad insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich purchase result(s) for raw Facebook Ads ad insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich purchase result(s) for raw Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich purchase result(s) for raw Facebook Ads ad insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich purchase result(s) for raw Facebook Ads ad insights due to {e}.")
@@ -493,9 +505,9 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_message["enrich_messages_value"] = enrich_messages_value
             print(f"✅ [ENRICH] Successfully enriched messaging result(s) for raw Facebook Ads ad insights with {len(enrich_df_message)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched messaging result(s) for raw Facebook Ads ad insights with {len(enrich_df_message)} row(s).")
-            enrich_sections_status["1.2.6. Enrich messaging result(s) for raw Facebook Ads ad insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich messaging result(s) for raw Facebook Ads ad insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["1.2.6. Enrich messaging result(s) for raw Facebook Ads ad insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich messaging result(s) for raw Facebook Ads ad insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich messaging result(s) for raw Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich messaging result(s) for raw Facebook Ads ad insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich messaging result(s) for raw Facebook Ads ad insights due to {e}.")
@@ -516,9 +528,9 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             }
             print(f"✅ [ENRICH] Successfully casted enriched result(s) for raw Facebook Ads ad insights with {len(enrich_df_casted)} and coerced summary {enriched_summary_casted}.")
             logging.info(f"✅ [ENRICH] Successfully casted enriched result(s) for raw Facebook Ads ad insights with {len(enrich_df_casted)} and coerced summary {enriched_summary_casted}.")
-            enrich_sections_status["1.2.7. Safe cast enriched result(s) for raw Facebook Ads ad insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Safe cast enriched result(s) for raw Facebook Ads ad insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["1.2.7. Safe cast enriched result(s) for raw Facebook Ads ad insights"] = "failed"
+            enrich_sections_status["[ENRICH] Safe cast enriched result(s) for raw Facebook Ads ad insights"] = "failed"
             print(f"❌ [ENRICH] Failed to cast enriched result(s) to safe mode for raw Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to cast enriched result(s) to safe mode for raw Facebook Ads ad insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to cast enriched result(s) to safe mode for raw Facebook Ads ad insights due to {e}.")
@@ -527,27 +539,36 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_casted.copy() if not enrich_df_casted.empty else pd.DataFrame()
+
+        enrich_sections_total = len(enrich_sections_status)
         enrich_sections_failed = [k for k, v in enrich_sections_status.items() if v == "failed"]
+        enrich_sections_succeeded = [k for k, v in enrich_sections_status.items() if v == "succeed"]
+
+        enrich_rows_input = len(enrich_df_input)
         enrich_rows_output = len(enrich_df_final)
         if any(v == "failed" for v in enrich_sections_status.values()):
-            print(f"❌ [ENRICH] Failed to complete raw Facebook Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete raw Facebook Ads ad insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            print(f"❌ [ENRICH] Failed to complete raw Facebook Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete raw Facebook Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_failed_all"        
         else:
-            print(f"🏆 [ENRICH] Successfully completed raw Facebook Ads ad insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed raw Facebook Ads ad insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
+            print(f"🏆 [ENRICH] Successfully completed raw Facebook Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed raw Facebook Ads ad insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_success_all"
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
             "enrich_summary_final": {
                 "enrich_time_elapsed": enrich_time_elapsed,
+                "enrich_sections_total": enrich_sections_total,
+                "enrich_sections_succeed": enrich_sections_succeeded,
+                "enrich_sections_failed": enrich_sections_failed,
+                "enrich_sections_detail": enrich_sections_status,
+                "enrich_rows_input": enrich_rows_input,
                 "enrich_rows_output": enrich_rows_output,
-                "enrich_sections_total": len(enrich_sections_status),
-                "enrich_sections_failed": [k for k, v in enrich_sections_status.items() if v == "failed"],
             },
         }
     return enrich_results_final
+
 
 # 2. ENRICH FACEBOOK ADS INSIGHTS FROM STAGING PHASE
 
@@ -556,20 +577,21 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     print(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s)...")
     logging.info(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s)...")  
 
-    # 2.1.1. Start timing the staging Facebook Ads campaign insights enrichment process
+    # 2.1.1. Start timing the staging Facebook Ads campaign insights enrichment
     enrich_time_start = time.time()
     enrich_sections_status = {}
+    enrich_sections_status["[ENRICH] Start timing the raw Facebook Ads campaign insights enrichment process"] = "succeed"
     print(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
     # 2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment
     if enrich_df_input.empty:
-        enrich_sections_status["2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment"] = "failed"
+        enrich_sections_status["[ENRICH] Validate input for the staging Facebook Ads campaign insights enrichment"] = "failed"
         print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
         logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
         raise ValueError("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
     else:
-        enrich_sections_status["2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment"] = "succeed"
+        enrich_sections_status["[ENRICH] Validate input for the staging Facebook Ads campaign insights enrichment"] = "succeed"
         print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
         logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
 
@@ -589,9 +611,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                 enrich_df_table["tai_khoan"] = match.group("account")
             print(f"✅ [ENRICH] Successfully enriched table-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_table)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched table-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_table)} row(s).")
-            enrich_sections_status["2.1.3. Enrich table-level field(s) for staging Facebook Ads campaign insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich table-level field(s) for staging Facebook Ads campaign insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["2.1.3. Enrich table-level field(s) for staging Facebook Ads campaign insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich table-level field(s) for staging Facebook Ads campaign insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich table-level field(s) for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich table-level field(s) for staging Facebook Ads campaign insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich table-level field(s) for staging Facebook Ads campaign insights due to {e}.")
@@ -637,9 +659,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_campaign["last_updated_at"] = datetime.utcnow().replace(tzinfo=pytz.UTC)
             print(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
-            enrich_sections_status["2.1.4. Enrich campaign-level field(s) for staging Facebook Ads campaign insights"] = "succeed"
+            enrich_sections_status["[ENRICH] Enrich campaign-level field(s) for staging Facebook Ads campaign insights"] = "succeed"
         except Exception as e:
-            enrich_sections_status["2.1.4. Enrich campaign-level field(s) for staging Facebook Ads campaign insights"] = "failed"
+            enrich_sections_status["[ENRICH] Enrich campaign-level field(s) for staging Facebook Ads campaign insights"] = "failed"
             print(f"❌ [ENRICH] Failed to enrich campaign-level field(s) for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich campaign-level field(s) for staging Facebook Ads campaign insights due to {e}.")
             raise RuntimeError(f"❌ [ENRICH] Failed to enrich campaign-level field(s) for staging Facebook Ads campaign insights due to {e}.")
@@ -648,24 +670,34 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_campaign.copy() if not enrich_df_campaign.empty else pd.DataFrame()
+
+        enrich_sections_total = len(enrich_sections_status)
         enrich_sections_failed = [k for k, v in enrich_sections_status.items() if v == "failed"]
+        enrich_sections_succeeded = [k for k, v in enrich_sections_status.items() if v == "succeed"]
+
+        enrich_rows_input = len(enrich_df_input)
         enrich_rows_output = len(enrich_df_final)
+        
         if any(v == "failed" for v in enrich_sections_status.values()):
-            print(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
-            logging.error(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            print(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
+            logging.error(f"❌ [ENRICH] Failed to complete staging Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) due to section(s) {', '.join(enrich_sections_failed)} in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_failed_all"        
         else:
-            print(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
-            logging.info(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment for all {len(enrich_sections_status)} section(s) with {enrich_rows_output} row(s) output in {enrich_time_elapsed}s.")
+            print(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) output in {enrich_time_elapsed}s.")
+            logging.info(f"🏆 [ENRICH] Successfully completed staging Facebook Ads campaign insights enrichment with {enrich_rows_output}/{enrich_rows_input} enriched row(s) output in {enrich_time_elapsed}s.")
             enrich_status_final = "enrich_success_all"
+        
         enrich_results_final = {
             "enrich_df_final": enrich_df_final,
             "enrich_status_final": enrich_status_final,
             "enrich_summary_final": {
                 "enrich_time_elapsed": enrich_time_elapsed,
+                "enrich_sections_total": enrich_sections_total,
+                "enrich_sections_succeed": enrich_sections_succeeded,
+                "enrich_sections_failed": enrich_sections_failed,
+                "enrich_sections_detail": enrich_sections_status,
+                "enrich_rows_input": enrich_rows_input,
                 "enrich_rows_output": enrich_rows_output,
-                "enrich_sections_total": len(enrich_sections_status),
-                "enrich_sections_failed": [k for k, v in enrich_sections_status.items() if v == "failed"],
             },
         }
     return enrich_results_final
