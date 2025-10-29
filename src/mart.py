@@ -80,14 +80,14 @@ def mart_campaign_all() -> None:
     print(f"🚀 [MART] Starting to build materialized table for Facebook Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads campaign performance...")
 
-    # 1.1.1. Start timing the Facebook Ads campaign performance materialized table building process
+    # 1.1.1. Start timing the Facebook Ads campaign performance materialization
     mart_time_start = time.time()
-    mart_section_succeeded = {}
-    mart_section_failed = [] 
+    mart_sections_status = {}
+    mart_sections_status["[MART] Start timing the Facebook Ads campaign performance materialization"] = "succeed"
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Prepare table_id for Facebook Ads campaign performance
+    # 1.1.2. Prepare table_id for Facebook Ads campaign performance materialization
     staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
     staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
     print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
@@ -95,7 +95,8 @@ def mart_campaign_all() -> None:
     mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
     mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
     print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
-    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...") 
+    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
+    mart_sections_status["[MART] Prepare table_id for Facebook Ads campaign performance materialization"] = "succeed"
 
     # 1.1.3. Initialize Google BigQuery client
     try:
@@ -104,15 +105,14 @@ def mart_campaign_all() -> None:
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        mart_section_succeeded["1.1.3. Initialize Google BigQuery client"] = True
+        mart_sections_status["[MART] Initialize Google BigQuery client"] = "succeed"
     except Exception as e:
-        mart_section_succeeded["1.1.3. Initialize Google BigQuery client"] = False
-        mart_section_failed.append("1.1.3. Initialize Google BigQuery client")
+        mart_sections_status["[MART] Initialize Google BigQuery client"] = "failed"
         print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
     
-    # 1.1.4. Query all staging table(s) for Facebook Ads campaign performane
+    # 1.1.4. Query all staging table(s) for Facebook Ads campaign performance materialization
     try:
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_all}`
@@ -154,10 +154,9 @@ def mart_campaign_all() -> None:
             row_count = list(google_bigquery_client.query(count_query).result())[0]["row_count"]
             print(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for Facebook Ads campaign performance with {row_count} row(s).")
             logging.info(f"✅ [MART] Successfully created or replace materialized table {mart_table_all} for Facebook Ads campaign performance with {row_count} row(s).")
-            mart_section_succeeded["1.1.4. Query all staging table(s) for Facebook Ads campaign performane"] = True
+            mart_sections_status["[MART] Query all staging table(s) for Facebook Ads campaign performance materialization"] = "succeed"
         except Exception as e:
-            mart_section_succeeded["1.1.4. Query all staging table(s) for Facebook Ads campaign performane"] = False
-            mart_section_failed.append("1.1.4. Query all staging table(s) for Facebook Ads campaign performane")
+            mart_sections_status["[MART] Query all staging table(s) for Facebook Ads campaign performance materialization"] = "failed"
             print(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.")
             logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.")
             raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.") from e
@@ -165,7 +164,10 @@ def mart_campaign_all() -> None:
     # 1.1.5. Summarize materialization result(s) for Facebook Ads campaign performance
     finally:
         mart_time_elapsed = round(time.time() - mart_time_start, 2)
-        if mart_section_failed:
+        mart_sections_total = len(mart_sections_status) 
+        mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
+        mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
             mart_status_final = "mart_failed_all"
@@ -174,11 +176,14 @@ def mart_campaign_all() -> None:
             logging.info(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {mart_time_elapsed}s.")
             mart_status_final = "mart_succeed_all"
         mart_results_final = {
-            "mart_df_final": None,  # không xử lý dataframe
+            "mart_df_final": None,
             "mart_status_final": mart_status_final,
             "mart_summary_final": {
                 "mart_time_elapsed": mart_time_elapsed,
-                "mart_section_failed": mart_section_failed,
+                "mart_sections_total": mart_sections_total,
+                "mart_sections_succeed": mart_sections_succeeded,
+                "mart_sections_failed": mart_sections_failed,
+                "mart_sections_detail": mart_sections_status,
             },
         }
     return mart_results_final
