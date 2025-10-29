@@ -168,8 +168,8 @@ def mart_campaign_all() -> None:
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
         if len(mart_sections_failed) > 0:
-            print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
-            logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_section_failed)}.")
+            print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_sections_failed)}.")
+            logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_sections_failed)}.")
             mart_status_final = "mart_failed_all"
         else:
             print(f"🏆 [MART] Successfully completed Facebook Ads campaign performance materialization in {mart_time_elapsed}s.")
