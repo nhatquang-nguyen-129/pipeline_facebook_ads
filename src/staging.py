@@ -202,8 +202,8 @@ def staging_campaign_insights() -> dict:
             staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads campaign insights"] = "succeed"
         else:
             staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads campaign insights"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) due to section(s) {', '.join(staging_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {staging_summary_enforced['schema_time_elapsed']}s.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) due to section(s) {', '.join(staging_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {staging_summary_enforced['schema_time_elapsed']}s.")
+            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
 
     # 1.1.8. Create new table for staging Facebook Ads campaign insights if not exist
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()
@@ -247,13 +247,13 @@ def staging_campaign_insights() -> dict:
                 logging.info(f"🔍 [STAGING] Creating staging Facebook Ads campaign insights table with defined name {staging_table_campaign} and partition on {table_partition_effective}...")
                 table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
                 print(f"✅ [STAGING] Successfully created staging Facebook Ads campaign insights table with actual name {table_metadata_defined.full_table_id}.")
-                logging.info(f"✅ [STAGING] Successfully created staging Facebook Ads campaign insights table with actual name {table_metadata_defined.full_table_id}.")
-                staging_sections_status["[STAGING] Create new table for staging Facebook Ads campaign insights if not exist"] = "succeed"
+                logging.info(f"✅ [STAGING] Successfully created staging Facebook Ads campaign insights table with actual name {table_metadata_defined.full_table_id}.")              
             except Exception as e:
                 staging_sections_status["[STAGING] Create new table for staging Facebook Ads campaign insights if not exist"] = "failed"
                 print(f"❌ [STAGING] Failed to create staging Facebook Ads campaign insights table {staging_table_campaign} due to {e}.")
                 logging.error(f"❌ [STAGING] Failed to create staging Facebook Ads campaign insights table {staging_table_campaign} due to {e}.")
                 raise RuntimeError(f"❌ [STAGING] Failed to create staging Facebook Ads campaign insights table {staging_table_campaign} due to {e}.") from e
+        staging_sections_status["[STAGING] Create new table for staging Facebook Ads campaign insights if not exist"] = "succeed"
     
     # 1.1.9. Upload staging Facebook Ads campaign insights to Google BigQuery
         if not staging_table_exists:
