@@ -615,69 +615,92 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
     # 1.3.1. Start timing the Facebook Ads ad metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
-    ingest_sections_status["[INGEST] Start timing the Facebook Ads ad metadata ingestion"] = "succeed"    
+    ingest_sections_time = {}
+    ingest_section_name = "[INGEST] Start timing the Facebook Ads ad metadata ingestion"
+    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_time_start, 2)
+    ingest_sections_status[ingest_section_name] = "succeed"  
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.3.2. Validate input for Facebook Ads ad metadata ingestion
-    if not ad_id_list:
-        ingest_sections_status["[INGEST] Validate input for Facebook Ads ad metadata ingestion"] = "failed"
-        print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-    else:
-        ingest_sections_status["[INGEST] Validate input for Facebook Ads ad metadata ingestion"] = "succeed"
-        print(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad metadata ingestion.")
-        logging.info(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad metadata ingestion.")
-    
+    ingest_section_name = "[INGEST] Validate input for the Facebook Ads campaign metadata ingestion"
+    ingest_section_start = time.time()
+    try:
+        if not ad_id_list:
+            ingest_sections_status["[INGEST] Validate input for Facebook Ads ad metadata ingestion"] = "failed"
+            print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+            logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+            raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        else:
+            ingest_sections_status["[INGEST] Validate input for Facebook Ads ad metadata ingestion"] = "succeed"
+            print(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad metadata ingestion.")
+            logging.info(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad metadata ingestion.")
+    finally:
+        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
+
     try:
 
     # 1.3.3. Trigger to fetch Facebook Ads ad metadata
-        print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
-        logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
-        ingest_results_fetched = fetch_ad_metadata(ad_id_list=ad_id_list)
-        ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-        ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
-        ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_succeed_all":
-            print(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetching for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetching for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "succeed"
-        elif ingest_status_fetched == "fetch_succeed_partial":
-            print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "partial"
-        else:
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            raise RuntimeError(f"❌ [INGEST] Failed to trigger Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad metadata"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s)...")
+            ingest_results_fetched = fetch_ad_metadata(ad_id_list=ad_id_list)
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            if ingest_status_fetched == "fetch_succeed_all":
+                print(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetching for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetching for {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "succeed"
+            elif ingest_status_fetched == "fetch_succeed_partial":
+                print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "partial"
+            else:
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad metadata"] = "failed"
+                print(f"❌ [INGEST] Failed to trigger Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)            
 
     # 1.3.4. Prepare table_id for Facebook Ads ad metadata ingestion
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        raw_table_ad = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
-        ingest_sections_status["[INGEST] Prepare table_id for Facebook Ads ad metadata ingestion"] = "partial"
-        print(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
-        logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
+        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads ad metadata ingestion"
+        ingest_section_start = time.time()
+        try:
+            raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+            raw_table_ad = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
+            ingest_sections_status["[INGEST] Prepare table_id for Facebook Ads ad metadata ingestion"] = "succeed"
+            print(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
+            logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad metadata for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_ad}...")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)        
 
     # 1.3.5. Trigger to enforce schema for Facebook Ads ad metadata
-        print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
-        logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
-        ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_metadata")
-        ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-        ingest_status_enforced = ingest_results_enforced["schema_status_final"]
-        ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
-        if ingest_status_enforced == "schema_succeed_all":
-            print(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            logging.info(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad metadata"] = "succeed"
-        else:
-            ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad metadata"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
-            logging.error(f"❌ [INGEST] Failed to retrieve schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to retrieve schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+        ingest_section_name = "[INGEST] Trigger to enforce schema for Facebook Ads ad metadata"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad metadata with {len(ingest_df_fetched)} row(s)...")
+            ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_metadata")
+            ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
+            ingest_status_enforced = ingest_results_enforced["schema_status_final"]
+            ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
+            if ingest_status_enforced == "schema_succeed_all":
+                print(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad metadata"] = "succeed"
+            else:
+                ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad metadata"] = "failed"
+                print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [INGEST] Failed to retrieve schema enforcement for Facebook Ads ad metadata with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.3.6. Initialize Google BigQuery client
+        ingest_section_name = "[INGEST] Initialize Google BigQuery client"
+        ingest_section_start = time.time()
         try:
             print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -689,9 +712,12 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Initialize Google BigQuery client"] = "failed"
             print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.3.7. Delete existing row(s) or create new table if it not exist
+        ingest_section_name = "[INGEST] Delete existing row(s) or create new table if it not exist"
+        ingest_section_start = time.time()
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
             table_clusters_filtered = []
@@ -775,9 +801,12 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Delete existing row(s) or create new table if it not exist"] = "failed"
             print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.") from e
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.3.8. Upload Facebook Ads ad metadata to Google BigQuery
+        ingest_section_name = "[INGEST] Upload Facebook Ads ad metadata to Google BigQuery"
+        ingest_section_start = time.time()
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {raw_table_ad}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad metadata to Google BigQuery table {raw_table_ad}...")
@@ -791,7 +820,8 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Upload Facebook Ads ad metadata to Google BigQuery"] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.3.9. Summarize ingestion result(s) for Facebook Ads ad metadata
     finally:
@@ -814,6 +844,13 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_all"
+        ingest_sections_detail = {
+            section: {
+                "status": ingest_sections_status.get(section, "unknown"),
+                "time": ingest_sections_time.get(section, None),
+            }
+            for section in set(ingest_sections_status) | set(ingest_sections_time)
+        }    
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -822,7 +859,7 @@ def ingest_ad_metadata(ad_id_list: list) -> pd.DataFrame:
                 "ingest_sections_total": ingest_sections_total,
                 "ingest_sections_succeed": ingest_sections_succeeded, 
                 "ingest_sections_failed": ingest_sections_failed, 
-                "ingest_sections_detail": ingest_sections_status, 
+                "ingest_sections_detail": ingest_sections_detail,
                 "ingest_rows_input": ingest_rows_input, 
                 "ingest_rows_output": ingest_rows_output
             },
@@ -837,69 +874,92 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
     # 1.4.1. Start timing the Facebook Ads ad creative ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
-    ingest_sections_status["[INGEST] Start timing the Facebook Ads ad creative ingestion"] = "succeed"
+    ingest_sections_time = {}
+    ingest_section_name = "[INGEST] Start timing the Facebook Ads ad creative ingestion"
+    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_time_start, 2)
+    ingest_sections_status[ingest_section_name] = "succeed"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.4.2. Validate input for Facebook Ads ad creative ingestion
-    if not ad_id_list:
-        ingest_sections_status["[INGEST] Validate input for Facebook Ads ad creative ingestion"] = "failed"
-        print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-    else:
-        ingest_sections_status["1.4.2. Validate input for Facebook Ads ad creative ingestion"] = "succeed"
-        print(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
-        logging.info(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
+    ingest_section_name = "[INGEST] Validate input for Facebook Ads ad creative ingestion"
+    ingest_section_start = time.time()
+    try:
+        if not ad_id_list:
+            ingest_sections_status["[INGEST] Validate input for Facebook Ads ad creative ingestion"] = "failed"
+            print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+            logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+            raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+        else:
+            ingest_sections_status["1.4.2. Validate input for Facebook Ads ad creative ingestion"] = "succeed"
+            print(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
+            logging.info(f"✅ [INGEST] Successfully validated input for {len(ad_id_list)} ad_id(s) of Facebook Ads ad creative ingestion.")
+    finally:
+        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     try:
   
     # 1.4.3. Trigger to fetch Facebook Ads ad creative
-        print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-        logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
-        ingest_results_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
-        ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-        ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
-        ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
-        if ingest_status_fetched == "fetch_succeed_all":
-            print(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "succeed"
-        elif ingest_status_fetched == "fetch_succeed_partial":
-            print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "partial"
-        else:
-            ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
-            raise RuntimeError(f"❌ [INGEST] Failed to fetch Facebook Ads ad creative due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad creative"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ad_id_list)} ad_id(s)...")
+            ingest_results_fetched = fetch_ad_creative(ad_id_list=ad_id_list)
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            if ingest_status_fetched == "fetch_succeed_all":
+                print(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "succeed"
+            elif ingest_status_fetched == "fetch_succeed_partial":
+                print(f"⚠️ [INGEST] Partially triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "partial"
+            else:
+                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "failed"
+                print(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.4.4. Prepare table_id for Facebook Ads ad creative ingestion
-        raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-        raw_table_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-        ingest_sections_status["[INGEST] Prepare table_id for Facebook Ads ad creative ingestion"] = "succeed"
-        print(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
-        logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
+        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads ad creative ingestion"
+        ingest_section_start = time.time()
+        try:
+            raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+            raw_table_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+            ingest_sections_status["[INGEST] Prepare table_id for Facebook Ads ad creative ingestion"] = "succeed"
+            print(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
+            logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads ad creative for {len(ad_id_list)} ad_id(s) with Google BigQuery table_id {raw_table_creative}...")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.4.5. Trigger to enforce schema for Facebook Ads ad creative
-        print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
-        logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
-        ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_creative")
-        ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
-        ingest_status_enforced = ingest_results_enforced["schema_status_final"]
-        ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
-        if ingest_status_enforced == "schema_succeed_all":
-            print(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            logging.info(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
-            ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad creative"] = "succeed"
-        else:
-            ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad creative"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
-            logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+        ingest_section_name = "[INGEST] Trigger to enforce schema for Facebook Ads ad creative"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+            logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads ad creative with {len(ingest_df_fetched)} row(s)...")
+            ingest_results_enforced = enforce_table_schema(ingest_df_fetched, "ingest_ad_creative")
+            ingest_summary_enforced = ingest_results_enforced["schema_summary_final"]
+            ingest_status_enforced = ingest_results_enforced["schema_status_final"]
+            ingest_df_enforced = ingest_results_enforced["schema_df_final"]   
+            if ingest_status_enforced == "schema_succeed_all":
+                print(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [INGEST] Successfully triggered schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+                ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad creative"] = "succeed"
+            else:
+                ingest_sections_status["[INGEST] Trigger to enforce schema for Facebook Ads ad creative"] = "failed"
+                print(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [INGEST] Failed to trigger schema enforcement for Facebook Ads ad creative with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed sections "f"{', '.join(ingest_summary_enforced['schema_sections_failed'])}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)    
 
     # 1.4.6. Initialize Google BigQuery client
+        ingest_section_name = "[INGEST] Initialize Google BigQuery client"
+        ingest_section_start = time.time()
         try:
             print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -911,9 +971,12 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Initialize Google BigQuery client"] = "failed"
             print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.4.7. Delete existing row(s) or create new table if it not exist
+        ingest_section_name = "[INGEST] Delete existing row(s) or create new table if it not exist"
+        ingest_section_start = time.time()    
         try:
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
             table_clusters_filtered = []
@@ -997,9 +1060,12 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Delete existing row(s) or create new table if it not exist"] = "failed"
             print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
             logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.") from e
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.4.8. Upload Facebook Ads ad creative to Google BigQuery
+        ingest_section_name = "[INGEST] Upload Facebook Ads ad creative to Google BigQuery"
+        ingest_section_start = time.time()
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
@@ -1013,7 +1079,8 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             ingest_sections_status["[INGEST] Upload Facebook Ads ad creative to Google BigQuery"] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
-            raise RuntimeError(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)    
 
     # 1.4.9. Summarize ingestion result(s) for Facebook Ads ad creative
     finally:
@@ -1036,6 +1103,13 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
             print(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
             logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_all"
+        ingest_sections_detail = {
+            section: {
+                "status": ingest_sections_status.get(section, "unknown"),
+                "time": ingest_sections_time.get(section, None),
+            }
+            for section in set(ingest_sections_status) | set(ingest_sections_time)
+        }
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -1044,7 +1118,7 @@ def ingest_ad_creative(ad_id_list: list) -> pd.DataFrame:
                 "ingest_sections_total": ingest_sections_total,
                 "ingest_sections_succeed": ingest_sections_succeeded, 
                 "ingest_sections_failed": ingest_sections_failed, 
-                "ingest_sections_detail": ingest_sections_status, 
+                "ingest_sections_detail": ingest_sections_detail, 
                 "ingest_rows_input": ingest_rows_input, 
                 "ingest_rows_output": ingest_rows_output
             },
@@ -1062,14 +1136,19 @@ def ingest_campaign_insights(
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
 
     # 2.1.1. Start timing the Facebook Ads campaign insights ingestion
-    ingest_time_start = time.time()
     ingest_dates_uploaded = []
+    ingest_time_start = time.time()
     ingest_sections_status = {}
-    ingest_sections_status["[INGEST] Start timing the Facebook Ads campaign insights ingestion"] = "succeed"    
+    ingest_sections_time = {}
+    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign insights ingestion"
+    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_time_start, 2)
+    ingest_sections_status[ingest_section_name] = "succeed"  
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 2.1.2. Initialize Google BigQuery client
+    ingest_section_name = "[INGEST] Initialize Google BigQuery client"
+    ingest_section_start = time.time()
     try:
         print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -1081,7 +1160,8 @@ def ingest_campaign_insights(
         ingest_sections_status["[INGEST] Initialize Google BigQuery client"] = "failed"
         print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        raise RuntimeError(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+    finally:
+        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 2.1.3. Split date range into individual days for ingestion
     try:

@@ -228,7 +228,7 @@ def staging_campaign_insights() -> dict:
             print(f"❌ [STAGING] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
             logging.error(f"❌ [STAGING] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
 
-    # 1.1.8. Create new table for staging Facebook Ads campaign insights if not exist
+    # 1.1.9. Create new table for staging Facebook Ads campaign insights if not exist
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()
         table_clusters_filtered = []
         table_schemas_defined = []
@@ -278,7 +278,7 @@ def staging_campaign_insights() -> dict:
                 raise RuntimeError(f"❌ [STAGING] Failed to create staging Facebook Ads campaign insights table {staging_table_campaign} due to {e}.") from e
         staging_sections_status["[STAGING] Create new table for staging Facebook Ads campaign insights if not exist"] = "succeed"
     
-    # 1.1.9. Upload staging Facebook Ads campaign insights to Google BigQuery
+    # 1.1.10. Upload staging Facebook Ads campaign insights to Google BigQuery
         if not staging_table_exists:
             try: 
                 print(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging Facebook Ads campaign insights to new Google BigQuery table {table_metadata_defined.full_table_id}...")
@@ -329,7 +329,7 @@ def staging_campaign_insights() -> dict:
                 logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging Facebook Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.")      
                 raise RuntimeError(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging Facebook Ads campaign insights to existing Google BigQuery table {staging_table_campaign} due to {e}.") from e     
 
-    # 1.1.10. Summarize staging result(s) of Facebook Ads campaign insights
+    # 1.1.11. Summarize staging result(s) of Facebook Ads campaign insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()

@@ -279,70 +279,71 @@ def update_campaign_insights(start_date: str, end_date: str):
                 update_sections_status["[UPDATE] Trigger to build materialized Facebook Ads festival campaign performance table"] = "skipped"
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
-            
+
     # 1.1.8. Summarize update result(s) for Facebook Ads campaign performance
     finally:
         update_time_end = time.time()
         update_time_elapsed = round(update_time_end - update_time_start, 2)
 
-        print("\n📊 [UPDATE] FACEBOOK ADS CAMPAIGN PERFORMANCE UPDATE SUMMARY")
-        print("=" * 110)
-        print(f"{'Step':<80} | {'Status':<10} | {'Time (s)':>8}")
-        print("-" * 110)
+        def print_update_summary(update_sections_status, update_sections_time, locals_dict):
+            print("\n📊 [UPDATE] FACEBOOK ADS CAMPAIGN PERFORMANCE UPDATE SUMMARY")
+            print("=" * 110)
+            print(f"{'Step':<80} | {'Status':<10} | {'Time (s)':>8}")
+            print("-" * 110)
 
-        sorted_steps = sorted(update_sections_status.items(), key=lambda x: x[0])
-        printed_steps = set()
+            sorted_steps = sorted(update_sections_status.items(), key=lambda x: x[0])
+            printed_steps = set()
 
-        for step_name, step_status in sorted_steps:
-            if step_name in printed_steps:
-                continue
-            printed_steps.add(step_name)
+            for step_name, step_status in sorted_steps:
+                if step_name in printed_steps:
+                    continue
+                printed_steps.add(step_name)
 
-            indent_level = step_name.count(".") - 1
-            indent = " " * (indent_level * 2)
-            prefix = "• " if indent_level == 0 else "- "
+                indent_level = step_name.count(".") - 1
+                indent = " " * (indent_level * 2)
+                prefix = "• " if indent_level == 0 else "- "
 
-            step_time = "-"
-            # --- Match chính xác từng section ---
-            if "[UPDATE] Trigger to ingest Facebook Ads campaign insights" in step_name and 'ingest_summary_insights' in locals():
-                step_time = ingest_summary_insights.get("ingest_time_elapsed", "-")
+                # --- Default step_time lấy từ update_sections_time ---
+                step_time = update_sections_time.get(step_name, "-")
+
+                # --- Xử lý chi tiết các phần có summary riêng ---
+                summary_map = {
+                    "[UPDATE] Trigger to ingest Facebook Ads campaign insights": "ingest_summary_insights",
+                    "[UPDATE] Trigger to ingest Facebook Ads campaign metadata": "ingest_summary_metadata",
+                    "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging table": "staging_summary_campaign",
+                    "[UPDATE] Trigger to build materialized Facebook Ads campaign performance table": "mart_summary_all",
+                    "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table": "mart_summary_supplier",
+                    "[UPDATE] Trigger to build materialized Facebook Ads festival campaign performance table": "mart_summary_festival",
+                }
+
+                if step_name in summary_map and summary_map[step_name] in locals_dict:
+                    summary_obj = locals_dict[summary_map[step_name]]
+                    # --- lấy thời gian từ summary ---
+                    step_time = summary_obj.get("ingest_time_elapsed", summary_obj.get("staging_time_elapsed", summary_obj.get("mart_time_elapsed", "-")))
+                    print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
+
+                    # --- nếu có detail, in ra từng sub-step ---
+                    if "ingest_sections_detail" in summary_obj:
+                        for sub_step, sub_info in summary_obj["ingest_sections_detail"].items():
+                            sub_status = sub_info.get("status", "-") if isinstance(sub_info, dict) else sub_info
+                            sub_time = sub_info.get("time_elapsed", "-") if isinstance(sub_info, dict) else "-"
+                            sub_indent = " " * ((indent_level + 2) * 2)
+                            print(f"{sub_indent}- {sub_step:<70} | {sub_status:<10} | {sub_time:>8}")
+                    continue
+
+                # --- In các step khác ---
                 print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
-                if "ingest_sections_detail" in ingest_summary_insights:
-                    for sub_step, sub_status in ingest_summary_insights["ingest_sections_detail"].items():
-                        sub_indent = " " * ((indent_level + 2) * 2)
-                        print(f"{sub_indent}- {sub_step:<70} | {sub_status:<10} | {'-':>8}")
-                continue
 
-            elif "[UPDATE] Trigger to ingest Facebook Ads campaign metadata" in step_name and 'ingest_summary_metadata' in locals():
-                step_time = ingest_summary_metadata.get("ingest_time_elapsed", "-")
-                print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
-                if "ingest_sections_detail" in ingest_summary_metadata:
-                    for sub_step, sub_status in ingest_summary_metadata["ingest_sections_detail"].items():
-                        sub_indent = " " * ((indent_level + 2) * 2)
-                        print(f"{sub_indent}- {sub_step:<70} | {sub_status:<10} | {'-':>8}")
-                continue
+            print("-" * 110)
+            print(f"{'Total execution time':<80} | {'-':<10} | {update_time_elapsed:>8}s")
+            print("=" * 110)
 
-            elif "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging table" in step_name and 'staging_summary_campaign' in locals():
-                step_time = staging_summary_campaign.get("staging_time_elapsed", "-")
+            logging.info(f"📊 [UPDATE] Completed Facebook Ads Campaign Insights update in {update_time_elapsed}s.")
+            logging.info(f"📊 [UPDATE] Section results {update_sections_status}.")
+            logging.info(f"📊 [UPDATE] Section timing {update_sections_time}.")
 
-            elif "[UPDATE] Trigger to build materialized Facebook Ads campaign performance table" in step_name and 'mart_summary_all' in locals():
-                step_time = mart_summary_all.get("mart_time_elapsed", "-")
-
-            elif "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table" in step_name and 'mart_summary_supplier' in locals():
-                step_time = mart_summary_supplier.get("mart_time_elapsed", "-")
-
-            elif "[UPDATE] Trigger to build materialized Facebook Ads festival campaign performance table" in step_name and 'mart_summary_festival' in locals():
-                step_time = mart_summary_festival.get("mart_time_elapsed", "-")
-
-            print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
-
-        print("-" * 110)
-        print(f"{'Total execution time':<80} | {'-':<10} | {update_time_elapsed:>8}s")
-        print("=" * 110)
-
-        logging.info(f"📊 [UPDATE] Completed Facebook Ads Campaign Insights update in {update_time_elapsed}s.")
-        logging.info(f"📊 [UPDATE] Section results {update_sections_status}.")
-
+        # --- Call summary printer ---
+        print_update_summary(update_sections_status, update_sections_time, locals())
 
 
 # 1.2. Update Facebook ad insights data for a given date range
