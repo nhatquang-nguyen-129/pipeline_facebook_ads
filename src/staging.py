@@ -209,8 +209,8 @@ def staging_campaign_insights() -> dict:
             staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads campaign insights"] = "succeed"
         else:
             staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads campaign insights"] = "failed"
-            print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
-            logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            print(f"❌ [STAGING] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            logging.error(f"❌ [STAGING] Failed to trigger Facebook Ads campaign insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
 
     # 1.1.8. Create new table for staging Facebook Ads campaign insights if not exist
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()
@@ -341,10 +341,10 @@ def staging_campaign_insights() -> dict:
             "staging_status_final": staging_status_final,
             "staging_summary_final": {
                 "staging_time_elapsed": staging_time_elapsed,
-                "schema_sections_total": staging_sections_total,
-                "schema_sections_succeed": staging_sections_succeed,
-                "schema_sections_failed": staging_sections_failed,
-                "schema_sections_detail": staging_sections_status,
+                "staging_sections_total": staging_sections_total,
+                "staging_sections_succeed": staging_sections_succeed,
+                "staging_sections_failed": staging_sections_failed,
+                "staging_sections_detail": staging_sections_status,
                 "staging_tables_input": staging_tables_input,
                 "staging_tables_output": staging_tables_output,
                 "staging_tables_failed": staging_tables_failed,
