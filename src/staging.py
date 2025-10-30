@@ -141,6 +141,8 @@ def staging_campaign_insights() -> dict:
             raise RuntimeError(f"❌ [STAGING] Failed to scan raw Facebook Ads campaign insights table(s) due to {e}.") from e
         
     # 1.1.5. Query all raw Facebook Ads campaign insights table(s)
+        staging_query_succeed = []
+        staging_query_failed = []
         for raw_table_campaign in raw_tables_campaign:
             query_campaign_staging = f"""
                 SELECT
@@ -158,19 +160,24 @@ def staging_campaign_insights() -> dict:
                 logging.info(f"🔄 [STAGING] Querying raw Facebook Ads campaign insights table {raw_table_campaign}...")
                 staging_df_queried = google_bigquery_client.query(query_campaign_staging).to_dataframe()
                 staging_table_queried.append(staging_df_queried)
+                staging_query_succeed.append(raw_table_campaign)
                 print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw Facebook Ads campaign insights from {raw_table_campaign}.")
                 logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw Facebook Ads campaign insights from {raw_table_campaign}.")
             except Exception as e:
+                staging_query_failed.append(raw_table_campaign)
                 print(f"❌ [STAGING] Failed to query raw Facebook Ads campaign insights table {raw_table_campaign} due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to query Facebook Ads campaign insights table {raw_table_campaign} due to {e}.")
                 continue
-        if not staging_table_queried:
+        if len(staging_query_succeed) == len(raw_tables_campaign):
+            staging_sections_status["[STAGING] Query all raw Facebook Ads campaign insights table(s)"] = "succeed"
+        elif len(staging_query_succeed) > 0:
+            staging_sections_status["[STAGING] Query all raw Facebook Ads campaign insights table(s)"] = "partial"
+        else:
             staging_sections_status["[STAGING] Query all raw Facebook Ads campaign insights table(s)"] = "failed"
-            raise RuntimeError("❌ [STAGING] Failed to query TiKTok Ads campaign insights due to no raw table found.")
+            raise RuntimeError("❌ [STAGING] Failed to query any raw Facebook Ads campaign insights table(s).")
         staging_df_concatenated = pd.concat(staging_table_queried, ignore_index=True)
         print(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads campaign insights from {len(staging_table_queried)} table(s).")
         logging.info(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads campaign insights from {len(staging_table_queried)} table(s).")
-        staging_sections_status["[STAGING] Query all raw Facebook Ads campaign insights table(s)"] = "succeed"
 
     # 1.1.6. Trigger to enrich Facebook Ads campaign insights
         print(f"🔄 [STAGING] Triggering to enrich Facebook Ads campaign insights for {len(staging_df_concatenated)} row(s) from Google BigQuery table {raw_table_campaign}...")
