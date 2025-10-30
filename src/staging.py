@@ -358,17 +358,17 @@ def staging_ad_insights() -> dict:
     print("🚀 [STAGING] Starting to build staging Facebook Ads ad insights table...")
     logging.info("🚀 [STAGING] Starting to build staging Facebook Ads ad insights table...")
 
-    # 1.2.1. Start timing the Facebook Ads ad insights staging process
+    # 1.2.1. Start timing the Facebook Ads ad insights staging
     staging_time_start = time.time()
-    staging_section_succeeded = {}
-    staging_section_failed = [] 
     staging_table_queried= []
+    staging_sections_status = {}
+    staging_sections_status["[STAGING] Start timing the Facebook Ads ad insights staging"] = "succeed"
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
     try:
 
-    # 1.2.2. Prepare table_id for Facebook Ads ad insights staging process
+    # 1.2.2. Prepare table_id for Facebook Ads ad insights staging
         raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
         raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
         raw_adset_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
@@ -380,6 +380,7 @@ def staging_ad_insights() -> dict:
         staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
         print(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook Ads ad insights...")
         logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook Ads ad insights...")
+        staging_sections_status["[STAGING] Prepare table_id for Facebook Ads ad insights staging"] = "succeed"
 
     # 1.2.3. Initialize Google BigQuery client
         try:
@@ -388,10 +389,9 @@ def staging_ad_insights() -> dict:
             google_bigquery_client = bigquery.Client(project=PROJECT)
             print(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
             logging.info(f"✅ [STAGING] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-            staging_section_succeeded["1.2.3. Initialize Google BigQuery client"] = True
+            staging_sections_status["[STAGING] Initialize Google BigQuery client"] = "succeed"
         except Exception as e:
-            staging_section_succeeded["1.2.3. Initialize Google BigQuery client"] = False
-            staging_section_failed.append("1.2.3. Initialize Google BigQuery client")
+            staging_sections_status["[STAGING] Initialize Google BigQuery client"] = "failed"
             print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             raise RuntimeError(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
@@ -414,15 +414,16 @@ def staging_ad_insights() -> dict:
                 raise RuntimeError("❌ [STAGING] Failed to scan raw Facebook Ads ad insights table(s) due to no tables found.")
             print(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw Facebook Ads ad insights table(s).")
             logging.info(f"✅ [STAGING] Successfully found {len(raw_tables_ad)} raw Facebook Ads ad insights table(s).")
-            staging_section_succeeded["1.2.4. Scan all raw Facebook Ads ad insights table(s)"] = True
+            staging_sections_status["[STAGING] Scan all raw Facebook Ads ad insights table(s)"] = "succeed"
         except Exception as e:
-            staging_section_succeeded["1.2.4. Scan all raw Facebook Ads ad insights table(s)"] = False
-            staging_section_failed.append("1.2.4. Scan all raw Facebook Ads ad insights table(s)")
+            staging_sections_status["[STAGING] Scan all raw Facebook Ads ad insights table(s)"] = "failed"
             print(f"❌ [STAGING] Failed to scan raw Facebook Ads ad insights table(s) due to {e}.")
             logging.error(f"❌ [STAGING] Failed to scan raw Facebook Ads ad insights table(s) due to {e}.")
             raise RuntimeError(f"❌ [STAGING] Failed to scan raw Facebook Ads ad insights table(s) due to {e}.") from e
 
     # 1.2.5. Query all raw Facebook Ads ad insights table(s)
+        staging_query_succeed = []
+        staging_query_failed = []
         for raw_table_ad in raw_tables_ad:
             query_ad_staging = f"""
                 SELECT
@@ -457,16 +458,18 @@ def staging_ad_insights() -> dict:
                 print(f"❌ [STAGING] Failed to query raw Facebook Ads ad insights table {raw_table_ad} due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to query Facebook Ads ad insights table {raw_table_ad} due to {e}.")
                 continue
-        if not staging_table_queried:
-            staging_section_succeeded["1.2.5. Query all raw Facebook Ads ad insights table(s)"] = False
-            staging_section_failed.append("1.2.5. Query all raw Facebook Ads ad insights table(s)")
-            raise RuntimeError("❌ [STAGING] Failed to query TiKTok Ads campaign insights due to no raw table found.")
+        if len(staging_query_succeed) == len(raw_tables_ad):
+            staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "succeed"
+        elif len(staging_query_succeed) > 0:
+            staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "partial"
+        else:
+            staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "failed"
+            raise RuntimeError("❌ [STAGING] Failed to query any raw Facebook Ads ad insights table(s).")
         staging_df_concatenated = pd.concat(staging_table_queried, ignore_index=True)
         print(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads ad insights from {len(staging_table_queried)} table(s).")
         logging.info(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads ad insights from {len(staging_table_queried)} table(s).")
-        staging_section_succeeded["1.2.5. Query all raw Facebook Ads ad insights table(s)"] = True
 
-    # 1.2.6. Enrich Facebook Ads ad insights
+    # 1.2.6. Trigger to enrich Facebook Ads ad insights
         try:
             print(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads ad insights field(s) for {len(staging_df_concatenated)} row(s)...")
             logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads ad insights field(s) for {len(staging_df_concatenated)} row(s)...")

@@ -767,16 +767,47 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             print(f"🔍 [ENRICH] Enriching campaign-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_table)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching campaign-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_table)} row(s)...")
             enrich_df_campaign = enrich_df_table.copy()
+            enrich_df_campaign = (
+                enrich_df_campaign
+                .assign(
+                    enrich_campaign_objective=lambda df: df["campaign_name"].str.split("_").str[0],
+                    enrich_campaign_region=lambda df: df["campaign_name"].str.split("_").str[1],
+                    enrich_budget_group=lambda df: df["campaign_name"].str.split("_").str[2],
+                    enrich_budget_type=lambda df: df["campaign_name"].str.split("_").str[3],
+                    enrich_category_group=lambda df: df["campaign_name"].str.split("_").str[4],
+                    enrich_campaign_personnel=lambda df: df["campaign_name"].str.split("_").str[5],
+                    enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[7],
+                    enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[8],
+                    date_start=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
+                    date_stop=lambda df: pd.to_datetime(df["date_stop"], errors="coerce", utc=True).dt.floor("D") + timedelta(hours=23, minutes=59, seconds=59),
+                    date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
+                )
+            )
+            vietnamese_map_all = {
+                'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
+                'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
+                'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
+                'đ': 'd',
+                'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
+                'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
+                'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
+                'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
+                'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
+                'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
+                'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
+                'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
+                'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
+            }
+            vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map_all.items()}
+            full_map = {**vietnamese_map_all, **vietnamese_map_upper}
+            enrich_df_campaign["enrich_campaign_personnel"] = (
+                enrich_df_campaign["enrich_campaign_personnel"]
+                .apply(lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x)
+            )
             enrich_df_campaign = enrich_df_campaign.assign(
-                enrich_campaign_objective=lambda df: df["campaign_name"].fillna("").str.split("_").str[0].fillna("unknown"),
-                enrich_campaign_region=lambda df: df["campaign_name"].fillna("").str.split("_").str[1].fillna("unknown"),
-                enrich_budget_group=lambda df: df["campaign_name"].fillna("").str.split("_").str[2].fillna("unknown"),
-                enrich_budget_type=lambda df: df["campaign_name"].fillna("").str.split("_").str[3].fillna("unknown"),
-                enrich_category_group=lambda df: df["campaign_name"].fillna("").str.split("_").str[4].fillna("unknown"),
-                enrich_campaign_personnel=lambda df: df["campaign_name"].fillna("").str.split("_").str[5].fillna("unknown"),
-                enrich_program_group=lambda df: df["campaign_name"].fillna("").str.split("_").str[7].fillna("unknown"),
-                enrich_program_type=lambda df: df["campaign_name"].fillna("").str.split("_").str[8].fillna("unknown"),
-                campaign_name_invalid=lambda df: df["campaign_name"].fillna("").str.split("_").str.len() < 9
+                year=lambda df: df["date"].dt.strftime("%Y"),
+                month=lambda df: df["date"].dt.strftime("%Y-%m"),
+                last_updated_at=datetime.utcnow().replace(tzinfo=pytz.UTC)
             )
             print(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_campaign)} row(s).")
