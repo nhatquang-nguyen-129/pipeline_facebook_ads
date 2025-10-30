@@ -16,7 +16,7 @@ prepares clean, query-ready datasets for downstream consumption.
 ✔️ Validates data integrity and ensures field completeness  
 ✔️ Supports modular extension for new Facebook Ads entities  
 
-⚠️ This module is strictly responsible for *data transformation*  
+⚠️ This module is strictly responsible for data transformation
 into staging format. It does not handle API ingestion or final  
 materialized aggregations.
 ==================================================================
@@ -359,8 +359,11 @@ def staging_ad_insights() -> dict:
     logging.info("🚀 [STAGING] Starting to build staging Facebook Ads ad insights table...")
 
     # 1.2.1. Start timing the Facebook Ads ad insights staging
+    raw_tables_ad = []
     staging_time_start = time.time()
-    staging_table_queried= []
+    staging_tables_queried = []
+    staging_df_concatenated = pd.DataFrame()
+    staging_df_uploaded = pd.DataFrame()    
     staging_sections_status = {}
     staging_sections_status["[STAGING] Start timing the Facebook Ads ad insights staging"] = "succeed"
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -378,8 +381,8 @@ def staging_ad_insights() -> dict:
         logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook Ads ad insights...")
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
-        print(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook Ads ad insights...")
-        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_ad_insights} for Facebook Ads ad insights...")
+        print(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for Facebook Ads ad insights...")
+        logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for Facebook Ads ad insights...")
         staging_sections_status["[STAGING] Prepare table_id for Facebook Ads ad insights staging"] = "succeed"
 
     # 1.2.3. Initialize Google BigQuery client
@@ -422,8 +425,6 @@ def staging_ad_insights() -> dict:
             raise RuntimeError(f"❌ [STAGING] Failed to scan raw Facebook Ads ad insights table(s) due to {e}.") from e
 
     # 1.2.5. Query all raw Facebook Ads ad insights table(s)
-        staging_query_succeed = []
-        staging_query_failed = []
         for raw_table_ad in raw_tables_ad:
             query_ad_staging = f"""
                 SELECT
@@ -451,71 +452,76 @@ def staging_ad_insights() -> dict:
                 print(f"🔄 [STAGING] Querying raw Facebook Ads ad insights table {raw_table_ad}...")
                 logging.info(f"🔄 [STAGING] Querying raw Facebook Ads ad insights table {raw_table_ad}...")
                 staging_df_queried = google_bigquery_client.query(query_ad_staging).to_dataframe()
-                staging_table_queried.append(staging_df_queried)
+                staging_tables_queried.append({"raw_table_ad": raw_table_ad, "staging_df_queried": staging_df_queried})
                 print(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw Facebook Ads ad insights from {raw_table_ad}.")
                 logging.info(f"✅ [STAGING] Successfully queried {len(staging_df_queried)} row(s) of raw Facebook Ads ad insights from {raw_table_ad}.")
             except Exception as e:
                 print(f"❌ [STAGING] Failed to query raw Facebook Ads ad insights table {raw_table_ad} due to {e}.")
                 logging.warning(f"❌ [STAGING] Failed to query Facebook Ads ad insights table {raw_table_ad} due to {e}.")
                 continue
-        if len(staging_query_succeed) == len(raw_tables_ad):
+        if len(staging_tables_queried) == len(raw_tables_ad):
             staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "succeed"
-        elif len(staging_query_succeed) > 0:
+        elif len(staging_tables_queried) > 0:
             staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "partial"
         else:
             staging_sections_status["[STAGING] Query all raw Facebook Ads ad insights table(s)"] = "failed"
-            raise RuntimeError("❌ [STAGING] Failed to query any raw Facebook Ads ad insights table(s).")
-        staging_df_concatenated = pd.concat(staging_table_queried, ignore_index=True)
-        print(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads ad insights from {len(staging_table_queried)} table(s).")
-        logging.info(f"✅ [STAGING] Successfully concatenated total {len(staging_df_concatenated)} row(s) of Facebook Ads ad insights from {len(staging_table_queried)} table(s).")
 
     # 1.2.6. Trigger to enrich Facebook Ads ad insights
-        try:
-            print(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads ad insights field(s) for {len(staging_df_concatenated)} row(s)...")
-            logging.info(f"🔄 [STAGING] Triggering to enrich staging Facebook Ads ad insights field(s) for {len(staging_df_concatenated)} row(s)...")
-            staging_df_enriched = enrich_ad_fields(staging_df_concatenated, enrich_table_id=raw_table_ad)
-            if "nhan_su" in staging_df_enriched.columns:
-                vietnamese_map = {
-                    'á': 'a', 'à': 'a', 'ả': 'a', 'ã': 'a', 'ạ': 'a',
-                    'ă': 'a', 'ắ': 'a', 'ằ': 'a', 'ẳ': 'a', 'ẵ': 'a', 'ặ': 'a',
-                    'â': 'a', 'ấ': 'a', 'ầ': 'a', 'ẩ': 'a', 'ẫ': 'a', 'ậ': 'a',
-                    'đ': 'd',
-                    'é': 'e', 'è': 'e', 'ẻ': 'e', 'ẽ': 'e', 'ẹ': 'e',
-                    'ê': 'e', 'ế': 'e', 'ề': 'e', 'ể': 'e', 'ễ': 'e', 'ệ': 'e',
-                    'í': 'i', 'ì': 'i', 'ỉ': 'i', 'ĩ': 'i', 'ị': 'i',
-                    'ó': 'o', 'ò': 'o', 'ỏ': 'o', 'õ': 'o', 'ọ': 'o',
-                    'ô': 'o', 'ố': 'o', 'ồ': 'o', 'ổ': 'o', 'ỗ': 'o', 'ộ': 'o',
-                    'ơ': 'o', 'ớ': 'o', 'ờ': 'o', 'ở': 'o', 'ỡ': 'o', 'ợ': 'o',
-                    'ú': 'u', 'ù': 'u', 'ủ': 'u', 'ũ': 'u', 'ụ': 'u',
-                    'ư': 'u', 'ứ': 'u', 'ừ': 'u', 'ử': 'u', 'ữ': 'u', 'ự': 'u',
-                    'ý': 'y', 'ỳ': 'y', 'ỷ': 'y', 'ỹ': 'y', 'ỵ': 'y',
-                }
-                vietnamese_map_upper = {k.upper(): v.upper() for k, v in vietnamese_map.items()}
-                full_map = {**vietnamese_map, **vietnamese_map_upper}
-                staging_df_enriched["nhan_su"] = staging_df_enriched["nhan_su"].apply(
-                    lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x
-                )
-            print(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) from all raw Facebook Ads ad insights table(s).")
-            logging.info(f"✅ [STAGING] Successfully enriched {len(staging_df_enriched)} row(s) from all raw Facebook Ads ad insights table(s).")
-            staging_section_succeeded["1.2.6. Enrich Facebook Ads ad insights"] = True
-        except Exception as e:
-            staging_section_succeeded["1.2.6. Enrich Facebook Ads ad insights"] = False
-            staging_section_failed.append("1.2.6. Enrich Facebook Ads ad insights")
-            print(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads campaign insights due to {e}.")
-            logging.warning(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads ad insights due to {e}.")
-            raise RuntimeError(f"❌ [STAGING] Failed to trigger enrichment for staging Facebook Ads ad insights due to {e}.") from e
+        staging_tables_enriched = []
+        staging_dfs_enriched = []
+        for staging_table_queried in staging_tables_queried:
+            raw_table_ad = staging_table_queried["raw_table_ad"]
+            staging_df_queried = staging_table_queried["staging_df_queried"]
+            print(f"🔄 [STAGING] Trigger to enrich Facebook Ads ad insights for {len(staging_df_queried)} queried row(s) from Google BigQuery table {raw_table_ad}...")
+            logging.info(f"🔄 [STAGING] Trigger to enrich Facebook Ads ad insights for {len(staging_df_queried)} queried row(s) from Google BigQuery table {raw_table_ad}...")
+            staging_results_enriched = enrich_ad_fields(staging_df_queried, enrich_table_id=raw_table_ad)
+            staging_df_enriched = staging_results_enriched["enrich_df_final"]
+            staging_status_enriched = staging_results_enriched["enrich_status_final"]
+            staging_summary_enriched = staging_results_enriched["enrich_summary_final"]
+            if staging_status_enriched == "enrich_success_all":
+                print(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights enrichment with {staging_summary_enriched["enrich_rows_output"]}/{staging_summary_enriched["enrich_rows_input"]} enriched row(s) in {staging_summary_enriched["enrich_time_elapsed"]}s.")
+                logging.info(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights enrichment with {staging_summary_enriched["enrich_rows_output"]}/{staging_summary_enriched["enrich_rows_input"]} enriched row(s) in {staging_summary_enriched["enrich_time_elapsed"]}s.")
+                staging_tables_enriched.append(raw_table_ad)
+                staging_dfs_enriched.append(staging_df_enriched)              
+            else:
+                print(f"❌ [STAGING] Failed to trigger Facebook Ads ad insights enrichment with {staging_summary_enriched["enrich_rows_output"]}/{staging_summary_enriched["enrich_rows_input"]} enriched row(s) due to section(s): {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched["enrich_time_elapsed"]}s.")
+                logging.error(f"❌ [STAGING] Failed to trigger Facebook Ads ad insights enrichment with {staging_summary_enriched["enrich_rows_output"]}/{staging_summary_enriched["enrich_rows_input"]} enriched row(s) due to section(s): {', '.join(staging_summary_enriched.get('enrich_sections_failed', []))} in {staging_summary_enriched["enrich_time_elapsed"]}s.")
+        if len(staging_tables_enriched) == len(staging_tables_queried):
+            staging_sections_status["[STAGING] Trigger to enrich Facebook Ads ad insights"] = "succeed"
+        elif len(staging_tables_enriched) > 0:
+            staging_sections_status["[STAGING] Trigger to enrich Facebook Ads ad insights"] = "partial"
+        else:
+            staging_sections_status["[STAGING] Trigger to enrich Facebook Ads ad insights"] = "failed"
+            raise RuntimeError("❌ [STAGING] Failed to enrich any raw Facebook Ads ad insights table(s).")
 
-    # 1.2.7. Enforce schema for Facebook Ads campaign insights
-        try:
-            print(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads ad insights...")
-            logging.info(f"🔄 [STAGING] Triggering to enforce schema for {len(staging_df_enriched)} row(s) of staging Facebook Ads ad insights...")
-            staging_df_enforced = enforce_table_schema(staging_df_enriched, "staging_ad_insights")
-        except Exception as e:
-            print(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights due to {e}.")
-            logging.error(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights due to {e}.")
-            raise RuntimeError(f"❌ [STAGING] Failed to trigger schema enforcement for {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights due to {e}.")
+    # 1.2.7. Concatenate all enriched Facebook Ads ad insights DataFrame(s)
+        if staging_dfs_enriched:
+            staging_df_concatenated = pd.concat(staging_dfs_enriched, ignore_index=True)
+            print(f"✅ [STAGING] Concatenated {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} table(s).")
+            logging.info(f"✅ [STAGING] Concatenated {len(staging_df_concatenated)} enriched rows from {len(staging_dfs_enriched)} table(s).")
+            staging_sections_status["[STAGING] Concatenate all enriched Facebook Ads ad insights DataFrame(s)"] = "succeed"
+        else:
+            print("⚠️ [STAGING] No enriched DataFrame to concatenate.")
+            logging.warning("⚠️ [STAGING] No enriched DataFrame to concatenate.")
+            staging_sections_status["[STAGING] Concatenate all enriched Facebook Ads ad insights DataFrame(s)"] = "skipped"
 
-    # 1.2.8. Create new table for staging Facebook Ads ad insights if not exist
+    # 1.2.8. Trigger to enforce schema for Facebook Ads ad insights
+        print(f"🔁 [STAGING] Triggering to enforce schema for Facebook Ads ad insights for {len(staging_df_concatenated)} row(s)...")
+        logging.info(f"🔁 [STAGING] Triggering to enforce schema for Facebook Ads ad insights for {len(staging_df_concatenated)} row(s)...")
+        staging_results_enforced = enforce_table_schema(schema_df_input=staging_df_concatenated,schema_type_mapping="staging_ad_insights")
+        staging_df_enforced = staging_results_enforced["schema_df_final"]
+        staging_status_enforced = staging_results_enforced["schema_status_final"]
+        staging_summary_enforced = staging_results_enforced["schema_summary_final"]
+        if staging_status_enforced == "schema_succeed_all":
+            print(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            logging.info(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads ad insights"] = "succeed"
+        else:
+            staging_sections_status["[STAGING] Trigger to enforce schema for Facebook Ads ad insights"] = "failed"
+            print(f"❌ [STAGING] Failed to trigger Facebook Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+            logging.error(f"❌ [STAGING] Failed to trigger Facebook Ads ad insights schema enforcement with {staging_summary_enforced['schema_rows_output']}/{staging_summary_enforced['schema_rows_input']} enforced row(s) in {staging_summary_enforced['schema_time_elapsed']}s.")
+
+    # 1.2.9. Create new table for staging Facebook Ads ad insights if not exist
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()
         table_clusters_filtered = []
         table_schemas_defined = []
@@ -558,15 +564,14 @@ def staging_ad_insights() -> dict:
                 table_metadata_defined = google_bigquery_client.create_table(table_configuration_defined)
                 print(f"✅ [STAGING] Successfully created staging Facebook Ads ad insights table with actual name {table_metadata_defined.full_table_id}.")
                 logging.info(f"✅ [STAGING] Successfully created staging Facebook Ads ad insights table with actual name {table_metadata_defined.full_table_id}.")
-                staging_section_succeeded["1.2.8. Create new table for staging Facebook Ads ad insights if not exist"] = True
             except Exception as e:
-                staging_section_succeeded["1.2.8. Create new table for staging Facebook Ads ad insights if not exist"] = False
-                staging_section_failed.append("1.2.8. Create new table for staging Facebook Ads ad insights if not exist")
+                staging_sections_status["[STAGING] Create new table for staging Facebook Ads ad insights if not exist"] = "failed"
                 print(f"❌ [STAGING] Failed to create staging Facebook Ads ad insights table {staging_table_ad} due to {e}.")
                 logging.error(f"❌ [STAGING] Failed to create staging Facebook Ads ad insights table {staging_table_ad} due to {e}.")
                 raise RuntimeError(f"❌ [STAGING] Failed to create staging Facebook Ads ad insights table {staging_table_ad} due to {e}.") from e
+        staging_sections_status["[STAGING] Create new table for staging Facebook Ads ad insights if not exist"] = "succeed"
 
-    # 1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery   
+    # 1.2.10. Upload staging Facebook Ads ad insights to Google BigQuery   
         if not staging_table_exists:
             try: 
                 print(f"🔍 [STAGING] Uploading {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}...")
@@ -588,10 +593,9 @@ def staging_ad_insights() -> dict:
                 staging_df_uploaded = staging_df_enforced.copy()
                 print(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging Facebook Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
                 logging.info(f"✅ [STAGING] Successfully uploaded {len(staging_df_uploaded)} row(s) of staging Facebook Ads ad insights to new Google BigQuery table {table_metadata_defined.full_table_id}.")
-                staging_section_succeeded["1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery"] = True
+                staging_sections_status["[STAGING] Upload staging Facebook Ads ad insights to Google BigQuery"] = "succeed"
             except Exception as e:
-                staging_section_succeeded["1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery"] = False
-                staging_section_failed.append("1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery")
+                staging_sections_status["[STAGING] Upload staging Facebook Ads ad insights to Google BigQuery"] = "failed"
                 print(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")
                 logging.error(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.")      
                 raise RuntimeError(f"❌ [STAGING] Failed to upload {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to Google BigQuery table {table_metadata_defined.full_table_id} due to {e}.") from e  
@@ -611,44 +615,49 @@ def staging_ad_insights() -> dict:
                 staging_df_uploaded = staging_df_enforced.copy()
                 print(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging Facebook Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
                 logging.info(f"✅ [STAGING] Successfully overwrote {len(staging_df_uploaded)} row(s) of staging Facebook Ads ad insights to existing Google BigQuery table {staging_table_ad}.")
-                staging_section_succeeded["1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery"] = True
+                staging_sections_status["[STAGING] Upload staging Facebook Ads ad insights to Google BigQuery"] = "succeed"
             except Exception as e:
-                staging_section_succeeded["1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery"] = False
-                staging_section_failed.append("1.2.9. Upload staging Facebook Ads ad insights to Google BigQuery")
+                staging_sections_status["[STAGING] Upload staging Facebook Ads ad insights to Google BigQuery"] = "failed"
                 print(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")
                 logging.error(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.")      
                 raise RuntimeError(f"❌ [STAGING] Failed to overwrite {len(staging_df_enforced)} row(s) of staging Facebook Ads ad insights to existing Google BigQuery table {staging_table_ad} due to {e}.") from e
 
-    # 1.2.10. Summarize staging result(s) of Facebook Ads ad insights
+    # 1.2.11. Summarize staging result(s) of Facebook Ads ad insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
+        staging_sections_total = len(staging_sections_status)
+        staging_sections_succeed = [k for k, v in staging_sections_status.items() if v == "succeed"]
+        staging_sections_failed = [k for k, v in staging_sections_status.items() if v == "failed"]     
         staging_tables_input = len(raw_tables_ad)
-        staging_tables_succeeded = len(staging_table_queried)
-        staging_tables_failed = staging_tables_input - staging_tables_succeeded
-        staging_rows_uploaded = len(staging_df_final)
-        if staging_section_failed:
-            print(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging process with all {staging_tables_failed} table(s) failed and 0 row(s) queried in {staging_time_elapsed}s due to section {', '.join(staging_section_failed)}.")
-            logging.error(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging process with all {staging_tables_failed} table(s) failed and 0 row(s) queried in {staging_time_elapsed}s due to section {', '.join(staging_section_failed)}.")
+        staging_tables_output = len(staging_tables_queried)
+        staging_tables_failed = staging_tables_input - staging_tables_output
+        staging_rows_output = len(staging_df_final)
+        if staging_sections_failed:
+            print(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
+            logging.error(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             staging_status_final = "staging_failed_all"
         elif staging_tables_failed > 0:
-            print(f"⚠️ [STAGING] Completed Facebook Ads ad insights staging process with partial failure of {staging_tables_failed}/{staging_tables_input} table(s) and {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
-            logging.warning(f"⚠️ [STAGING] Completed Facebook Ads ad insights staging process with partial failure of {staging_tables_failed}/{staging_tables_input} table(s) and {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
+            print(f"⚠️ [STAGING] Partially completed Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
+            logging.warning(f"⚠️ [STAGING] Partially completed Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             staging_status_final = "staging_failed_partial"
         else:
-            print(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
-            logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging process for {staging_tables_succeeded} table(s) with {staging_rows_uploaded} row(s) queried in {staging_time_elapsed}s.")
+            print(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
+            logging.info(f"🏆 [STAGING] Successfully completed Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             staging_status_final = "staging_succeed_all"
         staging_results_final = {
             "staging_df_final": staging_df_final,
             "staging_status_final": staging_status_final,
             "staging_summary_final": {
                 "staging_time_elapsed": staging_time_elapsed,
-                "staging_rows_uploaded": staging_rows_uploaded,
+                "staging_sections_total": staging_sections_total,
+                "staging_sections_succeed": staging_sections_succeed,
+                "staging_sections_failed": staging_sections_failed,
+                "staging_sections_detail": staging_sections_status,
                 "staging_tables_input": staging_tables_input,
-                "staging_tables_succeeded": staging_tables_succeeded,
+                "staging_tables_output": staging_tables_output,
                 "staging_tables_failed": staging_tables_failed,
-                "staging_section_failed": staging_section_failed,
+                "staging_rows_output": staging_rows_output,
             }
         }
-    return staging_results_final     
+    return staging_results_final
