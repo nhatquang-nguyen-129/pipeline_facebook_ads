@@ -130,8 +130,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             ingest_df_insights = ingest_results_insights["ingest_df_final"]
             ingest_status_insights = ingest_results_insights["ingest_status_final"]
             ingest_summary_insights = ingest_results_insights["ingest_summary_final"]
-            updated_ids_campaign = set()
-            updated_ids_campaign.update(ingest_df_insights["campaign_id"].dropna().unique())
+            updated_ids_campaign = set(ingest_df_insights["campaign_id"].dropna().unique())
             if ingest_status_insights == "ingest_succeed_all":
                 print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
                 logging.info(f" [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
@@ -289,14 +288,13 @@ def update_campaign_insights(start_date: str, end_date: str):
         print("-" * 110)
 
         summary_map = {
-            "[UPDATE] Trigger to ingest Facebook Ads campaign insights": "ingest_results_final",
-            "[UPDATE] Trigger to ingest Facebook Ads campaign metadata": "metadata_results_final",
-            "[UPDATE] Trigger to enrich Facebook Ads campaign insights": "enrich_results_final",
-            "[UPDATE] Trigger to enforce schema for Facebook Ads campaign insights": "schema_results_final",
-            "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging mart": "staging_results_final",
-            "[UPDATE] Trigger to transform Facebook Ads campaign performance into final mart": "mart_results_final"
+            "[UPDATE] Trigger to ingest Facebook Ads campaign insights": "ingest_results_insights",
+            "[UPDATE] Trigger to ingest Facebook Ads campaign metadata": "ingest_results_metadata",
+            "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging table": "staging_results_campaign",
+            "[UPDATE] Trigger to build materialized Facebook Ads campaign performance table": "mart_results_all",
+            "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table": "mart_results_supplier",
+            "[UPDATE] Trigger to build materialized Facebook Ads festival campaign performance table": "mart_results_festival",
         }
-
         locals_dict = locals()
 
         def print_update_summary(step_name, step_status, indent_level=1, prefix="• "):
@@ -304,7 +302,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             if step_name in summary_map and summary_map[step_name] in locals_dict:
                 summary_obj = locals_dict[summary_map[step_name]]
 
-                # Lấy tổng thời gian thực thi của section chính
+                # Tổng thời gian thực thi
                 step_time = (
                     summary_obj.get("ingest_time_elapsed")
                     or summary_obj.get("staging_time_elapsed")
@@ -313,9 +311,8 @@ def update_campaign_insights(start_date: str, end_date: str):
                 )
 
                 print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
-                logging.info(f"⏱ [UPDATE] {step_name} total time: {step_time}s.")
 
-                # In chi tiết tất cả sections detail (kể cả loop)
+                # ✅ In chi tiết sections
                 for detail_key in [k for k in summary_obj.keys() if k.endswith("_sections_detail")]:
                     for sub_step, sub_info in summary_obj[detail_key].items():
                         sub_status = sub_info.get("ingest_section_status", sub_info.get("status", "-"))
@@ -326,7 +323,6 @@ def update_campaign_insights(start_date: str, end_date: str):
                         print(f"{sub_indent}- {sub_step:<70} | {sub_status:<10} | {sub_total:>8}")
                 return
 
-            # Nếu step không có summary riêng
             print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {'-':>8}")
 
         # In toàn bộ các step trong update_sections_status
