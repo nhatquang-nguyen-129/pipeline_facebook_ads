@@ -1420,7 +1420,7 @@ def ingest_campaign_insights(
                 "ingest_rows_uploaded": ingest_rows_output,
             }
         }
-        return ingest_results_final
+    return ingest_results_final
 
 # 2.2. Ingest Facebook Ad ad insight to Google BigQuery raw tables
 def ingest_ad_insights(
@@ -1722,4 +1722,4 @@ def ingest_ad_insights(
                 "ingest_rows_uploaded": ingest_rows_output,
             }
         }
-        return ingest_results_final
+    return ingest_results_final
