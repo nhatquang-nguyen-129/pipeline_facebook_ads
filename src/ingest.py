@@ -1678,35 +1678,34 @@ def ingest_ad_insights(
         ingest_dates_output = len(ingest_dates_uploaded)
         ingest_dates_failed = ingest_dates_input - ingest_dates_output
         ingest_rows_output = len(ingest_df_final)
+        ingest_section_all = (
+            set(ingest_sections_status.keys())
+            | set(ingest_sections_time.keys())
+            | set(ingest_loops_time.keys())
+        )
         ingest_sections_detail = {}
-        for section_name, section_status in ingest_sections_status.items():
-            ingest_sections_detail[section_name] = {
-                "ingest_section_status": section_status,
-                "ingest_section_time": round(ingest_sections_time.get(section_name, 0.0), 2),
-                "ingest_loop_time": 0.0,
-                "ingest_time_total": 0.0
+        for ingest_section_separated in sorted(ingest_section_all):
+            ingest_section_time = (
+                ingest_loops_time.get(ingest_section_separated)
+                if ingest_section_separated in ingest_loops_time
+                else ingest_sections_time.get(ingest_section_separated)
+            )
+            ingest_sections_detail[ingest_section_separated] = {
+                "status": ingest_sections_status.get(ingest_section_separated, "unknown"),
+                "time": round(ingest_section_time or 0.0, 2),
+                "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
-        for loop_section_name, loop_time_total in ingest_loops_time.items():
-            if loop_section_name in ingest_sections_detail:
-                ingest_sections_detail[loop_section_name]["ingest_loop_time"] = round(loop_time_total, 2)
-            else:
-                ingest_sections_detail[loop_section_name] = {
-                    "ingest_section_status": ingest_sections_status.get(loop_section_name, "unknown"),
-                    "ingest_section_time": 0.0,
-                    "ingest_loop_time": round(loop_time_total, 2),
-                    "ingest_time_total": 0.0
-                }
         if len(ingest_dates_uploaded) == 0:
             print(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_failed > 0:
             print(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_partial"
         else:
-            print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
@@ -1723,4 +1722,4 @@ def ingest_ad_insights(
                 "ingest_rows_uploaded": ingest_rows_output,
             }
         }
-    return ingest_results_final
+        return ingest_results_final
