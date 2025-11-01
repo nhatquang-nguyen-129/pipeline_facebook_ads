@@ -96,7 +96,7 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign metadata ingestion"  
+    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign metadata ingestion"
     ingest_sections_time[ingest_section_name] = round(time.time() - ingest_time_start, 2)
     ingest_sections_status[ingest_section_name] = "succeed"
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")

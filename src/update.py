@@ -110,11 +110,12 @@ def update_campaign_insights(start_date: str, end_date: str):
     logging.info(f"🚀 [UPDATE] Starting to update Facebook Ads campaign insights from {start_date} to {end_date}...")
 
 # 1.1.1. Start timing Facebook Ads campaign insights update
+    update_section_name = "[UPDATE] Start timing Facebook Ads campaign insights update"
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    update_sections_status["Start timing Facebook Ads campaign insights update"] = "succeed"
-    update_sections_time["Start timing Facebook Ads campaign insights update"] = round(time.time() - update_time_start, 2)
+    update_sections_status[update_section_name] = "succeed"
+    update_sections_time[update_section_name] = round(time.time() - update_time_start, 2)
     print(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
@@ -134,11 +135,11 @@ def update_campaign_insights(start_date: str, end_date: str):
             if ingest_status_insights == "ingest_succeed_all":
                 print(f"✅ [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
                 logging.info(f" [UPDATE] Successfully triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) and {ingest_summary_insights['ingest_rows_uploaded']} uploaded row(s) in {ingest_summary_insights['ingest_time_elapsed']}s.")
-                update_sections_status["[UPDATE] Trigger to ingest Facebook Ads campaign insights"] = "succeed"
+                update_sections_status[update_section_name] = "succeed"
             elif ingest_status_insights == "ingest_succeed_partial":
                 print(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} failed day(s) and {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
                 logging.warning(f"⚠️ [UPDATE] Partially triggered Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_summary_insights['ingest_dates_output']} failed day(s) and {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
-                update_sections_status["[UPDATE] Trigger to ingest Facebook Ads campaign insights"] = "partial"
+                update_sections_status[update_section_name] = "partial"
             else:
                 update_sections_status["UPDATE] Trigger to ingest Facebook Ads campaign insights"] = "failed"
                 print(f"❌ [UPDATE] Failed to trigger Facebook Ads ad insights ingestion from {start_date} to {end_date} {ingest_summary_insights['ingest_dates_output']} uploaded day(s) on {ingest_summary_insights['ingest_dates_input']} total day(s) then {ingest_summary_insights['ingest_rows_uploaded']} row(s) uploaded in {ingest_summary_insights['ingest_time_elapsed']}s.")
@@ -295,39 +296,41 @@ def update_campaign_insights(start_date: str, end_date: str):
             "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table": "mart_results_supplier",
             "[UPDATE] Trigger to build materialized Facebook Ads festival campaign performance table": "mart_results_festival",
         }
+
         locals_dict = locals()
 
-        def print_update_summary(step_name, step_status, indent_level=1, prefix="• "):
-            indent = " " * (indent_level * 2)
-            if step_name in summary_map and summary_map[step_name] in locals_dict:
-                summary_obj = locals_dict[summary_map[step_name]]
-
-                # Tổng thời gian thực thi
-                step_time = (
-                    summary_obj.get("ingest_time_elapsed")
-                    or summary_obj.get("staging_time_elapsed")
-                    or summary_obj.get("mart_time_elapsed")
-                    or "-"
-                )
-
-                print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {str(step_time):>8}")
-
-                # ✅ In chi tiết sections
-                for detail_key in [k for k in summary_obj.keys() if k.endswith("_sections_detail")]:
-                    for sub_step, sub_info in summary_obj[detail_key].items():
-                        sub_status = sub_info.get("ingest_section_status", sub_info.get("status", "-"))
-                        sub_time_section = sub_info.get("ingest_section_time", sub_info.get("time_elapsed", 0.0))
-                        sub_time_loop = sub_info.get("ingest_loop_time", 0.0)
-                        sub_total = round(sub_time_section + sub_time_loop, 2)
-                        sub_indent = " " * ((indent_level + 2) * 2)
-                        print(f"{sub_indent}- {sub_step:<70} | {sub_status:<10} | {sub_total:>8}")
-                return
-
-            print(f"{indent}{prefix}{step_name:<76} | {step_status:<10} | {'-':>8}")
-
-        # In toàn bộ các step trong update_sections_status
+        # ✅ Giữ nguyên thứ tự tự nhiên khi in các step
         for update_step_name, update_step_status in update_sections_status.items():
-            print_update_summary(update_step_name, update_step_status, indent_level=1, prefix="• ")
+            summary_obj = None
+            if update_step_name in summary_map and summary_map[update_step_name] in locals_dict:
+                summary_obj = locals_dict[summary_map[update_step_name]]
+
+            nested_summary = None
+            if summary_obj and isinstance(summary_obj, dict):
+                for k in summary_obj.keys():
+                    if k.endswith("_summary_final"):
+                        nested_summary = summary_obj[k]
+                        break
+
+            step_time = (
+                (nested_summary or summary_obj or {}).get("ingest_time_elapsed")
+                or (nested_summary or summary_obj or {}).get("staging_time_elapsed")
+                or (nested_summary or summary_obj or {}).get("mart_time_elapsed")
+                or "-"
+            )
+
+            print(f"• {update_step_name:<76} | {update_step_status:<10} | {str(step_time):>8}")
+
+            # ✅ In chi tiết section con theo đúng thứ tự thực thi
+            if nested_summary:
+                for detail_key in [k for k in nested_summary.keys() if k.endswith("_sections_detail")]:
+                    detail_dict = nested_summary[detail_key]
+                    for idx, (sub_step, sub_info) in enumerate(detail_dict.items(), start=1):
+                        sub_status = sub_info.get("status", "-")
+                        sub_time_section = sub_info.get("time", 0.0)
+                        sub_loop_time = sub_info.get("loop_time", 0.0)
+                        sub_total = round(sub_time_section + sub_loop_time, 2)
+                        print(f"    {idx:>2}. {sub_step:<70} | {sub_status:<10} | {sub_total:>8}")
 
         print("-" * 110)
         print(f"{'Total execution time':<80} | {'-':<10} | {update_time_total:>8}s")
