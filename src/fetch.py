@@ -79,41 +79,55 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
 
     # 1.1.1. Start timing the Facebook Ads campaign metadata fetching
-    fetch_time_start = time.time()
+    fetch_time_start = time.time()   
     fetch_sections_status = {}
-    fetch_sections_status["[FETCH] Start timing the Facebook Ads campaign metadata fetching"] = "succeed"    
+    fetch_sections_time = {}
+    fetch_section_name = "[FETCH] Start timing the Facebook Ads campaign metadata fetching"
+    fetch_sections_status[fetch_section_name] = "succeed"     
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Validate input for the Facebook Ads campaign metadata fetching
-    if not campaign_id_list:
-        fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "failed"        
-        print("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
-        logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
-        raise ValueError("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")    
-    else:
-        fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "succeed"
-        print(f"✅ [FETCH] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of raw Facebook Ads campaign metadata fetching process.")
-        logging.info(f"✅ [FETCH] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of raw Facebook Ads campaign metadata fetching process.")
+    fetch_section_name = "[FETCH] Validate input for the Facebook Ads campaign metadata fetching"
+    fetch_section_start = time.time()    
+    try:
+        if not campaign_id_list:
+            fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "failed"        
+            print("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
+            logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
+            raise ValueError("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")    
+        else:
+            fetch_sections_status["[FETCH] Validate input for the Facebook Ads campaign metadata fetching"] = "succeed"
+            print(f"✅ [FETCH] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
+            logging.info(f"✅ [FETCH] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
+    finally:
+        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)            
 
     # 1.1.3. Prepare fields for Facebook Ads campaign metadata fetching
-    fetch_fields_default = [
-        "id", 
-        "name", 
-        "status",
-        "effective_status",
-        "objective",
-        "configured_status",
-        "buying_type"
-    ]
-    fetch_records_campaign = [] 
-    fetch_sections_status["[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"] = "succeed"   
-    print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch Facebooks Ads campaign metadata with {fetch_fields_default} field(s)...")
+    fetch_section_name = "[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"
+    fetch_section_start = time.time()        
+    try:
+        fetch_fields_default = [
+            "id", 
+            "name", 
+            "status",
+            "effective_status",
+            "objective",
+            "configured_status",
+            "buying_type"
+        ]
+        fetch_records_campaign = [] 
+        fetch_sections_status["[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"] = "succeed"   
+        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
+        logging.info(f"🔍 [FETCH] Preparing to fetch Facebooks Ads campaign metadata with {fetch_fields_default} field(s)...")
+    finally:
+        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)          
     
     try:
     
     # 1.1.4 Initialize Google Secret Manager client
+        fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
+        fetch_section_start = time.time()                
         try:
             print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
@@ -125,9 +139,12 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             fetch_sections_status["[FETCH] Initialize Google Secret Manager client"] = "failed"
             print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)              
 
     # 1.1.5. Get Facebook Ads access token from Google Secret Manager
+        fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
+        fetch_section_start = time.time()               
         try: 
             print(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
@@ -142,9 +159,12 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             fetch_sections_status["[FETCH] Get Facebook Ads access token from Google Secret Manager"] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
     # 1.1.6. Initialize Facebook SDK session from access token
+        fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
+        fetch_section_start = time.time()             
         try:
             print(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
             logging.info(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
@@ -156,9 +176,12 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             fetch_sections_status["[FETCH] Initialize Facebook SDK session from access token"] = "failed"
             print(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)             
 
     # 1.1.7. Get Facebook Ads account_id from Google Secret Manager
+        fetch_section_name = "[FETCH] Get Facebook Ads account_id from Google Secret Manager"
+        fetch_section_start = time.time()         
         try:
             print(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
@@ -173,9 +196,12 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             fetch_sections_status["[FETCH] Get Facebook Ads account_id from Google Secret Manager"] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.1.8. Make Facebook Ads API call for ad account information
+        fetch_section_name = "[FETCH] Make Facebook Ads API call for ad account information"
+        fetch_section_start = time.time()          
         try: 
             print(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")    
@@ -189,32 +215,37 @@ def fetch_campaign_metadata(campaign_id_list: list[str]) -> pd.DataFrame:
             fetch_sections_status["[FETCH] Make Facebook Ads API call for ad account information"] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")      
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.1.9. Make Facebook Ads API call for campaign metadata
-        print(f"🔍 [FETCH] Retrieving Facebook Ads campaign metadata for account_id {account_id} with {len(campaign_id_list)} campaign_id(s).")
-        logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign metadata for account_id {account_id} with {len(campaign_id_list)} campaign_id(s).")        
-        for campaign_id in campaign_id_list:
-            try:
-                campaign = Campaign(fbid=campaign_id).api_get(fields=fetch_fields_default)
-                record = {f: campaign.get(f, None) for f in fetch_fields_default}
-                record["campaign_id"] = record.pop("id", None)
-                record["campaign_name"] = record.pop("name", None)
-                record["account_id"] = account_id
-                record["account_name"] = account_name
-                fetch_records_campaign.append(record)
-            except Exception as e:
-                print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign metadata for campaign_id {campaign_id} due to {e}.")
-                logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign metadata for campaign_id {campaign_id} due to {e}.")
-        fetch_df_flattened = pd.DataFrame(fetch_records_campaign)
-        print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} campaign metadata record(s) for account_id {account_id}.")
-        logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} campaign metadata record(s) for account_id {account_id}.")
-        fetch_sections_status["[FETCH] Make Facebook Ads API call for campaign metadata"] = "succeed"
-        if not fetch_records_campaign:
-            fetch_sections_status["[FETCH] Make Facebook Ads API call for campaign metadata"] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
-            raise ValueError(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
+        fetch_section_name = "[FETCH] Make Facebook Ads API call for ad account information"
+        fetch_section_start = time.time()            
+        try:
+            print(f"🔍 [FETCH] Retrieving Facebook Ads campaign metadata for account_id {account_id} with {len(campaign_id_list)} campaign_id(s).")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign metadata for account_id {account_id} with {len(campaign_id_list)} campaign_id(s).")        
+            for campaign_id in campaign_id_list:
+                try:
+                    campaign = Campaign(fbid=campaign_id).api_get(fields=fetch_fields_default)
+                    record = {f: campaign.get(f, None) for f in fetch_fields_default}
+                    record["campaign_id"] = record.pop("id", None)
+                    record["campaign_name"] = record.pop("name", None)
+                    record["account_id"] = account_id
+                    record["account_name"] = account_name
+                    fetch_records_campaign.append(record)
+                except Exception as e:
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign metadata for campaign_id {campaign_id} due to {e}.")
+                    logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign metadata for campaign_id {campaign_id} due to {e}.")
+            fetch_df_flattened = pd.DataFrame(fetch_records_campaign)
+            print(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} campaign metadata record(s) for account_id {account_id}.")
+            logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_df_flattened)} campaign metadata record(s) for account_id {account_id}.")
+            fetch_sections_status["[FETCH] Make Facebook Ads API call for campaign metadata"] = "succeed"
+            if not fetch_records_campaign:
+                fetch_sections_status["[FETCH] Make Facebook Ads API call for campaign metadata"] = "failed"
+                print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign metadata for any campaign_id with account_id {account_id}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.1.10. Enforce schema for Facebook Ads campaign metadata
         print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign metadata with {len(fetch_df_flattened)} row(s)...")
