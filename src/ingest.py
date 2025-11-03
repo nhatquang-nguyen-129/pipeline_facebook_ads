@@ -10,7 +10,7 @@ It manages the complete ingestion flow — from authentication and
 data fetching, to enrichment, schema validation, and loading into 
 BigQuery tables segmented by campaign, ad, creative and metadata.
 
-✔️ Supports both append and truncate modes via `write_disposition`  
+✔️ Supports both append and truncate modes via write_disposition
 ✔️ Validates data structure using centralized schema utilities  
 ✔️ Integrates enrichment routines before loading into BigQuery  
 ✔️ Implements granular logging and CSV-based error traceability  
@@ -88,9 +88,9 @@ MODE = os.getenv("MODE")
 # 1. INGEST FACEBOOK ADS METADATA
 
 # 1.1. Ingest Facebook Ads campaign metadata to Google BigQuery
-def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(campaign_id_list)} campaign_id(s)...")
+def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
+    print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
+    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
 
     # 1.1.1. Start timing the Facebook Ads campaign metadata ingestion
     ingest_time_start = time.time()
@@ -106,11 +106,10 @@ def ingest_campaign_metadata(campaign_id_list: list) -> pd.DataFrame:
     ingest_section_name = "[INGEST] Validate input for the Facebook Ads campaign metadata ingestion"
     ingest_section_start = time.time()
     try:
-        if not campaign_id_list:
+        if not ingest_ids_campaign:
             ingest_sections_status["[INGEST] Validate input for the Facebook Ads campaign metadata ingestion"] = "failed"
             print("⚠️ [INGEST] Empty Facebook Ads campaign_id_list provided then ingestion is suspended.")
             logging.warning("⚠️ [INGEST] Empty Facebook Ads campaign_id_list provided then ingestion is suspended.")
-            raise ValueError("⚠️ [INGEST] Empty Facebook Ads campaign_id_list provided then ingestion is suspended.")
         else:
             ingest_sections_status["[INGEST] Validate input for the Facebook Ads campaign metadata ingestion"] = "succeed"
             print(f"✅ [INGEST] Successfully validated input for {len(campaign_id_list)} campaign_id(s) of Facebook Ads campaign metadata ingestion.")
