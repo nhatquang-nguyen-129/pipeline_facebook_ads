@@ -4,7 +4,7 @@ FACEBOOK ENRICHMENT MODULE
 ------------------------------------------------------------------
 This module is responsible for transforming raw Facebook Ads insights 
 into a clean, BigQuery-ready dataset optimized for advanced analytics, 
-cross-platform reporting, and machine learning applications.
+cross-platform reporting and machine learning applications.
 
 By centralizing enrichment rules, this module ensures transparency, 
 consistency, and maintainability across the marketing data pipeline to  
