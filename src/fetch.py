@@ -1043,7 +1043,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
 
     try:
 
-    # 2.1.3 Initialize Google Secret Manager client
+    # 2.1.3. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()           
         try:
@@ -1158,12 +1158,12 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
                     logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {start_date} to {end_date}.")
                     break
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
                     if attempt == fetch_retries_campaign - 1:
                         fetch_sections_status[fetch_section_name] = "failed"
-                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
-                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} due to maximum retry attempts exceeded.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
@@ -1188,7 +1188,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.2.10. Summarize fetch result(s) for Facebook Ads campaign insights
+    # 2.1.10. Summarize fetch result(s) for Facebook Ads campaign insights
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
@@ -1235,50 +1235,62 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
 
 # 2.2. Fetch ad insights for Facebook Ads
 def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch Facebook Ads ad insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads ad insights from {start_date} to {end_date}...")    
+    print(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {start_date} to {end_date}...")
+    logging.info(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {start_date} to {end_date}...")    
 
     # 2.2.1. Start timing the Facebook Ads ad insights fetching
-    fetch_time_start = time.time()
+    fetch_time_start = time.time()   
     fetch_sections_status = {}
-    fetch_sections_status["[FETCH] Start timing the Facebook Ads ad insights fetching"] = "succeed"  
+    fetch_sections_time = {}
+    fetch_section_name = "[FETCH] Start timing the Facebook Ads ad insights fetching"
+    fetch_sections_status[fetch_section_name] = "succeed"  
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.2.2. Validate input for Facebook Ads campaign insights fetching process
-    fetch_params_default = {
-        "level": "ad",
-        "time_increment": 1,
-        "time_range": {"since": start_date, "until": end_date},
-    }
-    print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
-    fetch_fields_default = [
-        "account_id", "campaign_id", "adset_id",
-        "ad_id", "spend", "reach", "impressions", "clicks", 
-        "optimization_goal", "actions", "date_start", "date_stop"
-    ]        
-    print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
-    logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
-    fetch_sections_status["[FETCH] Validate input for Facebook Ads campaign insights fetching"] = "succeed" 
+    # 2.2.2. Validate input for Facebook Ads campaign insights fetching
+    fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
+    fetch_section_start = time.time()          
+    try:
+        fetch_params_default = {
+            "level": "ad",
+            "time_increment": 1,
+            "time_range": {"since": start_date, "until": end_date},
+        }
+        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
+        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
+        fetch_fields_default = [
+            "account_id", "campaign_id", "adset_id",
+            "ad_id", "spend", "reach", "impressions", "clicks", 
+            "optimization_goal", "actions", "date_start", "date_stop"
+        ]        
+        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
+        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
+        fetch_sections_status[fetch_section_name] = "succeed" 
+    finally:
+        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
     try:
 
     # 2.2.3 Initialize Google Secret Manager client
+        fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
+        fetch_section_start = time.time()           
         try:
             print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             google_secret_client = secretmanager.SecretManagerServiceClient()
             print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
             logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-            fetch_sections_status["[FETCH] Initialize Google Secret Manager client"] = "succeed"
+            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
-            fetch_sections_status["[FETCH] Initialize Google Secret Manager client"] = "failed"
+            fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.4. Get Facebook Ads access token from Google Secret Manager
+        fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
+        fetch_section_start = time.time()        
         try: 
             print(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
@@ -1288,28 +1300,34 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             token_access_user = token_secret_response.payload.data.decode("utf-8")
             print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
-            fetch_sections_status["[FETCH] Get Facebook Ads access token from Google Secret Manager"] = "succeed"
+            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
-            fetch_sections_status["[FETCH] Get Facebook Ads access token from Google Secret Manager"] = "failed"
+            fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.5. Initialize Facebook SDK session from access token
+        fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
+        fetch_section_start = time.time()        
         try:
             print(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
             logging.info(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
             FacebookAdsApi.init(access_token=token_access_user, timeout=180)
             print(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
             logging.info(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
-            fetch_sections_status["[FETCH] Initialize Facebook SDK session from access token"] = "succeed"
+            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
-            fetch_sections_status["[FETCH] Initialize Facebook SDK session from access token"] = "failed"
+            fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)  
 
     # 2.2.6. Get Facebook Ads account_id from Google Secret Manager
+        fetch_section_name = "[FETCH] Get Facebook Ads account_id from Google Secret Manager"
+        fetch_section_start = time.time()           
         try:
             print(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
@@ -1319,14 +1337,17 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             account_id = account_secret_response.payload.data.decode("utf-8")
             print(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
             logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
-            fetch_sections_status["[FETCH] Get Facebook Ads account_id from Google Secret Manager"] = "succeed"
+            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
-            fetch_sections_status["[FETCH] Get Facebook Ads account_id from Google Secret Manager"] = "failed"
+            fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.2.7. Make Facebook Ads API call for ad account informatiohn
+    # 2.2.7. Make Facebook Ads API call for ad account information
+        fetch_section_name = "[FETCH] Make Facebook Ads API call for ad account information"
+        fetch_section_start = time.time()           
         try: 
             print(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")    
@@ -1335,62 +1356,71 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             account_name = account_info.get("name", "Unknown")       
             print(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {account_name} for account_id {account_id}.")
             logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {account_name} for account_id {account_id}.")        
-            fetch_sections_status["[FETCH] Make Facebook Ads API call for ad account information"] = "succeed"
+            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
-            fetch_sections_status["[FETCH] Make Facebook Ads API call for ad account information"] = "failed"
+            fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.") 
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.8. Make Facebook Ads API call for ad insights
-        fetch_records_ad = []
-        fetch_retries_max = 2
-        for attempt in fetch_retries_max :
-            try:
-                print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_max}...")
-                logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_max}...")
-                fetch_response_ad = account_id_prefixed.get_insights(
-                    fields=fetch_fields_default,
-                    params=fetch_params_default
-                )
-                fetch_records_ad = [dict(fetch_record_ad) for fetch_record_ad in fetch_response_ad]
-                fetch_df_flattened = pd.DataFrame(fetch_records_ad)
-                fetch_sections_status["[FETCH] Make Facebook Ads API call for ad insights"] = "succeed"
-                print(f"✅ [FETCH] Successfully retrieved {len(fetch_records_ad)} row(s) of Facebook Ads ad insights from {start_date} to {end_date}.")
-                logging.info(f"✅ [FETCH] Successfully retrieved {len(fetch_records_ad)} row(s) of Facebook Ads ad insights from {start_date} to {end_date}.")
-                break
-            except Exception as e:
-                print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_max} due to {e} then retrying....")
-                logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_max} due to {e} then retrying....")
-                if attempt == fetch_retries_max - 1:
-                    fetch_sections_status["[FETCH] Make Facebook Ads API call for ad insights"] = "failed"
-                    print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
-                    logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
-                    raise RuntimeError(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+        fetch_section_name = "[FETCH] Make Facebook Ads API call for ad insights"
+        fetch_section_start = time.time()        
+        fetch_insights_ad = []
+        fetch_retries_ad = 2
+        try:            
+            for attempt in range(fetch_retries_ad) :
+                try:
+                    print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad}...")
+                    logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad}...")
+                    fetch_response_ad = account_id_prefixed.get_insights(
+                        fields=fetch_fields_default,
+                        params=fetch_params_default
+                    )
+                    fetch_insights_ad = [dict(fetch_insight_ad) for fetch_insight_ad in fetch_response_ad]
+                    fetch_df_flattened = pd.DataFrame(fetch_insights_ad)
+                    fetch_sections_status[fetch_section_name] = "succeed"
+                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {start_date} to {end_date}.")
+                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {start_date} to {end_date}.")
+                    break
+                except Exception as e:
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    if attempt == fetch_retries_ad - 1:
+                        fetch_sections_status[fetch_section_name] = "failed"
+                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.2.9. Enforce schema for Facebook Ads ad insights
-        print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
-        logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")            
-        fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_insights")            
-        fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
-        fetch_status_enforced = fetch_results_schema["schema_status_final"]
-        fetch_df_enforced = fetch_results_schema["schema_df_final"]    
-        if fetch_status_enforced == "schema_succeed_all":
-            print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-            logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-            fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad insights"] = "succeed"
-        else:
-            fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad insights"] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-            raise RuntimeError(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")     
+    # 2.2.9. Trigger to enforce schema for Facebook Ads ad insights
+        fetch_section_name = "[FETCH] Trigger to enforce schema for Facebook Ads ad insights"
+        fetch_section_start = time.time()              
+        try:            
+            print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")            
+            fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_insights")            
+            fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
+            fetch_status_enforced = fetch_results_schema["schema_status_final"]
+            fetch_df_enforced = fetch_results_schema["schema_df_final"]    
+            if fetch_status_enforced == "schema_succeed_all":
+                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad insights"] = "succeed"
+            else:
+                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad insights"] = "failed"
+                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
     # 2.2.10. Summarize fetch result(s) for Facebook Ads ad insights
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
-        fetch_sections_total = len(fetch_sections_status)
-        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"]
+        fetch_sections_total = len(fetch_sections_status) 
+        fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
         fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
         fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
@@ -1407,6 +1437,13 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_all"
+        fetch_sections_detail = {
+            section: {
+                "status": fetch_sections_status.get(section, "unknown"),
+                "time": fetch_sections_time.get(section, None),
+            }
+            for section in set(fetch_sections_status) | set(fetch_sections_time)
+        }           
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -1417,7 +1454,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                 "fetch_sections_total": fetch_sections_total,
                 "fetch_sections_succeed": fetch_sections_succeeded,
                 "fetch_sections_failed": fetch_sections_failed,
-                "fetch_sections_detail": fetch_sections_status,
+                "fetch_sections_detail": fetch_sections_detail,
                 "fetch_rows_output": fetch_rows_output,
             },
         }
