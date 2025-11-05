@@ -92,18 +92,18 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest raw Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
     logging.info(f"🚀 [INGEST] Starting to ingest raw Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
 
-    # 1.1.1. Start timing the Facebook Ads campaign metadata ingestion
+    # 1.1.1. Start timing Facebook Ads campaign metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign metadata ingestion"
+    ingest_section_name = "[INGEST] Start timing Facebook Ads campaign metadata ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time
     print(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Validate input for the Facebook Ads campaign metadata ingestion
-    ingest_section_name = "[INGEST] Validate input for the Facebook Ads campaign metadata ingestion"
+    # 1.1.2. Validate input for Facebook Ads campaign metadata ingestion
+    ingest_section_name = "[INGEST] Validate input for Facebook Ads campaign metadata ingestion"
     ingest_section_start = time.time()
     try:
         if not ingest_ids_campaign:
@@ -350,11 +350,11 @@ def ingest_adset_metadata(ingest_ids_adset: list) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest raw Facebook Ads adset metadata for {len(ingest_ids_adset)} adset_id(s)...")
     logging.info(f"🚀 [INGEST] Starting to ingest raw Facebook Ads adset metadata for {len(ingest_ids_adset)} adset_id(s)...")
 
-    # 1.2.1. Start timing the Facebook Ads adset metadata ingestion
+    # 1.2.1. Start timing Facebook Ads adset metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads adset metadata ingestion"  
+    ingest_section_name = "[INGEST] Start timing Facebook Ads adset metadata ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -609,11 +609,11 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest raw Facebook Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
     logging.info(f"🚀 [INGEST] Starting to ingest raw Facebook Ads ad metadata for {len(ingest_ids_ad)} ad_id(s)...")
 
-    # 1.3.1. Start timing the Facebook Ads ad metadata ingestion
+    # 1.3.1. Start timing Facebook Ads ad metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads ad metadata ingestion"
+    ingest_section_name = "[INGEST] Start timing Facebook Ads ad metadata ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -868,11 +868,11 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
     print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
 
-    # 1.4.1. Start timing the Facebook Ads ad creative ingestion
+    # 1.4.1. Start timing Facebook Ads ad creative ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads ad creative ingestion"
+    ingest_section_name = "[INGEST] Start timing Facebook Ads ad creative ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -1132,7 +1132,7 @@ def ingest_campaign_insights(
     print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
 
-    # 2.1.1. Start timing the Facebook Ads campaign insights ingestion
+    # 2.1.1. Start timing Facebook Ads campaign insights ingestion
     ingest_dates_uploaded = []
     ingest_time_start = time.time()
     ingest_sections_status = {}
@@ -1145,7 +1145,7 @@ def ingest_campaign_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign insights ingestion"
+    ingest_section_name = "[INGEST] Start timing Facebook Ads campaign insights ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time    
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -1427,7 +1427,7 @@ def ingest_ad_insights(
     print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
 
-    # 2.2.1. Start timing the Facebook Ads ad insights ingestion
+    # 2.2.1. Start timing Facebook Ads ad insights ingestion
     ingest_dates_uploaded = []
     ingest_time_start = time.time()
     ingest_sections_status = {}
@@ -1440,7 +1440,7 @@ def ingest_ad_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
-    ingest_section_name = "[INGEST] Start timing the Facebook Ads campaign insights ingestion"
+    ingest_section_name = "[INGEST] Start timing Facebook Ads ad insights ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
     ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time    
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
