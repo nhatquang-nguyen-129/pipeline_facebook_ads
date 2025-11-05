@@ -42,11 +42,16 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
     # 1.1.1. Start timing the raw Facebook Ads enrichment
     schema_time_start = time.time()
     schema_sections_status = {}
-    schema_sections_status["[SCHEMA] Start timing the raw Facebook Ads enrichment"] = "succeed"    
+    schema_sections_time = {}
+    schema_section_name = "[SCHEMA] Start timing the raw Facebook Ads enrichment"
+    schema_sections_time[schema_section_name] = round(time.time() - schema_time_start, 2)
+    schema_sections_status[schema_section_name] = "succeed"
     print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Define schema mapping for Facebook Ads data type
+    schema_section_name = "[SCHEMA] Define schema mapping for Facebook Ads data type"
+    schema_section_start = time.time()    
     schema_types_mapping = {        
         "fetch_campaign_metadata": {
             "campaign_id": str,
@@ -264,23 +269,30 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "last_updated_at": "datetime64[ns, UTC]"
         }
     }    
-    schema_sections_status["[SCHEMA] Define schema mapping for Facebook Ads data type"] = "succeed"
+    schema_sections_status[schema_section_name] = "succeed"
+    schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
 
     try:
 
     # 1.1.3. Validate that the given schema_type_mapping exists
-        if schema_type_mapping not in schema_types_mapping:
-            schema_sections_status["[SCHEMA] Validate that the given schema_type_mapping exists"] = "failed"
-            print(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
-            logging.error(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
-            raise ValueError(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
-        else:
-            schema_columns_expected = schema_types_mapping[schema_type_mapping]
-            schema_sections_status["[SCHEMA] Validate that the given schema_type_mapping exists"] = "succeed"
-            print(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")
-            logging.info(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")       
+        schema_section_name = "[SCHEMA] Validate that the given schema_type_mapping exists"
+        schema_section_start = time.time()            
+        try:
+            if schema_type_mapping not in schema_types_mapping:
+                schema_sections_status[schema_section_name] = "failed"
+                print(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
+                logging.error(f"❌ [SCHEMA] Failed to validate schema type {schema_type_mapping} for Facebook Ads then enforcement is suspended.")
+            else:
+                schema_columns_expected = schema_types_mapping[schema_type_mapping]
+                schema_sections_status[schema_section_name] = "succeed"
+                print(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")
+                logging.info(f"✅ [SCHEMA] Successfully validated schema type {schema_type_mapping} for Facebook Ads.")
+        finally:
+            schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
         
     # 1.1.4. Enforce schema columns for Facebook Ads
+        schema_section_name = "[SCHEMA] Enforce schema columns for Facebook Ads"
+        schema_section_start = time.time()              
         try:
             print(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")
             logging.info(f"🔄 [SCHEMA] Enforcing schema for Facebook Ads with schema type {schema_type_mapping}...")            
@@ -308,11 +320,13 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             schema_df_enforced = schema_df_enforced[list(schema_columns_expected.keys())]       
             print(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
             logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
-            schema_sections_status["[SCHEMA] Enforce schema columns for Facebook Ads"] = "succeed"        
+            schema_sections_status[schema_section_name] = "succeed"        
         except Exception as e:
-            schema_sections_status["[SCHEMA] Enforce schema columns for Facebook Ads"] = "failed"
+            schema_sections_status[schema_section_name] = "failed"
             print(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
             logging.error(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
+        finally:
+            schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)            
 
     # 1.1.5. Summarize schema enforcement result(s) for Facebook Ads
     finally:
@@ -323,13 +337,20 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         schema_sections_failed = [k for k, v in schema_sections_status.items() if v == "failed"]        
         schema_rows_input = len(schema_df_input)
         schema_rows_output = len(schema_df_final)        
+        schema_sections_detail = {
+            section: {
+                "status": schema_sections_status.get(section, "unknown"),
+                "time": schema_sections_time.get(section, None),
+            }
+            for section in set(schema_sections_status) | set(schema_sections_time)
+        }          
         if any(v == "failed" for v in schema_sections_status.values()):
             print(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             schema_status_final = "schema_failed_all"
         else:
-            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
-            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for all {len(schema_sections_status)} section(s) with {schema_rows_output} row(s) output in {schema_time_elapsed}s.")
+            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for Facebook Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
+            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for Facebook Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
             schema_status_final = "schema_succeed_all"        
         schema_results_final = {
             "schema_df_final": schema_df_final,
@@ -339,7 +360,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "schema_sections_total": schema_sections_total,
                 "schema_sections_succeed": schema_sections_succeed,
                 "schema_sections_failed": schema_sections_failed,
-                "schema_sections_detail": schema_sections_status,
+                "schema_sections_detail": schema_sections_detail,
                 "schema_rows_input": schema_rows_input,
                 "schema_rows_output": schema_rows_output,
             },
