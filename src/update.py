@@ -116,7 +116,7 @@ def update_campaign_insights(start_date: str, end_date: str):
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    update_section_name = "[UPDATE] Start timing Facebook Ads campaign insights update"    
+    update_section_name = "[UPDATE] Start timing Facebook Ads campaign insights update"
     update_sections_status[update_section_name] = "succeed"
     update_sections_time[update_section_name] = 0.0  # just marker not real time   
     print(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
