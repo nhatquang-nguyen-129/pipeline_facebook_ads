@@ -131,29 +131,36 @@ def mart_campaign_all() -> dict:
             CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
             AS
             SELECT
-                SAFE_CAST(nhan_su AS STRING) AS nhan_su,
-                SAFE_CAST(ma_ngan_sach_cap_1 AS STRING) AS ma_ngan_sach_cap_1,
-                SAFE_CAST(khu_vuc AS STRING) AS khu_vuc,
-                SAFE_CAST(chuong_trinh AS STRING) AS chuong_trinh,
-                SAFE_CAST(noi_dung AS STRING) AS noi_dung,
-                SAFE_CAST(nen_tang AS STRING) AS nen_tang,
-                SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
-                SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,  -- thêm nganh_hang
+                SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
+                SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
+                SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                SAFE_CAST(campaign_id AS STRING) AS campaign_id,
                 SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                CAST(`date` AS DATE) AS ngay,
+                SAFE_CAST(enrich_campaign_objective AS STRING) AS muc_tieu,
+                SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
+                CAST(date AS DATE) AS ngay,
+                SAFE_CAST(year AS INT64) AS nam,
+                SAFE_CAST(month AS INT64) AS thang,
                 SAFE_CAST(spend AS FLOAT64) AS spend,
-                SAFE_CAST(result AS INT64) AS result,
+                SAFE_CAST(result AS FLOAT64) AS result,
                 SAFE_CAST(result_type AS STRING) AS result_type,
-                SAFE_CAST(purchase AS INT64) AS purchase,
-                SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                SAFE_CAST(reach AS INT64) AS reach,
-                SAFE_CAST(impressions AS INT64) AS impressions,
-                SAFE_CAST(clicks AS INT64) AS clicks,
+                SAFE_CAST(purchase AS FLOAT64) AS purchase,
+                SAFE_CAST(messaging_conversations_started AS FLOAT64) AS message,
+                SAFE_CAST(reach AS INT64) AS reach_,
+                SAFE_CAST(impressions AS INT64) AS impression,
+                SAFE_CAST(clicks AS INT64) AS click,
                 CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
-                    ELSE "❓"
-                END AS trang_thai
+                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢 Active"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪ Inactive"
+                    ELSE "❓ Unrecognized"
+                END AS trang_thai,
+                SAFE_CAST(last_updated_at AS TIMESTAMP) AS last_updated_at
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
         """
