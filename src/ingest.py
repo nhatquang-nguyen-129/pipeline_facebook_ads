@@ -1257,9 +1257,8 @@ def ingest_campaign_insights(
             ingest_section_start = time.time()
             try:
                 ingest_df_deduplicated = ingest_df_enforced.drop_duplicates().reset_index(drop=True)
-                table_clusters_defined = None
-                table_clusters_filtered = []
-                table_schemas_defined = []    
+                table_clusters_defined = []
+                table_schemas_defined = []
                 try:
                     print(f"🔍 [INGEST] Checking Facebook Ads campaign insights table {raw_table_campaign} existence...")
                     logging.info(f"🔍 [INGEST] Checking Facebook Ads campaign insights table {raw_table_campaign} existence...")
@@ -1292,7 +1291,7 @@ def ingest_campaign_insights(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
                         )                    
-                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
                     if table_clusters_filtered:
                         table_configuration_defined.clustering_fields = table_clusters_filtered
                     try:
@@ -1553,9 +1552,8 @@ def ingest_ad_insights(
             ingest_section_start = time.time()
             try:
                 ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
-                table_clusters_defined = None
-                table_clusters_filtered = []
-                table_schemas_defined = []  
+                table_clusters_defined = []
+                table_schemas_defined = []
                 try:
                     print(f"🔍 [INGEST] Checking Facebook Ads ad insights table {raw_table_ad} existence...")
                     logging.info(f"🔍 [INGEST] Checking Facebook Ads ad insights table {raw_table_ad} existence...")
@@ -1589,9 +1587,8 @@ def ingest_ad_insights(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
                         )
-                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
                     if table_clusters_filtered:
-                        table_configuration_defined.clustering_fields = table_clusters_filtered
                         table_configuration_defined.clustering_fields = table_clusters_filtered
                     try:
                         print(f"🔍 [INGEST] Creating Facebook Ads ad insights table {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
