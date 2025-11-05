@@ -92,7 +92,7 @@ def mart_campaign_all() -> None:
 
     # 1.1.2. Prepare table_id for Facebook Ads campaign performance materialization
     mart_section_name = "[INGEST] Prepare table_id for Facebook Ads campaign performance materialization"
-    mart_section_start = time.time()    
+    mart_section_start = time.time() 
     staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
     staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
     print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
@@ -101,7 +101,7 @@ def mart_campaign_all() -> None:
     mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
     print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
     logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
-    mart_sections_time[mart_section_name] = round(time.time() - mart_time_start, 2)
+    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     mart_sections_status[mart_section_name] = "succeed"
 
     # 1.1.3. Initialize Google BigQuery client
