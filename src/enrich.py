@@ -85,7 +85,8 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     enrich_sections_status = {}
     enrich_sections_time = {}
     enrich_section_name = "[ENRICH] Start timing the raw Facebook Ads campaign insights enrichment"
-    enrich_sections_status[enrich_section_name] = "succeed"    
+    enrich_sections_status[enrich_section_name] = "succeed"
+    enrich_sections_time[enrich_section_name] = 0.0  # just marker not real time
     print(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
