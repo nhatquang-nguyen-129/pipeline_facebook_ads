@@ -157,7 +157,7 @@ def update_campaign_insights(start_date: str, end_date: str):
             if updated_ids_campaign:
                 print(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_ids_campaign)} campaign_id(s)...")
                 logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook campaign metadata for {len(updated_ids_campaign)} campaign_id(s)...")
-                ingest_results_metadata = ingest_campaign_metadata(campaign_id_list=list(updated_ids_campaign))
+                ingest_results_metadata = ingest_campaign_metadata(ingest_ids_campaign=list(updated_ids_campaign))
                 ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                 ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                 if ingest_status_metadata == "ingest_succeed_all":
