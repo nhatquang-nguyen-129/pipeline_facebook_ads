@@ -85,14 +85,14 @@ def mart_campaign_all() -> None:
     mart_sections_status = {}
     mart_sections_time = {}
     mart_section_name = "[MART] Start timing the Facebook Ads campaign performance materialization"
-    mart_sections_time[mart_section_name] = round(time.time() - mart_time_start, 2)
     mart_sections_status[mart_section_name] = "succeed"
+    mart_sections_time[mart_section_name] = 0.0  # just marker not real time
     print(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialzed table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 1.1.2. Prepare table_id for Facebook Ads campaign performance materialization
-    mart_section_name = "[INGEST] Prepare table_id for Facebook Ads campaign performance materialization"
-    mart_section_start = time.time() 
+    mart_section_name = "[MART] Prepare table_id for Facebook Ads campaign performance materialization"
+    mart_section_start = time.time()
     staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
     staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
     print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
@@ -101,24 +101,29 @@ def mart_campaign_all() -> None:
     mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
     print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
     logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
+    mart_sections_status[mart_section_name] = "succeed"    
     mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
-    mart_sections_status[mart_section_name] = "succeed"
 
     # 1.1.3. Initialize Google BigQuery client
+    mart_section_name = "[MART] Initialize Google BigQuery client"
+    mart_section_start = time.time()
     try:
         print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         google_bigquery_client = bigquery.Client(project=PROJECT)
         print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
         logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        mart_sections_status["[MART] Initialize Google BigQuery client"] = "succeed"
+        mart_sections_status[mart_section_name] = "succeed"
     except Exception as e:
-        mart_sections_status["[MART] Initialize Google BigQuery client"] = "failed"
+        mart_sections_status[mart_section_name] = "failed"
         print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        raise RuntimeError(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.") from e
+    finally:
+        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
     # 1.1.4. Query all staging table(s) for Facebook Ads campaign performance materialization
+    mart_section_name = "[MART] Query all staging table(s) for Facebook Ads campaign performance materialization"
+    mart_section_start = time.time()    
     try:
         query = f"""
             CREATE OR REPLACE TABLE `{mart_table_all}`
@@ -165,7 +170,8 @@ def mart_campaign_all() -> None:
             mart_sections_status["[MART] Query all staging table(s) for Facebook Ads campaign performance materialization"] = "failed"
             print(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.")
             logging.error(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.")
-            raise RuntimeError(f"❌ [MART] Failed to create or replace materialized table for Facebook Ads campaign performance due to {e}.") from e
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 1.1.5. Summarize materialization result(s) for Facebook Ads campaign performance
     finally:
@@ -173,6 +179,13 @@ def mart_campaign_all() -> None:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_detail = {
+            section: {
+                "status": mart_sections_status.get(section, "unknown"),
+                "time": mart_sections_time.get(section, None),
+            }
+            for section in set(mart_sections_status) | set(mart_sections_time)
+        }          
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_sections_failed)}.")
             logging.error(f"❌ [MART] Failed to completed Facebook Ads campaign performance materialization due to unsuccesfull section(s) {', '.join(mart_sections_failed)}.")
@@ -189,7 +202,7 @@ def mart_campaign_all() -> None:
                 "mart_sections_total": mart_sections_total,
                 "mart_sections_succeed": mart_sections_succeeded,
                 "mart_sections_failed": mart_sections_failed,
-                "mart_sections_detail": mart_sections_status,
+                "mart_sections_detail": mart_sections_detail,
             },
         }
     return mart_results_final
