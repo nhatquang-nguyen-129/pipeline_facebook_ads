@@ -84,7 +84,7 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
     fetch_sections_time = {}
     fetch_section_name = "[FETCH] Start timing the Facebook Ads campaign metadata fetching"
     fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = 0.0  # just marker not real time
+    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -101,7 +101,7 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
             print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
             logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
     finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)            
+        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.1.3. Prepare fields for Facebook Ads campaign metadata fetching
     fetch_section_name = "[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"
@@ -282,6 +282,17 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
         fetch_rows_input = len(fetch_ids_campaign)
         fetch_rows_output = len(fetch_df_final)
+        fetch_sections_summary = list(dict.fromkeys(
+            list(fetch_sections_status.keys()) +
+            list(fetch_sections_time.keys())
+        ))
+        fetch_sections_detail = {
+            fetch_section_summary: {
+                "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
+                "time": fetch_sections_time.get(fetch_section_summary, None),
+            }
+            for fetch_section_summary in fetch_sections_summary
+        }          
         if fetch_sections_failed:
             print(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             logging.error(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to  {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -293,14 +304,7 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
         else:
             print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
             logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_all"
-        fetch_sections_detail = {
-            section: {
-                "status": fetch_sections_status.get(section, "unknown"),
-                "time": fetch_sections_time.get(section, None),
-            }
-            for section in set(fetch_sections_status) | set(fetch_sections_time)
-        }        
+            fetch_status_final = "fetch_succeed_all"    
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
