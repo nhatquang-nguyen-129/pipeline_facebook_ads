@@ -268,9 +268,9 @@ def update_campaign_insights(start_date: str, end_date: str):
         summary_map = {
             "[UPDATE] Trigger to ingest Facebook Ads campaign insights": "ingest_results_insights",
             "[UPDATE] Trigger to ingest Facebook Ads campaign metadata": "ingest_results_metadata",
-            "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging table": "staging_results_campaign",
-            "[UPDATE] Trigger to build materialized Facebook Ads campaign performance table": "mart_results_all",
-            "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table": "mart_results_supplier",
+            "[UPDATE] Trigger to build staging Facebook Ads campaign performance": "staging_results_campaign",
+            "[UPDATE] Trigger to materialize Facebook Ads campaign performance table": "mart_results_all",
+            "[UPDATE] Trigger to materialize Facebook Ads supplier campaign table": "mart_results_supplier",
         }
         locals_dict = locals()
         for update_step_name, update_step_status in update_sections_status.items():
