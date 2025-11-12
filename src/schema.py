@@ -10,7 +10,7 @@ Its main purpose is to validate, enforce, and standardize field
 structures across every pipeline stage to support reliable ETL
 execution and seamless data integration.
 
-✔️ Define and store expected field names and data types for each entity  
+✔️ Define and store expected field names and data types
 ✔️ Validate schema integrity before ingestion or transformation  
 ✔️ Enforce data type consistency across different processing layers  
 ✔️ Automatically handle missing or mismatched columns  
@@ -44,8 +44,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
     schema_sections_status = {}
     schema_sections_time = {}
     schema_section_name = "[SCHEMA] Start timing the raw Facebook Ads enrichment"
-    schema_sections_time[schema_section_name] = round(time.time() - schema_time_start, 2)
     schema_sections_status[schema_section_name] = "succeed"
+    schema_sections_time[schema_section_name] = round(time.time() - schema_time_start, 2)
     print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -347,13 +347,17 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         schema_sections_failed = [k for k, v in schema_sections_status.items() if v == "failed"]        
         schema_rows_input = len(schema_df_input)
         schema_rows_output = len(schema_df_final)        
+        schema_sections_summary = list(dict.fromkeys(
+            list(schema_sections_status.keys()) +
+            list(schema_sections_time.keys())
+        ))
         schema_sections_detail = {
-            section: {
-                "status": schema_sections_status.get(section, "unknown"),
-                "time": schema_sections_time.get(section, None),
+            schema_section_summary: {
+                "status": schema_sections_status.get(schema_section_summary, "unknown"),
+                "time": round(schema_sections_time.get(schema_section_summary, 0.0), 2),
             }
-            for section in set(schema_sections_status) | set(schema_sections_time)
-        }          
+            for schema_section_summary in schema_sections_summary
+        }         
         if any(v == "failed" for v in schema_sections_status.values()):
             print(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
             logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
