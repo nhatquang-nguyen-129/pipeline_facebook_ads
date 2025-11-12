@@ -43,9 +43,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
     schema_time_start = time.time()
     schema_sections_status = {}
     schema_sections_time = {}
-    schema_section_name = "[SCHEMA] Start timing the raw Facebook Ads enrichment"
-    schema_sections_status[schema_section_name] = "succeed"
-    schema_sections_time[schema_section_name] = round(time.time() - schema_time_start, 2)
     print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
