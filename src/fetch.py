@@ -13,7 +13,7 @@ downstream enrichment and transformation stages.
 ✔️ Initializes secure Facebook SDK sessions and retrieves credentials  
 ✔️ Fetches campaign, ad, and creative data via authenticated API calls  
 ✔️ Handles pagination, rate limiting and error retries automatically  
-✔️ Returns normalized and schema-ready Python DataFrames for processing  
+✔️ Returns normalized and schema-ready DataFrames for processing  
 ✔️ Logs detailed runtime information for monitoring and debugging  
 
 ⚠️ This module focuses solely on *data retrieval and extraction*.  
