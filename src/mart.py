@@ -86,12 +86,12 @@ def mart_campaign_all() -> dict:
     mart_sections_time = {}
     mart_section_name = "[MART] Start timing the Facebook Ads campaign materialization"
     mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = 0.0  # just marker not real time
+    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Prepare table_id for Facebook Ads campaign performance materialization
-    mart_section_name = "[MART] Prepare table_id for Facebook Ads campaign performance materialization"
+    # 1.1.2. Prepare Google BigQuery table_id for materialization
+    mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
     mart_section_start = time.time()
     staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
     staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -126,10 +126,11 @@ def mart_campaign_all() -> dict:
     mart_section_start = time.time()    
     try:
         query = f"""
-            CREATE OR REPLACE TABLE `{mart_table_all}`
-            PARTITION BY ngay
-            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
-            AS
+        CREATE OR REPLACE TABLE `{mart_table_all}`
+        PARTITION BY ngay
+        CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
+        AS
+        WITH base AS (
             SELECT
                 SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
                 SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
@@ -155,13 +156,16 @@ def mart_campaign_all() -> dict:
                 SAFE_CAST(impressions AS INT64) AS impression,
                 SAFE_CAST(clicks AS INT64) AS click,
                 CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢 Active"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪ Inactive"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
+                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
                     ELSE "❓ Unrecognized"
                 END AS trang_thai,
                 SAFE_CAST(last_updated_at AS TIMESTAMP) AS last_updated_at
             FROM `{staging_table_campaign}`
             WHERE date IS NOT NULL
+        )
+        SELECT *
+        FROM base;
         """
         try:
             print(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
@@ -234,8 +238,8 @@ def mart_campaign_supplier() -> dict:
     
     try:
 
-    # 1.2.2. Prepare table_id for Facebook Ads supplier campaign materialization
-        mart_section_name = "[MART] Prepare table_id for Facebook Ads supplier campaign materialization"
+    # 1.2.2. Prepare Google BigQuery table_id for materialization
+        mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
         mart_section_start = time.time()    
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -364,20 +368,11 @@ def mart_campaign_supplier() -> dict:
         mart_section_start = time.time()        
         try: 
             query = f"""
-                CREATE OR REPLACE TABLE `{mart_table_supplier}`
-                PARTITION BY ngay
-                CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
-                AS
-                WITH base AS (
-                    SELECT
-                        a.*,
-                        s.supplier_name AS supplier_name
-                    FROM `{staging_table_campaign}` a
-                    LEFT JOIN `{temp_table_id}` s
-                    ON REGEXP_CONTAINS(a.chuong_trinh, s.supplier_name)
-                    WHERE a.ma_ngan_sach_cap_1 = 'NC'
-                    AND a.date IS NOT NULL
-                )
+            CREATE OR REPLACE TABLE `{mart_table_supplier}`
+            PARTITION BY ngay
+            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
+            AS
+            WITH base AS (
                 SELECT
                     SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
                     SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
@@ -388,7 +383,7 @@ def mart_campaign_supplier() -> dict:
                     SAFE_CAST(enrich_campaign_objective AS STRING) AS muc_tieu,
                     SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
                     SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                    SAFE_CAST(supplier_name AS STRING) AS supplier_name,
+                    SAFE_CAST(s.supplier_name AS STRING) AS supplier_name,
                     CAST(date AS DATE) AS ngay,
                     SAFE_CAST(spend AS FLOAT64) AS spend,
                     SAFE_CAST(result AS INT64) AS result,
@@ -402,7 +397,14 @@ def mart_campaign_supplier() -> dict:
                         WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
                         ELSE "❓"
                     END AS trang_thai
-                FROM base
+                FROM `{staging_table_campaign}` a
+                LEFT JOIN `{temp_table_id}` s
+                ON a.enrich_program_group LIKE CONCAT('%', s.supplier_name, '%')
+                WHERE a.enrich_budget_group = 'NC'
+                AND a.date IS NOT NULL
+            )
+            SELECT *
+            FROM base;
             """
             print(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for supplier campaign performance...")
             logging.info(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for supplier campaign performance...")        
@@ -493,8 +495,8 @@ def mart_creative_all() -> dict:
 
     try:
 
-    # 2.1.2. Prepare table_id for Facebook Ads creative performance materialization
-        mart_section_name = "[MART] Prepare table_id for Facebook Ads creative performance materialization"
+    # 2.1.2. Prepare Google BigQuery table_id for materialization
+        mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
         mart_section_start = time.time()    
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
@@ -630,8 +632,8 @@ def mart_creative_supplier() -> dict:
 
     try:
     
-    # 2.2.2. Prepare table_id for Facebook Ads creative performance materialization
-        mart_section_name = "[MART] Prepare table_id for Facebook Ads creative performance materialization"
+    # 2.2.2. Prepare Google BigQuery table_id for materialization
+        mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
         mart_section_start = time.time()    
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"

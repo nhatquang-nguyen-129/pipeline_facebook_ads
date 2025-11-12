@@ -144,8 +144,8 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.4. Prepare table_id for Facebook Ads campaign metadata ingestion
-        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads campaign metadata ingestion"
+    # 1.1.4. Prepare Google BigQuery table_id for ingestion
+        ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -407,8 +407,8 @@ def ingest_adset_metadata(ingest_ids_adset: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.4. Prepare table_id for Facebook Ads adset metadata ingestion
-        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads adset metadata ingestion"
+    # 1.2.4. Prepare Google BigQuery table_id for ingestion
+        ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -666,8 +666,8 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)            
 
-    # 1.3.4. Prepare table_id for Facebook Ads ad metadata ingestion
-        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads ad metadata ingestion"
+    # 1.3.4. Prepare Google BigQuery table_id for ingestion
+        ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -925,8 +925,8 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.4.4. Prepare table_id for Facebook Ads ad creative ingestion
-        ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads ad creative ingestion"
+    # 1.4.4. Prepare Google BigQuery table_id for ingestion
+        ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
@@ -1145,7 +1145,7 @@ def ingest_campaign_insights(
         "[INGEST] Trigger to fetch Facebook Ads campaign insights": 0.0,
         "[INGEST] Trigger to enrich Facebook Ads campaign insights": 0.0,
         "[INGEST] Trigger to enforce schema for Facebook Ads campaign insights": 0.0,
-        "[INGEST] Prepare table_id for Facebook Ads campaign insights ingestion": 0.0,
+        "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
@@ -1242,8 +1242,8 @@ def ingest_campaign_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
         
-    # 2.1.6. Prepare table_id for Facebook Ads campaign insights ingestion
-            ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads campaign insights ingestion"            
+    # 2.1.6. Prepare Google BigQuery table_id for ingestion
+            ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
             ingest_section_start = time.time()
             try:
                 first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
@@ -1440,7 +1440,7 @@ def ingest_ad_insights(
         "[INGEST] Trigger to fetch Facebook Ads ad insights": 0.0,
         "[INGEST] Trigger to enrich Facebook Ads campaign insights": 0.0,
         "[INGEST] Trigger to enforce schema for Facebook Ads campaign insights": 0.0,
-        "[INGEST] Prepare table_id for Facebook Ads campaign insights ingestion": 0.0,
+        "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
@@ -1537,8 +1537,8 @@ def ingest_ad_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.2.6. Prepare table_id for Facebook Ads ad insights ingestion
-            ingest_section_name = "[INGEST] Prepare table_id for Facebook Ads campaign insights ingestion"            
+    # 2.2.6. Prepare Google BigQuery table_id for ingestion
+            ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
             ingest_section_start = time.time()
             try:
                 first_date = pd.to_datetime(ingest_df_fetched["date_start"].dropna().iloc[0])
