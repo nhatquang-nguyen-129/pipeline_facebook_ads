@@ -82,9 +82,6 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads campaign metadata fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -329,9 +326,6 @@ def fetch_adset_metadata(fetch_ids_adset: list[str]) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads adset metadata fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -575,9 +569,6 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads ad metadata fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -819,9 +810,6 @@ def fetch_ad_creative(fetch_ids_ad: list[str]) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads ad creative fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -1034,9 +1022,6 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads campaign insights fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -1267,9 +1252,6 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    fetch_section_name = "[FETCH] Start timing the Facebook Ads ad insights fetching"
-    fetch_sections_status[fetch_section_name] = "succeed"
-    fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
