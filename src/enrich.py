@@ -335,7 +335,7 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_finalized = enrich_df_finalized.assign(
                 **{
                     col: pd.to_numeric(enrich_df_finalized[col], errors="coerce").fillna(0)
-                    for col in ["reach", "impressions", "clicks"]
+                    for col in ["impressions", "clicks"]
                     if col in enrich_df_finalized.columns
                 },
                 result=lambda df: df["enrich_results_value"],
@@ -650,7 +650,7 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             enrich_df_finalized = enrich_df_finalized.assign(
                 **{
                     col: pd.to_numeric(enrich_df_finalized[col], errors="coerce").fillna(0)
-                    for col in ["reach", "impressions", "clicks"]
+                    for col in ["impressions", "clicks"]
                     if col in enrich_df_finalized.columns
                 },
                 result=lambda df: df["enrich_results_value"],
