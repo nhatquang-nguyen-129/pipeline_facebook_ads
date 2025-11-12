@@ -84,9 +84,6 @@ def mart_campaign_all() -> dict:
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads campaign materialization"
-    mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -230,9 +227,6 @@ def mart_campaign_supplier() -> dict:
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads supplier campaign materialization"
-    mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -487,9 +481,6 @@ def mart_creative_all() -> dict:
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads creative performance materialization"
-    mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -628,9 +619,6 @@ def mart_creative_supplier() -> dict:
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads campaign performance materialization"
-    mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
