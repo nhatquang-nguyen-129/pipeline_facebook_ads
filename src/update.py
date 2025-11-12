@@ -179,8 +179,8 @@ def update_campaign_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.1.4. Trigger to transform Facebook Ads campaign performance into staging table
-        update_section_name = "[UPDATE] Trigger to transform Facebook Ads campaign performance into staging table"
+    # 1.1.4. Trigger to build staging Facebook Ads campaign performance
+        update_section_name = "[UPDATE] Trigger to build staging Facebook Ads campaign performance"
         update_section_start = time.time()
         try:
             if updated_ids_campaign:

@@ -89,8 +89,8 @@ def staging_campaign_insights() -> dict:
     staging_sections_status = {}
     staging_sections_time = {}
     staging_section_name = "[STAGING] Start timing the Facebook Ads campaign insights staging"
-    staging_sections_time[staging_section_name] = round(time.time() - staging_time_start, 2)
     staging_sections_status[staging_section_name] = "succeed"
+    staging_sections_time[staging_section_name] = 0.0  # just marker not real time
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -225,8 +225,8 @@ def staging_campaign_insights() -> dict:
         else:
             staging_sections_status[staging_section_name] = "failed"
 
-    # 1.1.7. Concatenate enriched Facebook Ads campaign insights DataFrame(s)
-        staging_section_name = "[STAGING] Concatenate enriched Facebook Ads campaign insights DataFrame(s)"
+    # 1.1.7. Concatenate enriched Facebook Ads campaign insights
+        staging_section_name = "[STAGING] Concatenate enriched Facebook Ads campaign insights"
         staging_section_start = time.time()
         try:        
             if staging_dfs_enriched:
@@ -262,8 +262,8 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                       
 
-    # 1.1.9. Create staging Facebook Ads campaign insights table if not exist
-        staging_section_name = "[STAGING] Create staging Facebook Ads campaign insights table if not exist"
+    # 1.1.9. Create new staging Facebook Ads campaign insights table
+        staging_section_name = "[STAGING] Create new staging Facebook Ads campaign insights table"
         staging_section_start = time.time()               
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()
         table_clusters_filtered = []
@@ -321,8 +321,8 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
     
-    # 1.1.10. Upload staging Facebook Ads campaign insights to Google BigQuery
-        staging_section_name = "[STAGING] Upload staging Facebook Ads campaign insights to Google BigQuery"
+    # 1.1.10. Upload staging Facebook Ads campaign insights
+        staging_section_name = "[STAGING] Upload staging Facebook Ads campaign insights"
         staging_section_start = time.time()
         try:            
             if not staging_table_exists:
@@ -438,8 +438,8 @@ def staging_ad_insights() -> dict:
     staging_sections_status = {}
     staging_sections_time = {}
     staging_section_name = "[STAGING] Start timing the Facebook Ads ad insights staging"
-    staging_sections_time[staging_section_name] = round(time.time() - staging_time_start, 2)
     staging_sections_status[staging_section_name] = "succeed"
+    staging_sections_time[staging_section_name] = 0.0  # just marker not real time    
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -588,7 +588,7 @@ def staging_ad_insights() -> dict:
         else:
             staging_sections_status[staging_section_name] = "failed"
 
-    # 1.2.7. Concatenate enriched Facebook Ads ad insights DataFrame(s)
+    # 1.2.7. Concatenate enriched Facebook Ads ad insights
         staging_section_name = "[STAGING] Concatenate enriched Facebook Ads ad insights DataFrame(s)"
         staging_section_start = time.time()
         try:
@@ -625,7 +625,7 @@ def staging_ad_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                       
 
-    # 1.2.9. Create staging Facebook Ads ad insights table if not exist
+    # 1.2.9. Create new staging Facebook Ads ad insights table
         staging_section_name = "[STAGING] Create staging Facebook Ads ad insights table if not exist"
         staging_section_start = time.time()     
         staging_df_deduplicated = staging_df_enforced.drop_duplicates()

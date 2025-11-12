@@ -311,13 +311,17 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         ingest_sections_succeeded = [k for k, v in ingest_sections_status.items() if v == "succeed"]
         ingest_rows_input = len(ingest_ids_campaign)
         ingest_rows_output = len(ingest_df_final)
+        ingest_sections_all = list(dict.fromkeys(
+            list(ingest_sections_status.keys()) +
+            list(ingest_sections_time.keys())
+        ))
         ingest_sections_detail = {
             section: {
                 "status": ingest_sections_status.get(section, "unknown"),
                 "time": ingest_sections_time.get(section, None),
             }
-            for section in set(ingest_sections_status) | set(ingest_sections_time)
-        }        
+            for section in ingest_sections_all
+        }     
         if ingest_sections_failed:
             print(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -1677,13 +1681,13 @@ def ingest_ad_insights(
         ingest_dates_output = len(ingest_dates_uploaded)
         ingest_dates_failed = ingest_dates_input - ingest_dates_output
         ingest_rows_output = len(ingest_df_final)
-        ingest_section_all = (
-            set(ingest_sections_status.keys())
-            | set(ingest_sections_time.keys())
-            | set(ingest_loops_time.keys())
-        )
+        ingest_section_all = list(dict.fromkeys(
+            list(ingest_sections_status.keys()) +
+            list(ingest_sections_time.keys()) +
+            list(ingest_loops_time.keys())
+        ))
         ingest_sections_detail = {}
-        for ingest_section_separated in sorted(ingest_section_all):
+        for ingest_section_separated in ingest_section_all:
             ingest_section_time = (
                 ingest_loops_time.get(ingest_section_separated)
                 if ingest_section_separated in ingest_loops_time
