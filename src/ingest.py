@@ -98,7 +98,7 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
     ingest_sections_time = {}
     ingest_section_name = "[INGEST] Start timing Facebook Ads campaign metadata ingestion"
     ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = 0.0  # just marker not real time
+    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -311,16 +311,16 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
         ingest_sections_succeeded = [k for k, v in ingest_sections_status.items() if v == "succeed"]
         ingest_rows_input = len(ingest_ids_campaign)
         ingest_rows_output = len(ingest_df_final)
-        ingest_sections_all = list(dict.fromkeys(
+        ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
         ))
         ingest_sections_detail = {
-            section: {
-                "status": ingest_sections_status.get(section, "unknown"),
-                "time": ingest_sections_time.get(section, None),
+            ingest_section_summary: {
+                "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
+                "time": ingest_sections_time.get(ingest_section_summary, None),
             }
-            for section in ingest_sections_all
+            for ingest_section_summary in ingest_sections_summary
         }     
         if ingest_sections_failed:
             print(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
