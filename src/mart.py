@@ -223,11 +223,11 @@ def mart_campaign_supplier() -> dict:
     print("🚀 [MART] Starting to build materialized table for Facebook Ads supplier campaign performance...")
     logging.info("🚀 [MART] Starting to build materialized table for Facebook Ads supplier campaign performance...")
 
-    # 1.2.1. Start timing the Facebook Ads supplier campaign performance materialization
+    # 1.2.1. Start timing the Facebook Ads supplier campaign materialization
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads supplier campaign performance materialization"
+    mart_section_name = "[MART] Start timing the Facebook Ads supplier campaign materialization"
     mart_sections_status[mart_section_name] = "succeed"
     mart_sections_time[mart_section_name] = 0.0  # just marker not real time
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -235,8 +235,8 @@ def mart_campaign_supplier() -> dict:
     
     try:
 
-    # 1.2.2. Prepare table_id for Facebook Ads supplier campaign performance materialization
-        mart_section_name = "[MART] Prepare table_id for Facebook Ads supplier campaign performance materialization"
+    # 1.2.2. Prepare table_id for Facebook Ads supplier campaign materialization
+        mart_section_name = "[MART] Prepare table_id for Facebook Ads supplier campaign materialization"
         mart_section_start = time.time()    
         staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
         staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
@@ -264,8 +264,8 @@ def mart_campaign_supplier() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 1.2.4. Get Google Sheets sheet_id for supplier list from Google Secret Manager
-        mart_section_name = "[MART] Get Google Sheets sheet_id for supplier list from Google Secret Manager"
+    # 1.2.4. Get sheet_id for supplier list from Google Secret Manager
+        mart_section_name = "[MART] Get sheet_id for supplier list from Google Secret Manager"
         mart_section_start = time.time()    
         try:
             print(f"🔍 [MART] Retrieving Google Sheets sheet_id containing supplier name list for Facebook Ads campaign performance from Google Secret Manager...")
@@ -360,8 +360,8 @@ def mart_campaign_supplier() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
-    # 1.2.9. Query all staging table(s) for Facebook Ads supplier campaign performance
-        mart_section_name = "[MART] Query all staging table(s) for Facebook Ads supplier campaign performance"
+    # 1.2.9. Query all staging Facebook Ads campaign insights table(s)
+        mart_section_name = "[MART] Query all staging Facebook Ads campaign insights table(s)"
         mart_section_start = time.time()        
         try: 
             query = f"""
@@ -444,13 +444,17 @@ def mart_campaign_supplier() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_all = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
         mart_sections_detail = {
             section: {
                 "status": mart_sections_status.get(section, "unknown"),
-                "time": mart_sections_time.get(section, None),
+                "time": round(mart_sections_time.get(section, 0.0), 2),
             }
-            for section in set(mart_sections_status) | set(mart_sections_time)
-        }          
+            for section in mart_sections_all
+        }        
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
             logging.error(f"❌ [MART] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
