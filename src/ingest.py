@@ -1373,13 +1373,13 @@ def ingest_campaign_insights(
         ingest_dates_output = len(ingest_dates_uploaded)
         ingest_dates_failed = ingest_dates_input - ingest_dates_output
         ingest_rows_output = len(ingest_df_final)
-        ingest_section_all = (
-            set(ingest_sections_status.keys())
-            | set(ingest_sections_time.keys())
-            | set(ingest_loops_time.keys())
-        )
+        ingest_section_all = list(dict.fromkeys(
+            list(ingest_sections_status.keys()) +
+            list(ingest_sections_time.keys()) +
+            list(ingest_loops_time.keys())
+        ))
         ingest_sections_detail = {}
-        for ingest_section_separated in sorted(ingest_section_all):
+        for ingest_section_separated in ingest_section_all:
             ingest_section_time = (
                 ingest_loops_time.get(ingest_section_separated)
                 if ingest_section_separated in ingest_loops_time
