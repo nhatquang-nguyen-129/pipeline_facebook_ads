@@ -189,16 +189,16 @@ def mart_campaign_all() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
-        mart_sections_all = list(dict.fromkeys(
+        mart_sections_summary = list(dict.fromkeys(
             list(mart_sections_status.keys()) +
             list(mart_sections_time.keys())
         ))
         mart_sections_detail = {
-            section: {
-                "status": mart_sections_status.get(section, "unknown"),
-                "time": round(mart_sections_time.get(section, 0.0), 2),
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
             }
-            for section in mart_sections_all
+            for mart_section_summary in mart_sections_summary
         }       
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
