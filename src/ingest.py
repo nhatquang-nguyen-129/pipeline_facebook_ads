@@ -96,9 +96,6 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing Facebook Ads campaign metadata ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -358,9 +355,6 @@ def ingest_adset_metadata(ingest_ids_adset: list) -> pd.DataFrame:
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing Facebook Ads adset metadata ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -621,9 +615,6 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing Facebook Ads ad metadata ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -884,9 +875,6 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    ingest_section_name = "[INGEST] Start timing Facebook Ads ad creative ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -1161,9 +1149,6 @@ def ingest_campaign_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
-    ingest_section_name = "[INGEST] Start timing Facebook Ads campaign insights ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -1456,9 +1441,6 @@ def ingest_ad_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
-    ingest_section_name = "[INGEST] Start timing Facebook Ads ad insights ingestion"
-    ingest_sections_status[ingest_section_name] = "succeed"
-    ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
