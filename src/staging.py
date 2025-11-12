@@ -90,7 +90,7 @@ def staging_campaign_insights() -> dict:
     staging_sections_time = {}
     staging_section_name = "[STAGING] Start timing the Facebook Ads campaign insights staging"
     staging_sections_status[staging_section_name] = "succeed"
-    staging_sections_time[staging_section_name] = 0.0  # just marker not real time
+    staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -110,7 +110,7 @@ def staging_campaign_insights() -> dict:
             logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_table_campaign} for Facebook Ads campaign insights...")
             staging_sections_status[staging_section_name] = "succeed"
         finally:
-            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)            
+            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
 
     # 1.1.3. Initialize Google BigQuery client
         staging_section_name = "[STAGING] Initialize Google BigQuery client"
@@ -387,16 +387,16 @@ def staging_campaign_insights() -> dict:
         staging_tables_output = len(staging_tables_queried)
         staging_tables_failed = staging_tables_input - staging_tables_output
         staging_rows_output = len(staging_df_final)
-        staging_sections_all = list(dict.fromkeys(
+        staging_sections_summary = list(dict.fromkeys(
             list(staging_sections_status.keys()) +
             list(staging_sections_time.keys())
         ))
         staging_sections_detail = {
-            section: {
-                "status": staging_sections_status.get(section, "unknown"),
-                "time": round(staging_sections_time.get(section, 0.0), 2),
+            staging_section_summary: {
+                "status": staging_sections_status.get(staging_section_summary, "unknown"),
+                "time": round(staging_sections_time.get(staging_section_summary, 0.0), 2),
             }
-            for section in staging_sections_all
+            for staging_section_summary in staging_sections_summary
         }
         if staging_sections_failed:
             print(f"❌ [STAGING] Failed to complete Facebook Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
@@ -442,7 +442,7 @@ def staging_ad_insights() -> dict:
     staging_sections_time = {}
     staging_section_name = "[STAGING] Start timing the Facebook Ads ad insights staging"
     staging_sections_status[staging_section_name] = "succeed"
-    staging_sections_time[staging_section_name] = 0.0  # just marker not real time    
+    staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -465,7 +465,7 @@ def staging_ad_insights() -> dict:
             logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for Facebook Ads ad insights...")
             staging_sections_status["[STAGING] Prepare table_id for Facebook Ads ad insights staging"] = "succeed"
         finally:
-            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                  
+            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
 
     # 1.2.3. Initialize Google BigQuery client
         staging_section_name = "[STAGING] Initialize Google BigQuery client"
@@ -753,17 +753,17 @@ def staging_ad_insights() -> dict:
         staging_tables_output = len(staging_tables_queried)
         staging_tables_failed = staging_tables_input - staging_tables_output
         staging_rows_output = len(staging_df_final)
-        staging_sections_all = list(dict.fromkeys(
+        staging_sections_summary = list(dict.fromkeys(
             list(staging_sections_status.keys()) +
             list(staging_sections_time.keys())
         ))
         staging_sections_detail = {
-            section: {
-                "status": staging_sections_status.get(section, "unknown"),
-                "time": round(staging_sections_time.get(section, 0.0), 2),
+            staging_section_summary: {
+                "status": staging_sections_status.get(staging_section_summary, "unknown"),
+                "time": round(staging_sections_time.get(staging_section_summary, 0.0), 2),
             }
-            for section in staging_sections_all
-        }       
+            for staging_section_summary in staging_sections_summary
+        }     
         if staging_sections_failed:
             print(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             logging.error(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
