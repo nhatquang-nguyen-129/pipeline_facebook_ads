@@ -51,6 +51,7 @@ from google.cloud import secretmanager
 
 # Add Google Spreadsheets API modules for integration
 import gspread
+import traceback
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -267,7 +268,7 @@ def mart_campaign_supplier() -> dict:
         try:
             print(f"🔍 [MART] Retrieving Google Sheets sheet_id containing supplier name list for Facebook Ads campaign performance from Google Secret Manager...")
             logging.info(f"🔍 [MART] Retrieving Google Sheets sheet_id containing supplier name list for Facebook Ads campaign performance from Google Secret Manager...")        
-            supplier_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_budget_sheet_id_supplier"
+            supplier_secret_id = f"{COMPANY}_secret_all_all_gspread_id_config"
             supplier_secret_name = f"projects/{PROJECT}/secrets/{supplier_secret_id}/versions/latest"
             supplier_secret_response = google_secret_client.access_secret_version(name=supplier_secret_name)
             supplier_sheet_id = supplier_secret_response.payload.data.decode("UTF-8")
@@ -287,37 +288,57 @@ def mart_campaign_supplier() -> dict:
         try:
             print(f"🔍 [MART] Initializing Google Sheets client for read-only access...")
             logging.info(f"🔍 [MART] Initializing Google Sheets client for read-only access...")
-            scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+            scopes = [
+                "https://www.googleapis.com/auth/spreadsheets",
+                "https://www.googleapis.com/auth/drive.readonly"
+            ]
             creds, _ = default(scopes=scopes)
-            google_gspread_client = gspread.Client(auth=creds)
+            google_gspread_client = gspread.authorize(creds)
             google_gspread_client.session = AuthorizedSession(creds)
-            print(f"✅ [MART] Successfully initialized Google Sheets client with scopes {scopes}.")
+            print(f"✅ [DEBUG] Google Sheets client initialized. Service account email: {creds.service_account_email if hasattr(creds, 'service_account_email') else 'N/A'}")
             logging.info(f"✅ [MART] Successfully initialized Google Sheets client with scopes {scopes}.")
             mart_sections_status[mart_section_name] = "succeed"
         except Exception as e:
             mart_sections_status[mart_section_name] = "failed"
             print(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
-            logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")        
+            logging.error(f"❌ [MART] Failed to initialize Google Sheets client due to {e}.")
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 1.2.6. Get supplier name list from Google Sheets
         mart_section_name = "[MART] Get supplier name list from Google Sheets"
         mart_section_start = time.time()        
-        try:       
-            print(f"🔍 [MART] Retrieving supplier name list for Facebook Ads campaign performance from Google Sheets...")
-            logging.info(f"🔍 [MART] Retrieving supplier name list for Facebook Ads campaign performance from Google Sheets...")         
-            supplier_worksheet_id = google_gspread_client.open_by_key(supplier_sheet_id).worksheet("supplier")
-            supplier_records_fetched = supplier_worksheet_id.get_all_records()
-            mart_df_supplier = pd.DataFrame(supplier_records_fetched)  
-            _ = mart_df_supplier["supplier_name"]   
-            print(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads campaign performance from Google Sheets.")
-            logging.info(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads campaign performance from Google Sheets.")
-            mart_sections_status[mart_section_name] = "succeed"
+        try:          
+            print(f"🔍 [DEBUG] Opening Google Sheet with ID: {supplier_sheet_id}")
+            supplier_spreadsheet = google_gspread_client.open_by_key(supplier_sheet_id)
+            
+            # List all worksheets
+            print(f"📑 [DEBUG] Worksheets available: {[ws.title for ws in supplier_spreadsheet.worksheets()]}")
+            
+            # Open the specific worksheet
+            worksheet_name = "rule-supplier-ads"
+            supplier_worksheet = supplier_spreadsheet.worksheet(worksheet_name)
+            print(f"📘 [DEBUG] Opened worksheet: {supplier_worksheet.title}")
+            
+            # Fetch all records
+            records = supplier_worksheet.get_all_records()
+            print(f"📊 [DEBUG] First 3 records: {records[:3]}")
+            
+            # Convert to DataFrame
+            mart_df_supplier = pd.DataFrame(records)
+            print(f"📌 [DEBUG] Columns fetched: {list(mart_df_supplier.columns)}")
+            
+            # Access supplier_name column
+            _ = mart_df_supplier["supplier_name"]
+            print(f"✅ [DEBUG] Successfully retrieved supplier_name column with {len(mart_df_supplier)} row(s)")
+
         except Exception as e:
-            mart_sections_status[mart_section_name] = "failed"
-            print(f"❌ [MART] Failed to retrieve supplier name list for Facebook Ads campaign performance from Google Sheets due to {e}.")
-            logging.error(f"❌ [MART] Failed to retrieve supplier name list for Facebook Ads campaign performance from Google Sheets due to {e}.")
+            import sys
+            print(f"❌ [DEBUG] Failed to retrieve supplier data due to {type(e)}: {e}")
+            # Full traceback in a single line
+            tb_lines = traceback.format_exc().splitlines()
+            tb_one_line = " | ".join(tb_lines)
+            print(f"⚠️ [DEBUG ERROR] Full traceback: {tb_one_line}", file=sys.stderr)
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
@@ -696,24 +717,56 @@ def mart_creative_supplier() -> dict:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 2.2.6. Get supplier name list from Google Sheets
+        # 1.2.6. Get supplier name list from Google Sheets
+        import traceback
+
         mart_section_name = "[MART] Get supplier name list from Google Sheets"
-        mart_section_start = time.time()
-        try:       
-            print(f"🔍 [MART] Retrieving supplier name list for Facebook Ads creative performance from Google Sheets...")
-            logging.info(f"🔍 [MART] Retrieving supplier name list for Facebook Ads creative performance from Google Sheets...")         
-            supplier_worksheet_id = google_gspread_client.open_by_key(supplier_sheet_id).worksheet("supplier")
-            supplier_records_fetched = supplier_worksheet_id.get_all_records()
-            mart_df_supplier = pd.DataFrame(supplier_records_fetched)  
-            _ = mart_df_supplier["supplier_name"]   
-            print(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads creative performance from Google Sheets.")
-            logging.info(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads creative performance from Google Sheets.")
+        mart_section_start = time.time()        
+        try:
+            print(f"🔍 [MART] Retrieving supplier name list for Facebook Ads campaign performance from Google Sheets...")
+            logging.info(f"🔍 [MART] Retrieving supplier name list for Facebook Ads campaign performance from Google Sheets...")         
+
+            # Mở spreadsheet
+            supplier_spreadsheet = google_gspread_client.open_by_key(supplier_sheet_id)
+            
+            # Debug: in ra tất cả worksheets
+            all_ws_titles = [ws.title for ws in supplier_spreadsheet.worksheets()]
+            print(f"📑 [DEBUG] Available worksheets in this spreadsheet: {all_ws_titles}")
+            
+            # Mở worksheet "rule-supplier-ads"
+            if "rule-supplier-ads" not in all_ws_titles:
+                raise ValueError("Worksheet 'rule-supplier-ads' does not exist in this spreadsheet")
+            
+            supplier_worksheet = supplier_spreadsheet.worksheet("rule-supplier-ads")
+            print(f"📘 [DEBUG] Opened worksheet: {supplier_worksheet.title}")
+
+            # Lấy tất cả records
+            supplier_records_fetched = supplier_worksheet.get_all_records()
+            print(f"📊 [DEBUG] Number of rows fetched: {len(supplier_records_fetched)}")
+            
+            # Chuyển sang DataFrame
+            mart_df_supplier = pd.DataFrame(supplier_records_fetched)
+            
+            # Debug: in ra cột
+            print(f"📋 [DEBUG] Columns in fetched DataFrame: {list(mart_df_supplier.columns)}")
+            
+            # Chắc chắn cột supplier_name có trong DataFrame
+            if "supplier_name" not in mart_df_supplier.columns:
+                raise ValueError("Column 'supplier_name' not found in worksheet 'rule-supplier-ads'")
+            
+            _ = mart_df_supplier["supplier_name"]
+
+            print(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads campaign performance from Google Sheets.")
+            logging.info(f"✅ [MART] Successfully retrieved supplier name list for Facebook Ads campaign performance from Google Sheets.")
             mart_sections_status[mart_section_name] = "succeed"
+
         except Exception as e:
             mart_sections_status[mart_section_name] = "failed"
-            print(f"❌ [MART] Failed to retrieve supplier name list for Facebook Ads creative performance from Google Sheets due to {e}.")
-            logging.error(f"❌ [MART] Failed to retrieve supplier name list for Facebook Ads creative performance from Google Sheets due to {e}.")
+            print(f"❌ [MART] Failed to retrieve supplier name list due to: {e}")
+            logging.error(f"❌ [MART] Failed to retrieve supplier name list due to: {e} | Traceback: {traceback.format_exc()}")
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+
 
     # 2.2.7. Initialize Google BigQuery client
         mart_section_name = "[MART] Initialize Google BigQuery client"
