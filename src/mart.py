@@ -152,7 +152,6 @@ def mart_campaign_all() -> dict:
                 SAFE_CAST(result_type AS STRING) AS result_type,
                 SAFE_CAST(purchase AS FLOAT64) AS purchase,
                 SAFE_CAST(messaging_conversations_started AS FLOAT64) AS message,
-                SAFE_CAST(reach AS INT64) AS reach_,
                 SAFE_CAST(impressions AS INT64) AS impression,
                 SAFE_CAST(clicks AS INT64) AS click,
                 CASE
@@ -380,14 +379,14 @@ def mart_campaign_supplier() -> dict:
                     AND a.date IS NOT NULL
                 )
                 SELECT
-                    SAFE_CAST(nhan_su AS STRING) AS nhan_su,
-                    SAFE_CAST(ma_ngan_sach_cap_1 AS STRING) AS ma_ngan_sach_cap_1,
-                    SAFE_CAST(khu_vuc AS STRING) AS khu_vuc,
-                    SAFE_CAST(chuong_trinh AS STRING) AS chuong_trinh,
-                    SAFE_CAST(noi_dung AS STRING) AS noi_dung,
-                    SAFE_CAST(nen_tang AS STRING) AS nen_tang,
-                    SAFE_CAST(hinh_thuc AS STRING) AS hinh_thuc,
-                    SAFE_CAST(nganh_hang AS STRING) AS nganh_hang,
+                    SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                    SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                    SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                    SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                    SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                    SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                    SAFE_CAST(enrich_campaign_objective AS STRING) AS muc_tieu,
+                    SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
                     SAFE_CAST(campaign_name AS STRING) AS campaign_name,
                     SAFE_CAST(supplier_name AS STRING) AS supplier_name,
                     CAST(date AS DATE) AS ngay,
@@ -395,8 +394,7 @@ def mart_campaign_supplier() -> dict:
                     SAFE_CAST(result AS INT64) AS result,
                     SAFE_CAST(result_type AS STRING) AS result_type,
                     SAFE_CAST(purchase AS INT64) AS purchase,
-                    SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                    SAFE_CAST(reach AS INT64) AS reach,
+                    SAFE_CAST(messaging_conversations_started AS FLOAT64) AS message,
                     SAFE_CAST(impressions AS INT64) AS impressions,
                     SAFE_CAST(clicks AS INT64) AS clicks,
                     CASE
@@ -557,7 +555,6 @@ def mart_creative_all() -> dict:
                     SAFE_CAST(result_type AS STRING) AS result_type,
                     SAFE_CAST(purchase AS INT64) AS purchase,
                     SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                    SAFE_CAST(reach AS INT64) AS reach,
                     SAFE_CAST(impressions AS INT64) AS impressions,
                     SAFE_CAST(clicks AS INT64) AS clicks,
                     CASE
@@ -802,7 +799,6 @@ def mart_creative_supplier() -> dict:
                     SAFE_CAST(result_type AS STRING) AS result_type,
                     SAFE_CAST(purchase AS INT64) AS purchase,
                     SAFE_CAST(messaging_conversations_started AS INT64) AS messaging_conversations_started,
-                    SAFE_CAST(reach AS INT64) AS reach,
                     SAFE_CAST(impressions AS INT64) AS impressions,
                     SAFE_CAST(clicks AS INT64) AS clicks,
                     CASE

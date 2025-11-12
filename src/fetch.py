@@ -1037,7 +1037,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
         fetch_fields_default = [
             "account_id", "campaign_id", "optimization_goal",
-            "spend", "reach", "impressions", "clicks", "actions",
+            "spend", "impressions", "clicks", "actions",
             "date_start", "date_stop"
         ]        
         print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
@@ -1266,7 +1266,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
         fetch_fields_default = [
             "account_id", "campaign_id", "adset_id",
-            "ad_id", "spend", "reach", "impressions", "clicks", 
+            "ad_id", "spend", "impressions", "clicks", 
             "optimization_goal", "actions", "date_start", "date_stop"
         ]        
         print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
