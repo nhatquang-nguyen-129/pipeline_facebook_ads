@@ -127,7 +127,7 @@ def staging_campaign_insights() -> dict:
             print(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [STAGING] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
         finally:
-            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                
+            staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
 
     # 1.1.4. Scan all raw Facebook Ads campaign insights table(s)
         staging_section_name = "[STAGING] Scan all raw Facebook Ads campaign insights table(s)"
