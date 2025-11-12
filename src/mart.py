@@ -232,7 +232,7 @@ def mart_campaign_supplier() -> dict:
     mart_sections_time = {}
     mart_section_name = "[MART] Start timing the Facebook Ads supplier campaign materialization"
     mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = 0.0  # just marker not real time
+    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -248,7 +248,7 @@ def mart_campaign_supplier() -> dict:
         print(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata table {mart_table_supplier} for Facebook Ads campaign performance...")
         logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} with supplier metadata table {mart_table_supplier} for Facebook Ads campaign performance...")
         mart_sections_status[mart_section_name] = "succeed"    
-        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)    
+        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 1.2.3. Initialize Google Secret Manager client
         mart_section_name = "[MART] Initialize Google Secret Manager client"
@@ -444,16 +444,16 @@ def mart_campaign_supplier() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
-        mart_sections_all = list(dict.fromkeys(
+        mart_sections_summary = list(dict.fromkeys(
             list(mart_sections_status.keys()) +
             list(mart_sections_time.keys())
         ))
         mart_sections_detail = {
-            section: {
-                "status": mart_sections_status.get(section, "unknown"),
-                "time": round(mart_sections_time.get(section, 0.0), 2),
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
             }
-            for section in mart_sections_all
+            for mart_section_summary in mart_sections_summary
         }        
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
@@ -489,7 +489,7 @@ def mart_creative_all() -> dict:
     mart_sections_time = {}
     mart_section_name = "[MART] Start timing the Facebook Ads creative performance materialization"
     mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = 0.0  # just marker not real time
+    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -507,7 +507,7 @@ def mart_creative_all() -> dict:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...") 
         mart_sections_status[mart_section_name] = "succeed"    
-        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)    
+        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 2.1.3. Initialize Google BigQuery client
         mart_section_name = "[MART] Initialize Google BigQuery client"
@@ -587,12 +587,16 @@ def mart_creative_all() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_summary = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
         mart_sections_detail = {
-            section: {
-                "status": mart_sections_status.get(section, "unknown"),
-                "time": mart_sections_time.get(section, None),
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
             }
-            for section in set(mart_sections_status) | set(mart_sections_time)
+            for mart_section_summary in mart_sections_summary
         }          
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
@@ -626,7 +630,7 @@ def mart_creative_supplier() -> dict:
     mart_sections_time = {}
     mart_section_name = "[MART] Start timing the Facebook Ads campaign performance materialization"
     mart_sections_status[mart_section_name] = "succeed"
-    mart_sections_time[mart_section_name] = 0.0  # just marker not real time
+    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads supplier creative performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -644,7 +648,7 @@ def mart_creative_supplier() -> dict:
         print(f"🔍 [MART] Preparing to build materialized table {mart_table_supplier} for Facebook Ads supplier creative performance...")
         logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_supplier} for Facebook Ads supplier creative performance...")
         mart_sections_status[mart_section_name] = "succeed"    
-        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)    
+        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
     # 2.2.3. Initialize Google Secret Manager client
         mart_section_name = "[MART] Initialize Google Secret Manager client"
@@ -848,12 +852,16 @@ def mart_creative_supplier() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_summary = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
         mart_sections_detail = {
-            section: {
-                "status": mart_sections_status.get(section, "unknown"),
-                "time": mart_sections_time.get(section, None),
+            mart_section_summary: {
+                "status": mart_sections_status.get(mart_section_summary, "unknown"),
+                "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
             }
-            for section in set(mart_sections_status) | set(mart_sections_time)
+            for mart_section_summary in mart_sections_summary
         }          
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads supplier creative performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
