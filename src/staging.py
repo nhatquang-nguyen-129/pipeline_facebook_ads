@@ -382,19 +382,22 @@ def staging_campaign_insights() -> dict:
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
         staging_sections_total = len(staging_sections_status)
         staging_sections_succeed = [k for k, v in staging_sections_status.items() if v == "succeed"]
-        staging_sections_failed = [k for k, v in staging_sections_status.items() if v == "failed"]     
+        staging_sections_failed = [k for k, v in staging_sections_status.items() if v == "failed"]
         staging_tables_input = len(raw_tables_campaign)
         staging_tables_output = len(staging_tables_queried)
         staging_tables_failed = staging_tables_input - staging_tables_output
         staging_rows_output = len(staging_df_final)
-        staging_section_all = set(staging_sections_status.keys()) | set(staging_sections_time.keys())
-        staging_sections_detail = {}
-        for staging_section_separated in sorted(staging_section_all):
-            staging_section_time = staging_sections_time.get(staging_section_separated)
-            staging_sections_detail[staging_section_separated] = {
-                "status": staging_sections_status.get(staging_section_separated, "unknown"),
-                "time": round(staging_section_time or 0.0, 2),
-            }        
+        staging_sections_all = list(dict.fromkeys(
+            list(staging_sections_status.keys()) +
+            list(staging_sections_time.keys())
+        ))
+        staging_sections_detail = {
+            section: {
+                "status": staging_sections_status.get(section, "unknown"),
+                "time": round(staging_sections_time.get(section, 0.0), 2),
+            }
+            for section in staging_sections_all
+        }
         if staging_sections_failed:
             print(f"❌ [STAGING] Failed to complete Facebook Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             logging.error(f"❌ [STAGING] Failed to complete Facebook Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
@@ -745,19 +748,22 @@ def staging_ad_insights() -> dict:
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
         staging_sections_total = len(staging_sections_status)
         staging_sections_succeed = [k for k, v in staging_sections_status.items() if v == "succeed"]
-        staging_sections_failed = [k for k, v in staging_sections_status.items() if v == "failed"]     
+        staging_sections_failed = [k for k, v in staging_sections_status.items() if v == "failed"]
         staging_tables_input = len(raw_tables_ad)
         staging_tables_output = len(staging_tables_queried)
         staging_tables_failed = staging_tables_input - staging_tables_output
         staging_rows_output = len(staging_df_final)
-        staging_section_all = set(staging_sections_status.keys()) | set(staging_sections_time.keys())
-        staging_sections_detail = {}
-        for staging_section_separated in sorted(staging_section_all):
-            staging_section_time = staging_sections_time.get(staging_section_separated)
-            staging_sections_detail[staging_section_separated] = {
-                "status": staging_sections_status.get(staging_section_separated, "unknown"),
-                "time": round(staging_section_time or 0.0, 2),
-            }        
+        staging_sections_all = list(dict.fromkeys(
+            list(staging_sections_status.keys()) +
+            list(staging_sections_time.keys())
+        ))
+        staging_sections_detail = {
+            section: {
+                "status": staging_sections_status.get(section, "unknown"),
+                "time": round(staging_sections_time.get(section, 0.0), 2),
+            }
+            for section in staging_sections_all
+        }       
         if staging_sections_failed:
             print(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
             logging.error(f"❌ [STAGING] Failed to complete Facebook Ads ad insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) in {staging_time_elapsed}s.")
