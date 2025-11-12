@@ -116,9 +116,6 @@ def update_campaign_insights(start_date: str, end_date: str):
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    update_section_name = "[UPDATE] Start timing Facebook Ads campaign insights update"
-    update_sections_status[update_section_name] = "succeed"
-    update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
     print(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
@@ -315,9 +312,6 @@ def update_ad_insights(start_date: str, end_date: str):
     update_time_start = time.time()
     update_sections_status = {}
     update_sections_time = {}
-    update_section_name = "[UPDATE] Start timing Facebook Ads ad insights update"
-    update_sections_status[update_section_name] = "succeed"
-    update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
     print(f"🔍 [UPDATE] Proceeding to update Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
     logging.info(f"🔍 [UPDATE] Proceeding to update Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}.")
 
