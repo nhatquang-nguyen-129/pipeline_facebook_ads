@@ -208,7 +208,7 @@ def staging_campaign_insights() -> dict:
                 staging_df_enriched = staging_results_enriched["enrich_df_final"]
                 staging_status_enriched = staging_results_enriched["enrich_status_final"]
                 staging_summary_enriched = staging_results_enriched["enrich_summary_final"]
-                if staging_status_enriched == "enrich_success_all":
+                if staging_status_enriched == "enrich_succeed_all":
                     print(f"✅ [STAGING] Successfully triggered Facebook Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     logging.info(f"✅ [STAGING] Successfully triggered Facebook Ads campaign insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     staging_tables_enriched.append(raw_table_campaign)
@@ -571,7 +571,7 @@ def staging_ad_insights() -> dict:
                 staging_df_enriched = staging_results_enriched["enrich_df_final"]
                 staging_status_enriched = staging_results_enriched["enrich_status_final"]
                 staging_summary_enriched = staging_results_enriched["enrich_summary_final"]
-                if staging_status_enriched == "enrich_success_all":
+                if staging_status_enriched == "enrich_succeed_all":
                     print(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     logging.info(f"✅ [STAGING] Successfully triggered Facebook Ads ad insights enrichment with {staging_summary_enriched['enrich_rows_output']}/{staging_summary_enriched['enrich_rows_input']} enriched row(s) in {staging_summary_enriched['enrich_time_elapsed']}s.")
                     staging_tables_enriched.append(raw_table_ad)
