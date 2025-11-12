@@ -208,8 +208,8 @@ def update_campaign_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.1.5 Trigger to build materialized Facebook Ads campaign performance table
-        update_section_name = "[UPDATE] Trigger to build materialized Facebook Ads campaign performance table"
+    # 1.1.5. Trigger to materialize Facebook Ads campaign performance table
+        update_section_name = "[UPDATE] Trigger to materialize Facebook Ads campaign performance table"
         update_section_start = time.time()
         try:
             if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
@@ -233,8 +233,8 @@ def update_campaign_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.1.6. Trigger to build materialized Facebook Ads supplier campaign performance table
-        update_section_name = "[UPDATE] Trigger to build materialized Facebook Ads supplier campaign performance table"
+    # 1.1.6. Trigger to materialize Facebook Ads supplier campaign table
+        update_section_name = "[UPDATE] Trigger to materialize Facebook Ads supplier campaign table"
         update_section_start = time.time()
         try:
             if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:

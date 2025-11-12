@@ -80,11 +80,11 @@ def mart_campaign_all() -> dict:
     print(f"🚀 [MART] Starting to build materialized table for Facebook Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads campaign performance...")
 
-    # 1.1.1. Start timing the Facebook Ads campaign performance materialization
+    # 1.1.1. Start timing the Facebook Ads campaign materialization
     mart_time_start = time.time()
     mart_sections_status = {}
     mart_sections_time = {}
-    mart_section_name = "[MART] Start timing the Facebook Ads campaign performance materialization"
+    mart_section_name = "[MART] Start timing the Facebook Ads campaign materialization"
     mart_sections_status[mart_section_name] = "succeed"
     mart_sections_time[mart_section_name] = 0.0  # just marker not real time
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -121,8 +121,8 @@ def mart_campaign_all() -> dict:
     finally:
         mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
-    # 1.1.4. Query all staging table(s) for Facebook Ads campaign performance materialization
-    mart_section_name = "[MART] Query all staging table(s) for Facebook Ads campaign performance materialization"
+    # 1.1.4. Query all staging Facebook Ads campaign insights table(s)
+    mart_section_name = "[MART] Query all staging Facebook Ads campaign insights table(s)"
     mart_section_start = time.time()    
     try:
         query = f"""
@@ -186,13 +186,17 @@ def mart_campaign_all() -> dict:
         mart_sections_total = len(mart_sections_status) 
         mart_sections_failed = [k for k, v in mart_sections_status.items() if v == "failed"] 
         mart_sections_succeeded = [k for k, v in mart_sections_status.items() if v == "succeed"]
+        mart_sections_all = list(dict.fromkeys(
+            list(mart_sections_status.keys()) +
+            list(mart_sections_time.keys())
+        ))
         mart_sections_detail = {
             section: {
                 "status": mart_sections_status.get(section, "unknown"),
-                "time": mart_sections_time.get(section, None),
+                "time": round(mart_sections_time.get(section, 0.0), 2),
             }
-            for section in set(mart_sections_status) | set(mart_sections_time)
-        }          
+            for section in mart_sections_all
+        }       
         if len(mart_sections_failed) > 0:
             print(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
             logging.error(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) {', '.join(mart_sections_failed)}.")
