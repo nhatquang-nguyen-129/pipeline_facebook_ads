@@ -223,8 +223,8 @@ def update_campaign_insights(start_date: str, end_date: str):
                     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads campaign performance materialization in {mart_summary_all['mart_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
                 elif mart_status_all == "mart_failed_all":
-                    print(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_section_failed']) if mart_summary_all['mart_section_failed'] else 'unknown'}.")
-                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_section_failed']) if mart_summary_all['mart_section_failed'] else 'unknown'}.")
+                    print(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_sections_failed']) if mart_summary_all['mart_sections_failed'] else 'unknown'}.")
+                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_all['mart_sections_failed']) if mart_summary_all['mart_sections_failed'] else 'unknown'}.")
                     update_sections_status[update_section_name] = "failed"
             else:
                 print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then materialization is skipped.")
@@ -248,8 +248,8 @@ def update_campaign_insights(start_date: str, end_date: str):
                     logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
                     update_sections_status[update_section_name] = "succeed"
                 elif mart_status_supplier == "mart_failed_all":
-                    print(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_section_failed']) if mart_summary_supplier['mart_section_failed'] else 'unknown'}.")
-                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_section_failed']) if mart_summary_supplier['mart_section_failed'] else 'unknown'}.")
+                    print(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
+                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
                     update_sections_status[update_section_name] = "failed"
             else:
                 print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then supplier materialization is skipped.")
