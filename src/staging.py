@@ -88,9 +88,6 @@ def staging_campaign_insights() -> dict:
     staging_df_uploaded = pd.DataFrame()    
     staging_sections_status = {}
     staging_sections_time = {}
-    staging_section_name = "[STAGING] Start timing the Facebook Ads campaign insights staging"
-    staging_sections_status[staging_section_name] = "succeed"
-    staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads campaign insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -440,9 +437,6 @@ def staging_ad_insights() -> dict:
     staging_df_uploaded = pd.DataFrame()    
     staging_sections_status = {}
     staging_sections_time = {}
-    staging_section_name = "[STAGING] Start timing the Facebook Ads ad insights staging"
-    staging_sections_status[staging_section_name] = "succeed"
-    staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
     print(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [STAGING] Proceeding to transform Facebook Ads ad insights into cleaned staging table at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
