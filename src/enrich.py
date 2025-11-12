@@ -84,9 +84,6 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_section_name = "[ENRICH] Start timing the raw Facebook Ads campaign insights enrichment"
-    enrich_sections_status[enrich_section_name] = "succeed"
-    enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
     print(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -405,9 +402,6 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_section_name = "[ENRICH] Start timing the raw Facebook Ads ad insights enrichment"
-    enrich_sections_status[enrich_section_name] = "succeed"
-    enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
     print(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
@@ -727,9 +721,6 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_section_name = "[ENRICH] Start timing the staging Facebook Ads campaign insights enrichment"
-    enrich_sections_status[enrich_section_name] = "succeed"
-    enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
     print(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
@@ -892,9 +883,6 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
     enrich_time_start = time.time()   
     enrich_sections_status = {}
     enrich_sections_time = {}
-    enrich_section_name = "[ENRICH] Start timing the staging Facebook Ads ad insights enrichment"
-    enrich_sections_status[enrich_section_name] = "succeed"
-    enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)    
     print(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
