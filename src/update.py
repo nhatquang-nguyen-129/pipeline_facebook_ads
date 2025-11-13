@@ -229,33 +229,8 @@ def update_campaign_insights(start_date: str, end_date: str):
                 update_sections_status[update_section_name] = "failed"
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
-
-    # 1.1.6. Trigger to materialize Facebook Ads supplier campaign table
-        update_section_name = "[UPDATE] Trigger to materialize Facebook Ads supplier campaign table"
-        update_section_start = time.time()
-        try:
-            if staging_status_campaign in ["staging_succeed_all", "staging_failed_partial"]:
-                print("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier campaign performance table...")
-                logging.info("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier campaign performance table...")
-                mart_results_supplier = mart_campaign_supplier()
-                mart_status_supplier = mart_results_supplier["mart_status_final"]
-                mart_summary_supplier = mart_results_supplier["mart_summary_final"]
-                if mart_status_supplier == "mart_succeed_all":
-                    print(f"✅ [UPDATE] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads supplier campaign performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
-                    update_sections_status[update_section_name] = "succeed"
-                elif mart_status_supplier == "mart_failed_all":
-                    print(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
-                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads supplier campaign performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
-                    update_sections_status[update_section_name] = "failed"
-            else:
-                print("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then supplier materialization is skipped.")
-                logging.warning("⚠️ [UPDATE] No data returned from Facebook Ads campaign insights staging then supplier materialization is skipped.")
-                update_sections_status[update_section_name] = "failed"
-        finally:
-            update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
-
-    # 1.1.7. Summarize update result(s) for Facebook Ads campaign performance
+    
+    # 1.1.6. Summarize update result(s) for Facebook Ads campaign performance
     finally:
         update_time_total = round(time.time() - update_time_start, 2)
         print("\n📊 [UPDATE] FACEBOOK ADS CAMPAIGN PERFORMANCE UPDATE SUMMARY")
@@ -267,7 +242,6 @@ def update_campaign_insights(start_date: str, end_date: str):
             "[UPDATE] Trigger to ingest Facebook Ads campaign metadata": "ingest_results_metadata",
             "[UPDATE] Trigger to build staging Facebook Ads campaign insights": "staging_results_campaign",
             "[UPDATE] Trigger to materialize Facebook Ads campaign performance table": "mart_results_all",
-            "[UPDATE] Trigger to materialize Facebook Ads supplier campaign table": "mart_results_supplier",
         }
         locals_dict = locals()
         for update_step_name, update_step_status in update_sections_status.items():
@@ -533,32 +507,7 @@ def update_ad_insights(start_date: str, end_date: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.2.9. Trigger to materialize Facebook Ads supplier creative table
-        update_section_name = "[UPDATE] Trigger to materialize Facebook Ads supplier creative table"
-        update_section_start = time.time()
-        try:
-            if staging_status_ad in ["staging_succeed_all", "staging_failed_partial"]:
-                print("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier creative performance table...")
-                logging.info("🔄 [UPDATE] Triggering to build materialized Facebook Ads supplier creative performance table...")
-                mart_results_supplier = mart_creative_supplier()
-                mart_status_supplier = mart_results_supplier["mart_status_final"]
-                mart_summary_supplier = mart_results_supplier["mart_summary_final"]
-                if mart_status_supplier == "mart_succeed_all":
-                    print(f"✅ [UPDATE] Successfully completed Facebook Ads supplier creative performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
-                    logging.info(f"✅ [UPDATE] Successfully completed Facebook Ads supplier creative performance materialization in {mart_summary_supplier['mart_time_elapsed']}s.")
-                    update_sections_status[update_section_name] = "succeed"
-                elif mart_status_supplier == "mart_failed_all":
-                    print(f"❌ [UPDATE] Failed to complete Facebook Ads supplier creative performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
-                    logging.error(f"❌ [UPDATE] Failed to complete Facebook Ads supplier creative performance materialization due to unsuccessful section(s) of {', '.join(mart_summary_supplier['mart_sections_failed']) if mart_summary_supplier['mart_sections_failed'] else 'unknown'}.")
-                    update_sections_status[update_section_name] = "failed"
-            else:
-                print("⚠️ [UPDATE] No data returned from Facebook Ads ad insights staging then supplier materialization is skipped.")
-                logging.warning("⚠️ [UPDATE] No data returned from Facebook Ads ad insights staging then supplier materialization is skipped.")
-                update_sections_status[update_section_name] = "failed"
-        finally:
-            update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
-
-    # 1.2.10. Summarize update result(s) for Facebook Ads ad insights pipeline
+    # 1.2.9. Summarize update result(s) for Facebook Ads ad insights pipeline
     finally:
         update_time_total = round(time.time() - update_time_start, 2)
         print("\n📊 [UPDATE] FACEBOOK ADS CREATIVE PERFORMANCE SUMMARY")
@@ -572,7 +521,6 @@ def update_ad_insights(start_date: str, end_date: str):
             "[UPDATE] Trigger to ingest Facebook Ads ad creative": "ingest_results_metadata",
             "[UPDATE] Trigger to build staging Facebook Ads ad insights": "staging_results_ad",
             "[UPDATE] Trigger to materialize Facebook Ads creative performance table": "mart_results_all",
-            "[UPDATE] Trigger to materialize Facebook Ads supplier creative table": "mart_results_supplier",
         }
         locals_dict = locals()
         for update_step_name, update_step_status in update_sections_status.items():
