@@ -75,13 +75,11 @@ from src.ingest import (
 )
 from src.staging import (
     staging_campaign_insights,
-    staging_ad_insights
+    staging_ad_insights,
 )
 from src.mart import (
     mart_campaign_all,
-    mart_campaign_supplier,
     mart_creative_all,
-    mart_creative_supplier,
 )
 
 # Get environment variable for Company
