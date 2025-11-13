@@ -210,8 +210,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             
             # Standardized time columns
             "date": "datetime64[ns, UTC]",
-            "year": int,
-            "month": int,
+            "year": str,
+            "month": str,
             "last_updated_at": "datetime64[ns, UTC]",
             
             # Enriched dimensions from table_id and specific to internal company structure
@@ -273,8 +273,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             
             # Standardized time columns
             "date": "datetime64[ns, UTC]",
-            "year": int,
-            "month": int,
+            "year": str,
+            "month": str,
             "last_updated_at": "datetime64[ns, UTC]"
         }
     }    
