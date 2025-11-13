@@ -204,6 +204,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "enrich_category_group": str,            
             
             # Enriched dimensions from campaign_name and specific to advertising strategy
+            "enrich_program_track": str,
             "enrich_program_group": str,
             "enrich_program_type": str,
             
@@ -252,6 +253,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "enrich_category_group": str,
             
             # Enriched dimensions from campaign_name and specific to advertising strategy
+            "enrich_program_track": str,
             "enrich_program_group": str,
             "enrich_program_type": str,
             
