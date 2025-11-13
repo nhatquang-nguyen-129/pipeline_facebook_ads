@@ -258,8 +258,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "enrich_program_type": str,
             
             # Enriched dimensions from adset_name and specific to advertising strategy
-            "enrich_program_subtype": str,
-            "enrich_program_strategy": str,            
+            "enrich_adset_strategy": str,
+            "enrich_adset_subtype": str,
             
             # Enriched dimensions from adset_name and specific to targeting
             "enrich_adset_location": str,
