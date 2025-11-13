@@ -1,8 +1,8 @@
 """
 ==================================================================
-MAIN ENTRYPOINT
+FACEBOOK MAIN ENTRYPOINT
 ------------------------------------------------------------------
-This script serves as the unified CLI **controller** for triggering  
+This script serves as the unified CLI controller for triggering  
 ads data updates across multiple platforms (e.g., Facebook, Google),  
 based on command-line arguments and environment variables.
 
