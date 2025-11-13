@@ -1009,8 +1009,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                 enrich_adset_location=lambda df: df["adset_name"].fillna("").str.split("_").str[0].fillna("unknown"),
                 enrich_adset_audience=lambda df: df["adset_name"].fillna("").str.split("_").str[1].fillna("unknown"),
                 enrich_adset_format=lambda df: df["adset_name"].fillna("").str.split("_").str[2].fillna("unknown"),
-                enrich_program_strategy=lambda df: df["adset_name"].fillna("").str.split("_").str[3].fillna("unknown"),
-                enrich_program_subtype=lambda df: df["adset_name"].fillna("").str.split("_").str[4].fillna("unknown")
+                enrich_adset_strategy=lambda df: df["adset_name"].fillna("").str.split("_").str[3].fillna("unknown"),
+                enrich_adset_subtype=lambda df: df["adset_name"].fillna("").str.split("_").str[4].fillna("unknown")
             )
             print(f"✅ [ENRICH] Successfully enriched adset-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_adset)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched adset-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_adset)} row(s).")
