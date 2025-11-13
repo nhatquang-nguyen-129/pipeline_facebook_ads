@@ -103,7 +103,7 @@ def main():
             start_date = first_day_last_month.strftime("%Y-%m-%d")
             end_date = last_day_last_month.strftime("%Y-%m-%d")
         else:
-            raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} so please re-check input environment variable.")
+            raise ValueError(f"⚠️ [MAIN] Unsupported mode {MODE} for Facebook Ads main entrypoint so please re-check input environment variable.")
         if "campaign" in layers:
             try:
                 print(f"🚀 [MAIN] Starting to update '{PLATFORM}' campaign performance of '{COMPANY}' company in '{MODE}' mode and '{LAYER}' layer from {start_date} to {end_date}...")
