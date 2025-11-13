@@ -813,12 +813,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_campaign["enrich_campaign_personnel"] = (
                 enrich_df_campaign["enrich_campaign_personnel"]
                 .apply(lambda x: ''.join(full_map.get(c, c) for c in x) if isinstance(x, str) else x)
-            )
-            enrich_df_campaign = enrich_df_campaign.assign(
-                year=lambda df: df["date"].dt.strftime("%Y"),
-                month=lambda df: df["date"].dt.strftime("%Y-%m"),
-                last_updated_at=datetime.utcnow().replace(tzinfo=pytz.UTC)
-            )            
+            )           
             print(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched campaign-level field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s).")
             enrich_sections_status[enrich_section_name] = "succeed"        
@@ -837,12 +832,9 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             logging.info(f"🔍 [ENRICH] Enriching other field(s) for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s)...")
             enrich_df_other = enrich_df_campaign.copy()
             enrich_df_other = enrich_df_other.assign(
-                date_start=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
-                date_stop=lambda df: pd.to_datetime(df["date_stop"], errors="coerce", utc=True).dt.floor("D") + timedelta(hours=23, minutes=59, seconds=59),
                 date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
-                last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC)
             )
             print(f"✅ [ENRICH] Successfully enriched other field(s) for staging Facebook Ads campaign insights with {len(enrich_df_other)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched other field(s) for staging Facebook Ads campaign insights with {len(enrich_df_other)} row(s).")
@@ -1037,12 +1029,9 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             logging.info(f"🔍 [ENRICH] Enriching ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_adset)} row(s)...")
             enrich_df_other = enrich_df_adset.copy()
             enrich_df_other = enrich_df_other.assign(
-                date_start=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
-                date_stop=lambda df: pd.to_datetime(df["date_stop"], errors="coerce", utc=True).dt.floor("D") + timedelta(hours=23, minutes=59, seconds=59),
                 date=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.floor("D"),
                 year=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y"),
                 month=lambda df: pd.to_datetime(df["date_start"], errors="coerce", utc=True).dt.strftime("%Y-%m"),
-                last_updated_at=lambda _: datetime.utcnow().replace(tzinfo=pytz.UTC)
             )
             print(f"✅ [ENRICH] Successfully enriched ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_other)} row(s).")
             logging.info(f"✅ [ENRICH] Successfully enriched ad-level field(s) for staging Facebook Ads ad insights with {len(enrich_df_other)} row(s).")
