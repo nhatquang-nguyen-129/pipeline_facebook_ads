@@ -386,13 +386,11 @@ def update_ad_insights(start_date: str, end_date: str):
                     """
                     for tbl in raw_tables_ad
                 ])
-                job_config = bigquery.QueryJobConfig(
-                    query_parameters=[bigquery.ArrayQueryParameter("ad_ids", "STRING", list(updated_ids_ad))]
-                )
-                adset_ids_df = google_bigquery_client.query(union_query, job_config=job_config).to_dataframe()
-                adset_id_list = adset_ids_df["adset_id"].dropna().unique().tolist()
-                if adset_id_list:
-                    ingest_results_metadata = ingest_adset_metadata(adset_id_list=adset_id_list)
+                job_config = bigquery.QueryJobConfig(query_parameters=[bigquery.ArrayQueryParameter("ad_ids", "STRING", list(updated_ids_ad))])
+                update_ids_adset = google_bigquery_client.query(union_query, job_config=job_config).to_dataframe()
+                ingest_ids_adset = update_ids_adset["adset_id"].dropna().unique().tolist()
+                if ingest_ids_adset:
+                    ingest_results_metadata = ingest_adset_metadata(ingest_ids_adset=update_ids_adset)
                     ingest_status_metadata = ingest_results_metadata["ingest_status_final"]
                     ingest_summary_metadata = ingest_results_metadata["ingest_summary_final"]
                     if ingest_status_metadata == "ingest_succeed_all":
@@ -551,3 +549,13 @@ def update_ad_insights(start_date: str, end_date: str):
         print("-" * 120)
         print(f"{'Total execution time':<80} | {'-':<10} | {update_time_total:>8.2f}s")
         print("=" * 120)
+
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
+    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
+    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
+    args = parser.parse_args()
+
+    update_ad_insights(start_date=args.start_date, end_date=args.end_date)
