@@ -1253,7 +1253,7 @@ def ingest_campaign_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
 
-    # 2.1.8. Delete existing row(s) or create new table if not exist
+    # 2.1.7. Delete existing row(s) or create new table if not exist
             ingest_section_name = "[INGEST] Delete existing row(s) or create new table if not exist"            
             ingest_section_start = time.time()
             try:
@@ -1339,7 +1339,7 @@ def ingest_campaign_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2) 
 
-    # 2.1.9. Upload Facebook Ads campaign insights to Google BigQuery
+    # 2.1.8. Upload Facebook Ads campaign insights to Google BigQuery
             ingest_section_name = "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery"
             ingest_section_start = time.time()
             try:
@@ -1363,7 +1363,7 @@ def ingest_campaign_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)             
 
-    # 2.1.10. Summarize ingestion result(s) for Facebook Ads campaign insights
+    # 2.1.9. Summarize ingestion result(s) for Facebook Ads campaign insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
@@ -1415,7 +1415,7 @@ def ingest_campaign_insights(
                 "ingest_dates_input": ingest_dates_input,
                 "ingest_dates_output": ingest_dates_output,
                 "ingest_dates_failed": ingest_dates_failed,
-                "ingest_rows_uploaded": ingest_rows_output,
+                "ingest_rows_output": ingest_rows_output,
             }
         }
     return ingest_results_final
@@ -1424,7 +1424,7 @@ def ingest_campaign_insights(
 def ingest_ad_insights(
     start_date: str,
     end_date: str,
-) -> pd.DataFrame:   
+) -> pd.DataFrame:  
     print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
 
@@ -1435,18 +1435,18 @@ def ingest_ad_insights(
     ingest_sections_time = {}
     ingest_loops_time = {
         "[INGEST] Trigger to fetch Facebook Ads ad insights": 0.0,
-        "[INGEST] Trigger to enrich Facebook Ads campaign insights": 0.0,
-        "[INGEST] Trigger to enforce schema for Facebook Ads campaign insights": 0.0,
+        "[INGEST] Trigger to enrich Facebook Ads ad insights": 0.0,
+        "[INGEST] Trigger to enforce schema for Facebook Ads ad insights": 0.0,
         "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
-        "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
+        "[INGEST] Upload Facebook Ads ad insights to Google BigQuery": 0.0,
     }
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     # 2.2.2. Initialize Google BigQuery client
     ingest_section_name = "[INGEST] Initialize Google BigQuery client"
-    ingest_section_start = time.time()    
+    ingest_section_start = time.time()
     try:
         print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
         logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -1460,12 +1460,12 @@ def ingest_ad_insights(
         logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
     finally:
         ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
-    
-    # 2.2.3. Trigger to fetch Facebook Ads ad insights 
+
+    # 2.2.3. Trigger to fetch Facebook Ads ad insights
     try:
         ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
         for ingest_date_separated in ingest_date_list:
-            ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad insights "
+            ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad insights"
             ingest_section_start = time.time()
             try:
                 print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad insights for {ingest_date_separated}...")
@@ -1487,7 +1487,7 @@ def ingest_ad_insights(
                     print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)    
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
     # 2.2.4. Trigger to enrich Facebook Ads ad insights
             ingest_section_name = "[INGEST] Trigger to enrich Facebook Ads ad insights"
@@ -1505,8 +1505,8 @@ def ingest_ad_insights(
                     ingest_sections_status[ingest_section_name] = "succeed"
                 elif ingest_status_enriched == "enrich_failed_all":
                     ingest_sections_status[ingest_section_name] = "failed"
-                    print(f"❌ [INGEST] Failed to enrich Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']}/{ingest_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
-                    logging.error(f"❌ [INGEST] Failed to enrich Facebook Ads ad insights for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']}/{ingest_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+                    print(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights enrichment for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']}/{ingest_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
+                    logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad insights enrichment for {ingest_date_separated} with {ingest_summary_enriched['enrich_rows_output']}/{ingest_summary_enriched['enrich_rows_input']} enriched row(s) due to section(s) {', '.join(ingest_summary_enriched["enrich_sections_failed"]) if ingest_summary_enriched["enrich_sections_failed"] else 'unknown error'} in {ingest_summary_enriched['enrich_time_elapsed']}s.")
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
@@ -1543,13 +1543,13 @@ def ingest_ad_insights(
                 print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {raw_table_ad}...")
                 logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights for {ingest_date_separated} to Google BigQuery table_id {raw_table_ad}...")
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)                      
-
-    # 2.2.8. Delete existing row(s) or create new table if not exist
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
+    
+    # 2.2.7. Delete existing row(s) or create new table if not exist
             ingest_section_name = "[INGEST] Delete existing row(s) or create new table if not exist"
             ingest_section_start = time.time()
             try:
-                ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+                ingest_df_deduplicated = ingest_df_enforced.drop_duplicates().reset_index(drop=True)
                 table_clusters_defined = []
                 table_schemas_defined = []
                 try:
@@ -1562,7 +1562,6 @@ def ingest_ad_insights(
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to check Facebook Ads ad insights table {raw_table_ad} existence due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to check Facebook Ads ad insights table {raw_table_ad} existence due to {e}.")
-                    raise RuntimeError(f"❌ [INGEST] Failed to check Facebook Ads campaign insights table {raw_table_ad} existence due to {e}.") from e
                 if not ingest_table_existed:
                     print(f"⚠️ [INGEST] Facebook Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
                     logging.info(f"⚠️ [INGEST] Facebook Ads ad insights table {raw_table_ad} not found then table creation will be proceeding...")
@@ -1584,7 +1583,7 @@ def ingest_ad_insights(
                         table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
-                        )
+                        )                    
                     table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
                     if table_clusters_filtered:
                         table_configuration_defined.clustering_fields = table_clusters_filtered
@@ -1627,44 +1626,36 @@ def ingest_ad_insights(
                 ingest_sections_status[ingest_section_name] = "succeed"
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
-                print(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
-                logging.error(f"❌ [INGEST] Failed to create new table or delete existing row(s) of Facebook Ads ad insights ingestion due to {e}.")
+                print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad insights due to {e}.")
+                logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad insights due to {e}.")
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)                        
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.2.9. Upload Facebook Ads ad insights to Google BigQuery
+    # 2.2.8. Upload Facebook Ads ad insights to Google BigQuery
             ingest_section_name = "[INGEST] Upload Facebook Ads ad insights to Google BigQuery"
-            ingest_section_start = time.time()          
+            ingest_section_start = time.time()
             try:
                 print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}...")
                 logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}...")
-                job_config = bigquery.LoadJobConfig(
-                    write_disposition="WRITE_APPEND",
-                    source_format=bigquery.SourceFormat.PARQUET,
-                    time_partitioning=bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field="date",
-                    ),
-                )
+                job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
                 load_job = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
                     raw_table_ad,
                     job_config=job_config
                 )
                 load_job.result()
-                ingest_df_uploaded = ingest_df_deduplicated.copy()
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}.")
-                logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}.")
+                print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}.")
+                logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad}.")
             except Exception as e:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to upload {len(ingest_df_deduplicated)} row(s) of Facebook Ads ad insights to Google BigQuery table {raw_table_ad} due to {e}.")
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)    
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.2.10. Summarize ingestion result(s) for Facebook Ads ad insights
+    # 2.2.9. Summarize ingestion result(s) for Facebook Ads ad insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
@@ -1697,7 +1688,7 @@ def ingest_ad_insights(
             logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_failed > 0:
-            print(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"⚠️ [INGEST] Partially completed Facebook Ads ad ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_partial"
         else:
@@ -1716,7 +1707,7 @@ def ingest_ad_insights(
                 "ingest_dates_input": ingest_dates_input,
                 "ingest_dates_output": ingest_dates_output,
                 "ingest_dates_failed": ingest_dates_failed,
-                "ingest_rows_uploaded": ingest_rows_output,
+                "ingest_rows_output": ingest_rows_output,
             }
         }
     return ingest_results_final

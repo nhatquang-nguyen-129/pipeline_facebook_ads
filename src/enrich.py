@@ -410,16 +410,16 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     enrich_section_start = time.time()
     try:
         if enrich_df_input.empty:
-            enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"] = "failed"
+            enrich_sections_status[enrich_section_name] = "failed"
             print("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
             logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
             raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
         else:
-            enrich_sections_status["[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"] = "succeed"
+            enrich_sections_status[enrich_section_name] = "succeed"
             print("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
             logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
     finally:
-        enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)        
+        enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     try:
 
@@ -479,7 +479,7 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             print(f"❌ [ENRICH] Failed to enrich date column(s) for raw Facebook Ads ad insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich date column(s) for raw Facebook Ads ad insights due to {e}.")
         finally:
-            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
+            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     # 1.2.6. Enrich goal to action for raw Facebook Ads ad insights
         enrich_section_name = "[ENRICH] Enrich goal to action for raw Facebook Ads ad insights"
@@ -577,7 +577,7 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
             print(f"❌ [ENRICH] Failed to enrich purchase result(s) for raw Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich purchase result(s) for raw Facebook Ads ad insights due to {e}.")
         finally:
-            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)  
+            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     # 1.2.8. Enrich messaging result(s) for raw Facebook Ads ad insights
         enrich_section_name = "[ENRICH] Enrich messaging result(s) for raw Facebook Ads ad insights"
