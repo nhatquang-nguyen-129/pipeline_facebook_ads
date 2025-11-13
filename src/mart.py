@@ -292,6 +292,7 @@ def mart_creative_all() -> dict:
                     SAFE_CAST(enrich_adset_location AS STRING) AS vi_tri,
                     SAFE_CAST(enrich_adset_audience AS STRING) AS doi_tuong,
                     SAFE_CAST(enrich_adset_format AS STRING) AS dinh_dang,
+                    SAFE_CAST(enrich_adset_strategy AS STRING) AS hoat_dong,
                     CAST(date AS DATE) AS ngay,
                     SAFE_CAST(spend AS FLOAT64) AS spend,
                     SAFE_CAST(result AS INT64) AS result,
