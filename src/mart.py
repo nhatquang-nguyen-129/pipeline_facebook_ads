@@ -126,7 +126,7 @@ def mart_campaign_all() -> dict:
         query = f"""
         CREATE OR REPLACE TABLE `{mart_table_all}`
         PARTITION BY ngay
-        CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
+        CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
         AS
         WITH base AS (
             SELECT
@@ -140,6 +140,7 @@ def mart_campaign_all() -> dict:
                 SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
                 SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
                 SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
                 SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
                 SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
                 SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
@@ -273,7 +274,7 @@ def mart_creative_all() -> dict:
             query = f"""
                 CREATE OR REPLACE TABLE `{mart_table_all}`
                 PARTITION BY ngay
-                CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, chuong_trinh
+                CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
                 AS
                 SELECT
                     SAFE_CAST(nhan_su AS STRING) AS nhan_su,
