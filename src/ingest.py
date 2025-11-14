@@ -27,9 +27,6 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add Python datetime utilities for integration
-from datetime import datetime
-
 # Add Python logging ultilities forintegration
 import logging
 
@@ -99,22 +96,22 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Validate input for Facebook Ads campaign metadata ingestion
-    ingest_section_name = "[INGEST] Validate input for Facebook Ads campaign metadata ingestion"
-    ingest_section_start = time.time()
     try:
-        if not ingest_ids_campaign:
-            ingest_sections_status[ingest_section_name] = "failed"
-            print("⚠️ [INGEST] Empty Facebook Ads ingest_ids_campaign provided then ingestion is suspended.")
-            logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_campaign provided then ingestion is suspended.")
-        else:
-            ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
-            logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    try:
+    # 1.1.2. Validate input for Facebook Ads campaign metadata ingestion
+        ingest_section_name = "[INGEST] Validate input for Facebook Ads campaign metadata ingestion"
+        ingest_section_start = time.time()
+        try:
+            if not ingest_ids_campaign:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print("⚠️ [INGEST] Empty Facebook Ads ingest_ids_campaign provided then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_campaign provided then ingestion is suspended.")
+            else:
+                ingest_sections_status[ingest_section_name] = "succeed"
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.1.3. Trigger to fetch Facebook Ads campaign metadata
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads campaign metadata"
@@ -358,23 +355,23 @@ def ingest_adset_metadata(ingest_ids_adset: list) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
+    try:
+
     # 1.2.2. Validate input for Facebook Ads adset metadata ingestion
-    ingest_section_name = "[INGEST] Validate input for Facebook Ads adset metadata ingestion"
-    ingest_section_start = time.time()
-    try:
-        if not ingest_ids_adset:
-            ingest_sections_status[ingest_section_name] = "failed"
-            print("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
-            logging.warning("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
-            raise ValueError("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
-        else:
-            ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_adset)} adset_id(s) of Facebook Ads adset metadata ingestion.")
-            logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_adset)} adset_id(s) of Facebook Ads adset metadata ingestion.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
-    
-    try:
+        ingest_section_name = "[INGEST] Validate input for Facebook Ads adset metadata ingestion"
+        ingest_section_start = time.time()
+        try:
+            if not ingest_ids_adset:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
+                raise ValueError("⚠️ [INGEST] Empty Facebook Ads adset_id_list provided then ingestion is suspended.")
+            else:
+                ingest_sections_status[ingest_section_name] = "succeed"
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_adset)} adset_id(s) of Facebook Ads adset metadata ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_adset)} adset_id(s) of Facebook Ads adset metadata ingestion.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.3. Trigger to fetch Facebook Ads adset metadata
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads adset metadata"
@@ -618,23 +615,23 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.3.2. Validate input for Facebook Ads ad metadata ingestion
-    ingest_section_name = "[INGEST] Validate input for Facebook Ads ad metadata ingestion"
-    ingest_section_start = time.time()
     try:
-        if not ingest_ids_ad:
-            ingest_sections_status[ingest_section_name] = "failed"
-            print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-            logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-            raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-        else:
-            ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad metadata ingestion.")
-            logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad metadata ingestion.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    try:
+    # 1.3.2. Validate input for Facebook Ads ad metadata ingestion
+        ingest_section_name = "[INGEST] Validate input for Facebook Ads ad metadata ingestion"
+        ingest_section_start = time.time()
+        try:
+            if not ingest_ids_ad:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+                raise ValueError("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+            else:
+                ingest_sections_status[ingest_section_name] = "succeed"
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad metadata ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad metadata ingestion.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.3.3. Trigger to fetch Facebook Ads ad metadata
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad metadata"
@@ -878,23 +875,23 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.4.2. Validate input for Facebook Ads ad creative ingestion
-    ingest_section_name = "[INGEST] Validate input for Facebook Ads ad creative ingestion"
-    ingest_section_start = time.time()
     try:
-        if not ingest_ids_ad:
-            ingest_sections_status[ingest_section_name] = "failed"
-            print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-            logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
-            raise ValueError("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
-        else:
-            ingest_sections_status[ingest_section_name] = "succeed"
-            print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
-            logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    try:
+    # 1.4.2. Validate input for Facebook Ads ad creative ingestion
+        ingest_section_name = "[INGEST] Validate input for Facebook Ads ad creative ingestion"
+        ingest_section_start = time.time()
+        try:
+            if not ingest_ids_ad:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
+                logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
+                raise ValueError("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
+            else:
+                ingest_sections_status[ingest_section_name] = "succeed"
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
   
     # 1.4.3. Trigger to fetch Facebook Ads ad creative
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad creative"
@@ -1152,25 +1149,26 @@ def ingest_campaign_insights(
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.1.2. Initialize Google BigQuery client
-    ingest_section_name = "[INGEST] Initialize Google BigQuery client"
-    ingest_section_start = time.time()
     try:
-        print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        google_bigquery_client = bigquery.Client(project=PROJECT)
-        print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        ingest_sections_status[ingest_section_name] = "succeed"
-    except Exception as e:
-        ingest_sections_status[ingest_section_name] = "failed"
-        print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
+
+    # 2.1.2. Initialize Google BigQuery client
+        ingest_section_name = "[INGEST] Initialize Google BigQuery client"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            ingest_sections_status[ingest_section_name] = "succeed"
+        except Exception as e:
+            ingest_sections_status[ingest_section_name] = "failed"
+            print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 2.1.3. Trigger to fetch Facebook Ads campaign insights
-    try:
         ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
         for ingest_date_separated in ingest_date_list:           
             ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads campaign insights"
@@ -1444,25 +1442,26 @@ def ingest_ad_insights(
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.2.2. Initialize Google BigQuery client
-    ingest_section_name = "[INGEST] Initialize Google BigQuery client"
-    ingest_section_start = time.time()
     try:
-        print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        google_bigquery_client = bigquery.Client(project=PROJECT)
-        print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        ingest_sections_status[ingest_section_name] = "succeed"
-    except Exception as e:
-        ingest_sections_status[ingest_section_name] = "failed"
-        print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-    finally:
-        ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
+
+    # 2.2.2. Initialize Google BigQuery client
+        ingest_section_name = "[INGEST] Initialize Google BigQuery client"
+        ingest_section_start = time.time()
+        try:
+            print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [INGEST] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            ingest_sections_status[ingest_section_name] = "succeed"
+        except Exception as e:
+            ingest_sections_status[ingest_section_name] = "failed"
+            print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 2.2.3. Trigger to fetch Facebook Ads ad insights
-    try:
         ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
         for ingest_date_separated in ingest_date_list:
             ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad insights"
