@@ -444,7 +444,7 @@ def staging_ad_insights() -> dict:
             raw_campaign_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
             raw_adset_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
             raw_ad_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_metadata"
-            raw_creative_metadata = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_creative_metadata"
+            raw_ad_creative = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_creative"
             print(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook Ads ad insights...")
             logging.info(f"🔍 [STAGING] Using raw table metadata {raw_dataset} to build staging table for Facebook Ads ad insights...")
             staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
@@ -523,7 +523,7 @@ def staging_ad_insights() -> dict:
                     LEFT JOIN `{raw_campaign_metadata}` AS campaign
                         ON CAST(raw.campaign_id AS STRING) = CAST(campaign.campaign_id AS STRING)
                         AND CAST(raw.account_id AS STRING) = CAST(campaign.account_id AS STRING)
-                    LEFT JOIN `{raw_creative_metadata}` AS creative
+                    LEFT JOIN `{raw_ad_creative}` AS creative
                         ON CAST(raw.ad_id AS STRING) = CAST(creative.ad_id AS STRING)
                         AND CAST(raw.account_id AS STRING) = CAST(creative.account_id AS STRING)
                 """
