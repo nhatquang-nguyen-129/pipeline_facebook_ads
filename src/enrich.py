@@ -782,15 +782,15 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_campaign = (
                 enrich_df_campaign
                 .assign(
-                    enrich_campaign_objective=lambda df: df["campaign_name"].str.split("_").str[0],
-                    enrich_campaign_region=lambda df: df["campaign_name"].str.split("_").str[1],
-                    enrich_budget_group=lambda df: df["campaign_name"].str.split("_").str[2],
-                    enrich_budget_type=lambda df: df["campaign_name"].str.split("_").str[3],
-                    enrich_category_group=lambda df: df["campaign_name"].str.split("_").str[4],
-                    enrich_campaign_personnel=lambda df: df["campaign_name"].str.split("_").str[5],
-                    enrich_program_track=lambda df: df["campaign_name"].str.split("_").str[7],
-                    enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8],
-                    enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9],
+                    enrich_campaign_objective=lambda df: df["campaign_name"].str.split("_").str[0].fillna("unknown"),
+                    enrich_campaign_region=lambda df: df["campaign_name"].str.split("_").str[1].fillna("unknown"),
+                    enrich_budget_group=lambda df: df["campaign_name"].str.split("_").str[2].fillna("unknown"),
+                    enrich_budget_type=lambda df: df["campaign_name"].str.split("_").str[3].fillna("unknown"),
+                    enrich_category_group=lambda df: df["campaign_name"].str.split("_").str[4].fillna("unknown"),
+                    enrich_campaign_personnel=lambda df: df["campaign_name"].str.split("_").str[5].fillna("unknown"),
+                    enrich_program_track=lambda df: df["campaign_name"].str.split("_").str[7].fillna("unknown"),
+                    enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8].fillna("unknown"),
+                    enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
             )
             vietnamese_map_all = {
@@ -956,15 +956,15 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             enrich_df_campaign = (
                 enrich_df_campaign
                 .assign(
-                    enrich_campaign_objective=lambda df: df["campaign_name"].str.split("_").str[0],
-                    enrich_campaign_region=lambda df: df["campaign_name"].str.split("_").str[1],
-                    enrich_budget_group=lambda df: df["campaign_name"].str.split("_").str[2],
-                    enrich_budget_type=lambda df: df["campaign_name"].str.split("_").str[3],
-                    enrich_category_group=lambda df: df["campaign_name"].str.split("_").str[4],
-                    enrich_campaign_personnel=lambda df: df["campaign_name"].str.split("_").str[5],
-                    enrich_program_track=lambda df: df["campaign_name"].str.split("_").str[7],
-                    enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8],
-                    enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9],
+                    enrich_campaign_objective=lambda df: df["campaign_name"].str.split("_").str[0].fillna("unknown"),
+                    enrich_campaign_region=lambda df: df["campaign_name"].str.split("_").str[1].fillna("unknown"),
+                    enrich_budget_group=lambda df: df["campaign_name"].str.split("_").str[2].fillna("unknown"),
+                    enrich_budget_type=lambda df: df["campaign_name"].str.split("_").str[3].fillna("unknown"),
+                    enrich_category_group=lambda df: df["campaign_name"].str.split("_").str[4].fillna("unknown"),
+                    enrich_campaign_personnel=lambda df: df["campaign_name"].str.split("_").str[5].fillna("unknown"),
+                    enrich_program_track=lambda df: df["campaign_name"].str.split("_").str[7].fillna("unknown"),
+                    enrich_program_group=lambda df: df["campaign_name"].str.split("_").str[8].fillna("unknown"),
+                    enrich_program_type=lambda df: df["campaign_name"].str.split("_").str[9].fillna("unknown"),
                 )
             )
             vietnamese_map_all = {
