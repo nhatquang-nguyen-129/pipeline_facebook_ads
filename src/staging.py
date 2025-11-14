@@ -36,12 +36,6 @@ import time
 # Add Python Pandas libraries for integration
 import pandas as pd
 
-# Add Google Authentication modules for integration
-from google.auth.exceptions import DefaultCredentialsError
-
-# Add Google API Core modules for integration
-from google.api_core.exceptions import NotFound
-
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
