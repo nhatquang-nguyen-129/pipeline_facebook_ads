@@ -273,7 +273,7 @@ def mart_creative_all() -> dict:
                     SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
                     SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
                     SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
-                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc
+                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
                     SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
                     SAFE_CAST(campaign_name AS STRING) AS campaign_name,
                     SAFE_CAST(adset_name AS STRING) AS adset_name,
