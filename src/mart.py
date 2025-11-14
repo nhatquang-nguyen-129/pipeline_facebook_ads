@@ -257,8 +257,8 @@ def mart_creative_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.4. Query all staging table(s) for Facebook Ads creative performance materialization
-        mart_section_name = "[MART] Query all staging table(s) for Facebook Ads creative performance materialization"
+    # 2.1.4. Query all staging table(s) for materialization
+        mart_section_name = "[MART] Query all staging table(s) for materialization"
         mart_section_start = time.time()        
         try:
             query = f"""

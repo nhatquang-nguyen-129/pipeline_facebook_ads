@@ -267,9 +267,9 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "enrich_adset_format": str,
             
             # Enriched dimensions from table_id and specific to internal company structure
-            "enrich_company_platform": str,
-            "enrich_company_department": str,
-            "enrich_company_account": str,
+            "enrich_account_platform": str,
+            "enrich_account_department": str,
+            "enrich_account_name": str,
             
             # Standardized time columns
             "date": "datetime64[ns, UTC]",
