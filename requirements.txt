@@ -10,4 +10,4 @@ google-cloud-bigquery-storage==2.33.1
 pyarrow==22.0.0
 pandas-gbq==0.29.2
 
-# Last updated: 2025-11-14
+# Last updated: 2025-11-13
