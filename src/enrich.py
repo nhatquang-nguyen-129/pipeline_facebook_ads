@@ -87,23 +87,23 @@ def enrich_campaign_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     print(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich raw Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Validate input for the raw Facebook Ads campaign insights enrichment
-    enrich_section_name = "[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment"
-    enrich_section_start = time.time()
     try:
-        if enrich_df_input.empty:        
-            enrich_sections_status[enrich_section_name] = "failed"        
-            print("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
-            logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
-            raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")    
-        else:
-            enrich_sections_status[enrich_section_name] = "succeed"
-            print("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
-            logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
-    finally:
-        enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    try:
+    # 1.1.2. Validate input for the raw Facebook Ads campaign insights enrichment
+        enrich_section_name = "[ENRICH] Validate input for the raw Facebook Ads campaign insights enrichment"
+        enrich_section_start = time.time()
+        try:
+            if enrich_df_input.empty:        
+                enrich_sections_status[enrich_section_name] = "failed"        
+                print("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
+                logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")
+                raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads campaign insights provided then enrichment is suspended.")    
+            else:
+                enrich_sections_status[enrich_section_name] = "succeed"
+                print("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
+                logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads campaign insights enrichment.")
+        finally:
+            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     # 1.1.3. Normalize 'actions' column for raw Facebook Ads campaign insights
         enrich_section_name = "[ENRICH] Normalize 'actions' column for raw Facebook Ads campaign insights"
@@ -405,23 +405,23 @@ def enrich_ad_insights(enrich_df_input: pd.DataFrame) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to enrich raw Facebook Ads ad insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.2.2. Validate input for the raw Facebook Ads ad insights enrichment
-    enrich_section_name = "[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"
-    enrich_section_start = time.time()
     try:
-        if enrich_df_input.empty:
-            enrich_sections_status[enrich_section_name] = "failed"
-            print("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
-            logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
-            raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
-        else:
-            enrich_sections_status[enrich_section_name] = "succeed"
-            print("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
-            logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
-    finally:
-        enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    try:
+    # 1.2.2. Validate input for the raw Facebook Ads ad insights enrichment
+        enrich_section_name = "[ENRICH] Validate input for the raw Facebook Ads ad insights enrichment"
+        enrich_section_start = time.time()
+        try:
+            if enrich_df_input.empty:
+                enrich_sections_status[enrich_section_name] = "failed"
+                print("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
+                logging.warning("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
+                raise ValueError("⚠️ [ENRICH] Empty raw Facebook Ads ad insights provided then enrichment is suspended.")
+            else:
+                enrich_sections_status[enrich_section_name] = "succeed"
+                print("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
+                logging.info("✅ [ENRICH] Successfully validated input for raw Facebook Ads ad insights enrichment.")
+        finally:
+            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     # 1.2.3. Normalize 'actions' column for raw Facebook Ads ad insights
         enrich_section_name = "[ENRICH] Normalize 'actions' column for raw Facebook Ads ad insights"
@@ -723,24 +723,24 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     enrich_sections_time = {}
     print(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [ENRICH] Proceeding to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s) at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    
-    # 2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment
-    enrich_section_name = "[ENRICH] Validate input for the staging Facebook Ads campaign insights enrichment"
-    enrich_section_start = time.time()    
-    try:
-        if enrich_df_input.empty:
-            enrich_sections_status[enrich_section_name] = "failed"
-            print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
-            logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
-            raise ValueError("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
-        else:
-            enrich_sections_status[enrich_section_name] = "succeed"
-            print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
-            logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
-    finally:
-        enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     try:
+
+    # 2.1.2. Validate input for the staging Facebook Ads campaign insights enrichment
+        enrich_section_name = "[ENRICH] Validate input for the staging Facebook Ads campaign insights enrichment"
+        enrich_section_start = time.time()    
+        try:
+            if enrich_df_input.empty:
+                enrich_sections_status[enrich_section_name] = "failed"
+                print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
+                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
+                raise ValueError("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
+            else:
+                enrich_sections_status[enrich_section_name] = "succeed"
+                print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
+                logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
+        finally:
+            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
     # 2.1.3. Enrich table-level field(s) for staging Facebook Ads campaign insights
         enrich_section_name = "[ENRICH] Enrich table-level field(s) for staging Facebook Ads campaign insights"
