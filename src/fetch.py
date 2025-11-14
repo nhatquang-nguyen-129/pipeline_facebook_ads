@@ -85,42 +85,42 @@ def fetch_campaign_metadata(fetch_ids_campaign: list[str]) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.1.2. Validate input for the Facebook Ads campaign metadata fetching
-    fetch_section_name = "[FETCH] Validate input for the Facebook Ads campaign metadata fetching"
-    fetch_section_start = time.time()    
     try:
-        if not fetch_ids_campaign:
-            fetch_sections_status[fetch_section_name] = "failed"        
-            print("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
-            logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")  
-        else:
-            fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
-            logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+
+    # 1.1.2. Validate input for the Facebook Ads campaign metadata fetching
+        fetch_section_name = "[FETCH] Validate input for the Facebook Ads campaign metadata fetching"
+        fetch_section_start = time.time()    
+        try:
+            if not fetch_ids_campaign:
+                fetch_sections_status[fetch_section_name] = "failed"        
+                print("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")
+                logging.warning("⚠️ [FETCH] Empty Facebook Ads campaign_id_list provided then fetching is suspended.")  
+            else:
+                fetch_sections_status[fetch_section_name] = "succeed"
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata fetching.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.1.3. Prepare fields for Facebook Ads campaign metadata fetching
-    fetch_section_name = "[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"
-    fetch_section_start = time.time()        
-    try:
-        fetch_fields_default = [
-            "id", 
-            "name", 
-            "status",
-            "effective_status",
-            "objective",
-            "configured_status",
-            "buying_type"
-        ]
-        fetch_sections_status[fetch_section_name] = "succeed"   
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)          
-    
-    try:
-    
+        fetch_section_name = "[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"
+        fetch_section_start = time.time()        
+        try:
+            fetch_fields_default = [
+                "id", 
+                "name", 
+                "status",
+                "effective_status",
+                "objective",
+                "configured_status",
+                "buying_type"
+            ]
+            fetch_sections_status[fetch_section_name] = "succeed"   
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)             
+   
     # 1.1.4 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()                
@@ -329,40 +329,40 @@ def fetch_adset_metadata(fetch_ids_adset: list[str]) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads adset metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     
-    # 1.2.2. Validate input for the raw Facebook Ads adset metadata fetching
-    fetch_section_name = "[FETCH] Validate input for the raw Facebook Ads adset metadata fetching"
-    fetch_section_start = time.time()     
     try:
-        if not fetch_ids_adset:
-            fetch_sections_status[fetch_section_name] = "failed"
-            print("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
-            logging.warning("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
-            raise ValueError("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
-        else:
-            fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_adset)} adset_id(s) of raw Facebook Ads adset metadata fetching.")
-            logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_adset)} adset_id(s) of raw Facebook Ads adset metadata fetching.")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+
+    # 1.2.2. Validate input for the raw Facebook Ads adset metadata fetching
+        fetch_section_name = "[FETCH] Validate input for the raw Facebook Ads adset metadata fetching"
+        fetch_section_start = time.time()     
+        try:
+            if not fetch_ids_adset:
+                fetch_sections_status[fetch_section_name] = "failed"
+                print("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+                logging.warning("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+                raise ValueError("⚠️ [FETCH] Empty Facebook Ads adset_id_list provided then fetching is suspended.")
+            else:
+                fetch_sections_status[fetch_section_name] = "succeed"
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_adset)} adset_id(s) of raw Facebook Ads adset metadata fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_adset)} adset_id(s) of raw Facebook Ads adset metadata fetching.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     
     # 1.2.3. Prepare field(s) for Facebook Ads adset metadata fetching
-    fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"
-    fetch_section_start = time.time()            
-    try:
-        fetch_fields_default = [
-            "id",
-            "name",
-            "status",
-            "effective_status",
-            "campaign_id"
-        ]
-        fetch_sections_status["[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"] = "succeed" 
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads adset metadata with {fetch_fields_default} field(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch  Ads adset metadata with {fetch_fields_default} field(s)...")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)              
-
-    try:
+        fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"
+        fetch_section_start = time.time()            
+        try:
+            fetch_fields_default = [
+                "id",
+                "name",
+                "status",
+                "effective_status",
+                "campaign_id"
+            ]
+            fetch_sections_status["[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"] = "succeed" 
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads adset metadata with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch  Ads adset metadata with {fetch_fields_default} field(s)...")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)              
 
     # 1.2.4 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
@@ -572,38 +572,38 @@ def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch raw Facebook Ads ad metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.3.2. Validate input for Facebook Ads ad metadata fetching
-    fetch_section_name = "[FETCH] Validate input for Facebook Ads ad metadata fetching"
-    fetch_section_start = time.time()        
     try:
-        if not fetch_ids_ad:
-            fetch_sections_status[fetch_section_name] = "failed"        
-            print("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
-            logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
-        else:
-            fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad metadata fetching.")
-            logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad metadata fetching.")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+
+    # 1.3.2. Validate input for Facebook Ads ad metadata fetching
+        fetch_section_name = "[FETCH] Validate input for Facebook Ads ad metadata fetching"
+        fetch_section_start = time.time()        
+        try:
+            if not fetch_ids_ad:
+                fetch_sections_status[fetch_section_name] = "failed"        
+                print("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
+                logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
+            else:
+                fetch_sections_status[fetch_section_name] = "succeed"
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad metadata fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad metadata fetching.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.3.3. Prepare field(s) for Facebook Ads ad metadata fetching
-    fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads ad metadata fetching"
-    fetch_section_start = time.time()
-    try:
-        fetch_fields_default = ["id",
-                        "name",
-                        "adset_id",
-                        "campaign_id",
-                        "status",
-                        "effective_status"]
-        fetch_sections_status[fetch_section_name] = "succeed" 
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_fields_default} field(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_fields_default} field(s)...")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    try:
+        fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads ad metadata fetching"
+        fetch_section_start = time.time()
+        try:
+            fetch_fields_default = ["id",
+                            "name",
+                            "adset_id",
+                            "campaign_id",
+                            "status",
+                            "effective_status"]
+            fetch_sections_status[fetch_section_name] = "succeed" 
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_fields_default} field(s)...")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.3.4 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
@@ -813,23 +813,23 @@ def fetch_ad_creative(fetch_ids_ad: list[str]) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 1.4.2. Validate input for Facebook Ads ad creative fetching
-    fetch_section_name = "[FETCH] Validate input for Facebook Ads ad creative fetching"
-    fetch_section_start = time.time()     
     try:
-        if not fetch_ids_ad:
-            fetch_sections_status[fetch_section_name] = "failed"
-            print("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
-            logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
-            raise ValueError("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
-        else:
-            fetch_sections_status[fetch_section_name] = "succeed"
-            print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad creative fetching.")
-            logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad creative fetching.")
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    try:
+    # 1.4.2. Validate input for Facebook Ads ad creative fetching
+        fetch_section_name = "[FETCH] Validate input for Facebook Ads ad creative fetching"
+        fetch_section_start = time.time()     
+        try:
+            if not fetch_ids_ad:
+                fetch_sections_status[fetch_section_name] = "failed"
+                print("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
+                logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
+                raise ValueError("⚠️ [FETCH] Empty Facebook Ads fetch_ids_ad list provided then fetching is suspended.")
+            else:
+                fetch_sections_status[fetch_section_name] = "succeed"
+                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad creative fetching.")
+                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ids_ad)} ad_id(s) of raw Facebook Ads ad creative fetching.")
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 1.4.3. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
@@ -1025,29 +1025,29 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.1.2. Validate input for Facebook Ads campaign insights fetching
-    fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
-    fetch_section_start = time.time()        
-    try:        
-        fetch_params_default = {
-        "level": "campaign",
-        "time_increment": 1,
-        "time_range": {"since": start_date, "until": end_date},
-        }
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
-        fetch_fields_default = [
-            "account_id", "campaign_id", "optimization_goal",
-            "spend", "impressions", "clicks", "actions",
-            "date_start", "date_stop"
-        ]        
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
-        fetch_sections_status[fetch_section_name] = "succeed"
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
     try:
+
+    # 2.1.2. Validate input for Facebook Ads campaign insights fetching
+        fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
+        fetch_section_start = time.time()        
+        try:        
+            fetch_params_default = {
+            "level": "campaign",
+            "time_increment": 1,
+            "time_range": {"since": start_date, "until": end_date},
+            }
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
+            fetch_fields_default = [
+                "account_id", "campaign_id", "optimization_goal",
+                "spend", "impressions", "clicks", "actions",
+                "date_start", "date_stop"
+            ]        
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
+            fetch_sections_status[fetch_section_name] = "succeed"
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.1.3. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
@@ -1255,29 +1255,29 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
     print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
-    # 2.2.2. Validate input for Facebook Ads campaign insights fetching
-    fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
-    fetch_section_start = time.time()          
     try:
-        fetch_params_default = {
-            "level": "ad",
-            "time_increment": 1,
-            "time_range": {"since": start_date, "until": end_date},
-        }
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
-        fetch_fields_default = [
-            "account_id", "campaign_id", "adset_id",
-            "ad_id", "spend", "impressions", "clicks", 
-            "optimization_goal", "actions", "date_start", "date_stop"
-        ]        
-        print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
-        logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
-        fetch_sections_status[fetch_section_name] = "succeed" 
-    finally:
-        fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    try:
+    # 2.2.2. Validate input for Facebook Ads campaign insights fetching
+        fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
+        fetch_section_start = time.time()          
+        try:
+            fetch_params_default = {
+                "level": "ad",
+                "time_increment": 1,
+                "time_range": {"since": start_date, "until": end_date},
+            }
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
+            fetch_fields_default = [
+                "account_id", "campaign_id", "adset_id",
+                "ad_id", "spend", "impressions", "clicks", 
+                "optimization_goal", "actions", "date_start", "date_stop"
+            ]        
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_fields_default} field(s)...")
+            fetch_sections_status[fetch_section_name] = "succeed" 
+        finally:
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
     # 2.2.3 Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
