@@ -33,25 +33,8 @@ import logging
 # Add Python time ultilities for integration
 import time
 
-# Add Python Pandas libraries for integraton
-import pandas as pd
-
-# Add Python UUID ultilities for integration
-import uuid
-
-# Add Google Authentication modules for integration
-from google.auth import default
-from google.auth.transport.requests import AuthorizedSession
-
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
-
-# Add Google Secret Manager modules for integration
-from google.cloud import secretmanager
-
-# Add Google Spreadsheets API modules for integration
-import gspread
-import traceback
 
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
@@ -88,85 +71,89 @@ def mart_campaign_all() -> dict:
     print(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [MART] Proceeding to build materialized table for Facebook Ads campaign performance at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
+    try:
+
     # 1.1.2. Prepare Google BigQuery table_id for materialization
-    mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
-    mart_section_start = time.time()
-    staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-    staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
-    print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
-    logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
-    mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-    mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
-    print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
-    logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
-    mart_sections_status[mart_section_name] = "succeed"    
-    mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        try: 
+            mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
+            mart_section_start = time.time()
+            staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+            staging_table_campaign = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_insights"
+            print(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
+            logging.info(f"🔍 [MART] Using staging table {staging_table_campaign} to build materialized table for Facebook Ads campaign performance...")
+            mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+            mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_campaign_performance"
+            print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
+            logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads campaign performance...")
+            mart_sections_status[mart_section_name] = "succeed"    
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)            
 
     # 1.1.3. Initialize Google BigQuery client
-    mart_section_name = "[MART] Initialize Google BigQuery client"
-    mart_section_start = time.time()
-    try:
-        print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
-        google_bigquery_client = bigquery.Client(project=PROJECT)
-        print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
-        mart_sections_status[mart_section_name] = "succeed"
-    except Exception as e:
-        mart_sections_status[mart_section_name] = "failed"
-        print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-        logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
-    finally:
-        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        mart_section_name = "[MART] Initialize Google BigQuery client"
+        mart_section_start = time.time()
+        try:
+            print(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            logging.info(f"🔍 [MART] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
+            google_bigquery_client = bigquery.Client(project=PROJECT)
+            print(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            logging.info(f"✅ [MART] Successfully initialized Google BigQuery client for Google Cloud Platform project {PROJECT}.")
+            mart_sections_status[mart_section_name] = "succeed"
+        except Exception as e:
+            mart_sections_status[mart_section_name] = "failed"
+            print(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+            logging.error(f"❌ [MART] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
     # 1.1.4. Query all staging Facebook Ads campaign insights table(s)
-    mart_section_name = "[MART] Query all staging Facebook Ads campaign insights table(s)"
-    mart_section_start = time.time()    
-    try:
-        query = f"""
-        CREATE OR REPLACE TABLE `{mart_table_all}`
-        PARTITION BY ngay
-        CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
-        AS
-        WITH base AS (
-            SELECT
-                SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
-                SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
-                SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
-                SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
-                SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
-                SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
-                SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
-                SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
-                SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
-                SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
-                SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
-                SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
-                SAFE_CAST(campaign_id AS STRING) AS campaign_id,
-                SAFE_CAST(campaign_name AS STRING) AS campaign_name,
-                CAST(date AS DATE) AS ngay,
-                SAFE_CAST(year AS STRING) AS nam,
-                SAFE_CAST(month AS STRING) AS thang,
-                SAFE_CAST(spend AS FLOAT64) AS spend,
-                SAFE_CAST(result AS FLOAT64) AS result,
-                SAFE_CAST(result_type AS STRING) AS result_type,
-                SAFE_CAST(purchase AS FLOAT64) AS purchase,
-                SAFE_CAST(messaging_conversations_started AS FLOAT64) AS message,
-                SAFE_CAST(impressions AS INT64) AS impression,
-                SAFE_CAST(clicks AS INT64) AS click,
-                CASE
-                    WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
-                    WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
-                    ELSE "❓ Unrecognized"
-                END AS trang_thai,
-                SAFE_CAST(last_updated_at AS TIMESTAMP) AS last_updated_at
-            FROM `{staging_table_campaign}`
-            WHERE date IS NOT NULL
-        )
-        SELECT *
-        FROM base;
-        """
+        mart_section_name = "[MART] Query all staging Facebook Ads campaign insights table(s)"
+        mart_section_start = time.time()    
         try:
+            query = f"""
+            CREATE OR REPLACE TABLE `{mart_table_all}`
+            PARTITION BY ngay
+            CLUSTER BY nhan_su, ma_ngan_sach_cap_1, nganh_hang, hang_muc
+            AS
+            WITH base AS (
+                SELECT
+                    SAFE_CAST(enrich_account_name AS STRING) AS tai_khoan,
+                    SAFE_CAST(enrich_account_department AS STRING) AS phong_ban,
+                    SAFE_CAST(enrich_account_platform AS STRING) AS nen_tang,
+                    SAFE_CAST(enrich_budget_group AS STRING) AS ma_ngan_sach_cap_1,
+                    SAFE_CAST(enrich_budget_type AS STRING) AS ma_ngan_sach_cap_2,
+                    SAFE_CAST(enrich_program_track AS STRING) AS hang_muc,
+                    SAFE_CAST(enrich_program_group AS STRING) AS chuong_trinh,
+                    SAFE_CAST(enrich_program_type AS STRING) AS noi_dung,
+                    SAFE_CAST(enrich_campaign_objective AS STRING) AS hinh_thuc,
+                    SAFE_CAST(enrich_campaign_region AS STRING) AS khu_vuc,
+                    SAFE_CAST(enrich_campaign_personnel AS STRING) AS nhan_su,
+                    SAFE_CAST(enrich_category_group AS STRING) AS nganh_hang,
+                    SAFE_CAST(campaign_id AS STRING) AS campaign_id,
+                    SAFE_CAST(campaign_name AS STRING) AS campaign_name,
+                    CAST(date AS DATE) AS ngay,
+                    SAFE_CAST(year AS STRING) AS nam,
+                    SAFE_CAST(month AS STRING) AS thang,
+                    SAFE_CAST(spend AS FLOAT64) AS spend,
+                    SAFE_CAST(result AS FLOAT64) AS result,
+                    SAFE_CAST(result_type AS STRING) AS result_type,
+                    SAFE_CAST(purchase AS FLOAT64) AS purchase,
+                    SAFE_CAST(messaging_conversations_started AS FLOAT64) AS message,
+                    SAFE_CAST(impressions AS INT64) AS impression,
+                    SAFE_CAST(clicks AS INT64) AS click,
+                    CASE
+                        WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
+                        WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
+                        ELSE "❓ Unrecognized"
+                    END AS trang_thai,
+                    SAFE_CAST(last_updated_at AS TIMESTAMP) AS last_updated_at
+                FROM `{staging_table_campaign}`
+                WHERE date IS NOT NULL
+            )
+            SELECT *
+            FROM base;
+            """
             print(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
             logging.info(f"🔄 [MART] Querying staging Facebook Ads campaign insights table {staging_table_campaign} to create or replace materialized table for campaign performance...")
             google_bigquery_client.query(query).result()
@@ -237,18 +224,21 @@ def mart_creative_all() -> dict:
     try:
 
     # 2.1.2. Prepare Google BigQuery table_id for materialization
-        mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
-        mart_section_start = time.time()    
-        staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
-        staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
-        print(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
-        logging.info(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
-        mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
-        mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
-        print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...")
-        logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...") 
-        mart_sections_status[mart_section_name] = "succeed"    
-        mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        try:
+            mart_section_name = "[MART] Prepare Google BigQuery table_id for materialization"
+            mart_section_start = time.time()    
+            staging_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_staging"
+            staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
+            print(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
+            logging.info(f"🔍 [MART] Using staging table {staging_table_ad} to build materialized table for Facebook Ads creative performance...")
+            mart_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_mart"
+            mart_table_all = f"{PROJECT}.{mart_dataset}.{COMPANY}_table_{PLATFORM}_all_all_creative_performance"
+            print(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...")
+            logging.info(f"🔍 [MART] Preparing to build materialized table {mart_table_all} for Facebook Ads creative performance...") 
+            mart_sections_status[mart_section_name] = "succeed"    
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
+        finally:
+            mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)              
 
     # 2.1.3. Initialize Google BigQuery client
         mart_section_name = "[MART] Initialize Google BigQuery client"
