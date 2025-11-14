@@ -285,7 +285,7 @@ def mart_creative_all() -> dict:
                     SAFE_CAST(enrich_adset_strategy AS STRING) AS hoat_dong,
                     CAST(date AS DATE) AS ngay,
                     SAFE_CAST(spend AS FLOAT64) AS spend,
-                    SAFE_CAST(result AS INT64) AS result,
+                    SAFE_CAST(result AS INT64) AS result,   
                     SAFE_CAST(result_type AS STRING) AS result_type,
                     SAFE_CAST(purchase AS INT64) AS purchase,
                     SAFE_CAST(messaging_conversations_started AS INT64) AS message,
