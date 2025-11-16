@@ -551,8 +551,8 @@ def ingest_adset_metadata(ingest_ids_adset: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to upload Facebok Ads campaign metadata to Google BigQuery table {raw_table_adset} due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to upload Facebok Ads campaign metadata to Google BigQuery table {raw_table_adset} due to {e}.")
+            print(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_adset} due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_adset} due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -811,7 +811,7 @@ def ingest_ad_metadata(ingest_ids_ad: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata to Google BigQuery table {raw_table_ad} due to {e}.")
+            print(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata to Google BigQuery table {raw_table_ad} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata to Google BigQuery table {raw_table_ad} due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
@@ -1071,7 +1071,7 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to upload Facebok Ads ad metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to upload Facebook Ads ad metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)    
