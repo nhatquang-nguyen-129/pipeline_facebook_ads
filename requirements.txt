@@ -1,5 +1,5 @@
 # Python library for array computing
-numpy==2.3.4
+numpy==2.3.5
 
 # Python library for time series and statistics
 pandas==2.3.3
@@ -29,6 +29,6 @@ google-cloud-secret-manager==2.25.0
 google-cloud-bigquery-storage==2.34.0
 
 # Google module for GCP BigQuery Native Pandas Connector
-pandas-gbq==0.30.0
+pandas-gbq==0.31.0
 
-# Last updated: 2025-11-16
+# Last updated: 2025-11-20
