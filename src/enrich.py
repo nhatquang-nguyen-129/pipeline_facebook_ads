@@ -95,8 +95,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         try:
             if enrich_df_input.empty:
                 enrich_sections_status[enrich_section_name] = "failed"
-                print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
-                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment is suspended.")
+                print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment will be suspended.")
+                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment will be suspended.")
             else:
                 print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
                 logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
@@ -159,7 +159,6 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                                 except Exception:
                                     print(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads campaign insights value to int for action type {enrich_action_type}.")
                                     logging.warning(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads campaign insights value to int for action type {enrich_action_type}.")
-                                    value = None
                                 break
                         enrich_result_type = "follows_or_likes" if enrich_action_type == "like" else enrich_action_type
                 if enrich_result_value is None:
@@ -417,8 +416,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         try:
             if enrich_df_input.empty:
                 enrich_sections_status[enrich_section_name] = "failed"
-                print("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment is suspended.")
-                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment is suspended.")
+                print("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment will be suspended.")
+                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads ad insights provided then enrichment will be suspended.")
             else:
                 print("✅ [ENRICH] Successfully validated input for staging Facebook Ads ad insights enrichment.")
                 logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads ad insights enrichment.")
@@ -435,68 +434,70 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             enrich_df_goal = enrich_df_input.copy()
             enrich_df_goal["actions"] = enrich_df_goal["actions"].apply(
                 lambda x: (
-                    x if isinstance(x, list) else
-                    [] if x is None or (isinstance(x, float) and np.isnan(x)) or (isinstance(x, str) and x.strip() in ["", "None"]) else
-                    (lambda s: (
-                        json.loads(re.sub(r"(?<!\")'([^']*?)':", r'"\1":', s))
-                    ) if isinstance(x, str) else [])
+                    x 
+                    if isinstance(x, list)
+                    else []
+                    if (
+                        x is None
+                        or (isinstance(x, float) and np.isnan(x))
+                        or (isinstance(x, str) and x.strip() in ["", "None", "null", "NULL"])
+                    )
+                    else (
+                        (lambda cleaned: (
+                            json.loads(cleaned)
+                            if isinstance(cleaned, str) else []
+                        ))(
+                            re.sub(
+                                r"(?<!\")'([^']*?)':",
+                                r'"\1":',
+                                x.replace("'", '"')
+                            ).strip()
+                            if isinstance(x, str) else x
+                        )
+                    )
+                    if isinstance(x, str) else []
                 )
             )
             enrich_results_value = []
             enrich_results_type = []
             for idx, row in enrich_df_goal.iterrows():
-                goal = row.get("optimization_goal")
+                enrich_action_mapping = row.get("optimization_goal")
                 actions = row.get("actions", [])
                 if not isinstance(actions, list):
                     actions = []
                 enrich_result_value = None
                 enrich_result_type = None
-                if goal in GOAL_TO_ACTION:
-                    action_type = GOAL_TO_ACTION[goal]
-                    if action_type in ["reach", "impressions"]:
+                if enrich_action_mapping in ENRICH_ACTIONS_MAPPING:
+                    enrich_action_type = ENRICH_ACTIONS_MAPPING[enrich_action_mapping]
+                    if enrich_action_type in ["reach", "impressions"]:
                         enrich_result_value = pd.to_numeric(row.get("impressions", 0), errors="coerce")
                         enrich_result_type = "impressions"
                     else:
                         for act in actions:
-                            if act.get("action_type") == action_type:
+                            if act.get("action_type") == enrich_action_type:
                                 try:
-                                    enrich_result_value = (
-                                        0 if act.get("value") is None 
-                                        else int(float(act.get("value"))) if str(act.get("value")).strip().lower() not in ["none", ""] 
-                                        else 0
-                                    )
+                                    enrich_result_value = int(act.get("value", 0))
                                 except Exception:
-                                    print(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads ad insights value to float for action_type {action_type}.")
-                                    logging.warning(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads ad insights value to float for action_type {action_type}.")
-                                    enrich_result_value = 0
+                                    print(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads ad insights value to int for action type {enrich_action_type}.")
+                                    logging.warning(f"⚠️ [ENRICH] Failed to convert staging Facebook Ads ad insights value to int for action type {enrich_action_type}.")
                                 break
-                        enrich_result_type = "follows_or_likes" if action_type == "like" else action_type
-
+                        enrich_result_type = "follows_or_likes" if enrich_action_type == "like" else enrich_action_type
                 if enrich_result_value is None:
                     for act in actions:
                         if act.get("action_type") == "onsite_conversion.lead_grouped":
                             try:
-                                enrich_result_value = (
-                                    0 if act.get("value") is None 
-                                    else int(float(act.get("value"))) if str(act.get("value")).strip().lower() not in ["none", ""] 
-                                    else 0
-                                )
+                                enrich_result_value = int(act.get("value", 0))
                             except Exception:
-                                enrich_result_value = 0
+                                enrich_result_value = None
                             enrich_result_type = "onsite_conversion.lead_grouped"
                             break
-
                 if enrich_result_value is None:
                     for act in actions:
                         if act.get("action_type") == "lead":
                             try:
-                                enrich_result_value = (
-                                    0 if act.get("value") is None 
-                                    else int(float(act.get("value"))) if str(act.get("value")).strip().lower() not in ["none", ""] 
-                                    else 0
-                                )
+                                enrich_result_value = int(act.get("value", 0))
                             except Exception:
-                                enrich_result_value = 0
+                                enrich_result_value = None
                             enrich_result_type = "lead"
                             break
                 enrich_results_value.append(enrich_result_value)
@@ -508,7 +509,6 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                 enrich_results_type=lambda df: df["enrich_results_type"].astype("string").fillna("unknown"),
                 result=lambda df: df["enrich_results_value"],
                 result_type=lambda df: df["enrich_results_type"],
-                spend=lambda df: pd.to_numeric(df["spend"], errors="coerce").fillna(0) if "spend" in df.columns else 0,
                 impressions=lambda df: pd.to_numeric(df["impressions"], errors="coerce").fillna(0) if "impressions" in df.columns else 0,
                 clicks=lambda df: pd.to_numeric(df["clicks"], errors="coerce").fillna(0) if "clicks" in df.columns else 0
             )
@@ -538,17 +538,21 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                     actions = []
                 enrich_message_value = None
                 enrich_purchase_value = None
-                for action in actions:
-                    if action.get("action_type") == "onsite_conversion.messaging_conversation_started_7d":
+                for act in actions:
+                    if not isinstance(act, dict):
+                        continue
+                    ingest_action_type = act.get("action_type")
+                    ingest_action_value = act.get("value", 0)
+                    if ingest_action_type == "onsite_conversion.messaging_conversation_started_7d":
                         try:
-                            enrich_message_value = int(action.get("value", 0))
-                        except Exception:
+                            enrich_message_value = int(ingest_action_value)
+                        except:
                             enrich_message_value = None
-                    elif action.get("action_type") == "purchase":
+                    elif ingest_action_type == "purchase":
                         try:
-                            enrich_purchase_value = int(action.get("value", 0))
-                        except Exception:
-                            enrich_purchase_value = None                            
+                            enrich_purchase_value = int(ingest_action_value)
+                        except:
+                            enrich_purchase_value = None
                 enrich_messages_value.append(enrich_message_value)
                 enrich_purchases_value.append(enrich_purchase_value)
             enrich_df_performance = enrich_df_performance.assign(
