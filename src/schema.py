@@ -94,7 +94,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "clicks": str,
             "date_start": str,
             "date_stop": str,
-            "actions": object,
+            "actions": str,
         },        
         "fetch_ad_insights": {
             "account_id": str,
@@ -108,7 +108,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "date_start": str,
             "date_stop": str,
             "delivery_status": str,
-            "actions": object
+            "actions": str,
         },        
         "ingest_campaign_metadata": {
             "campaign_id": str,
@@ -145,26 +145,26 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "account_id": str,
             "campaign_id": str,
             "optimization_goal": str,
-            "spend": str,
-            "impressions": str,
-            "clicks": str,
+            "spend": float,
+            "impressions": int,
+            "clicks": int,
             "date_start": str,
             "date_stop": str,
-            "actions": object,
+            "actions": str,
         },        
         "ingest_ad_insights": {
             "account_id": str,
             "ad_id": str,
             "adset_id": str,
             "campaign_id": str,
-            "spend": str,
-            "impressions": str,
-            "clicks": str,
             "optimization_goal": str,
+            "spend": float,
+            "impressions": str,
+            "clicks": int,
             "date_start": str,
             "date_stop": str,
             "delivery_status": str,
-            "actions": object
+            "actions": str,
         },        
         "staging_campaign_insights": {            
             
@@ -177,10 +177,10 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "spend": float,
             "impressions": int,
             "clicks": int,
-            "result": float,
+            "result": int,
             "result_type": str,
-            "purchase": float,
-            "messaging_conversations_started": float,
+            "purchase": int,
+            "messaging_conversations_started": int,
             
             # Enriched dimensions from campaign_name and specific to campaign settings
             "enrich_campaign_objective": str,
@@ -221,10 +221,10 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "campaign_name": str,
             "spend": float,
             "delivery_status": str,
-            "result": float,
+            "result": int,
             "result_type": str,
-            "purchase": float,
-            "messaging_conversations_started": float,
+            "purchase": int,
+            "messaging_conversations_started": int,
             "impressions": int,
             "clicks": int,
             "thumbnail_url": str,
@@ -297,21 +297,25 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             schema_df_enforced = schema_df_input.copy()            
             for schema_column_expected, schema_data_type in schema_columns_expected.items():
                 if schema_column_expected not in schema_df_enforced.columns: 
-                    schema_df_enforced[schema_column_expected] = pd.NA
+                    schema_df_enforced[schema_column_expected] = pd.NA               
                 try:
-                    if schema_data_type in [int, float]:
-                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].apply(
-                            lambda x: x if isinstance(x, (int, float, np.number, type(None))) else np.nan
-                        )
-                        schema_df_enforced[schema_column_expected] = pd.to_numeric(schema_df_enforced[schema_column_expected], errors="coerce").fillna(0).astype(schema_data_type)
+                    if schema_data_type == int:
+                        schema_df_enforced[schema_column_expected] = pd.to_numeric(
+                            schema_df_enforced[schema_column_expected].astype(str).str.replace(",", "."), errors="coerce"
+                        ).fillna(0).astype(int)
+
+                    elif schema_data_type == float:
+                        schema_df_enforced[schema_column_expected] = pd.to_numeric(
+                            schema_df_enforced[schema_column_expected].astype(str).str.replace(",", "."), errors="coerce"
+                        ).fillna(0.0).astype(float)
                     elif schema_data_type == "datetime64[ns, UTC]":
-                        schema_df_enforced[schema_column_expected] = pd.to_datetime(schema_df_enforced[schema_column_expected], errors="coerce")
-                        if schema_df_enforced[schema_column_expected].dt.tz is None:
-                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_localize("UTC")
-                        else:
-                            schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].dt.tz_convert("UTC")
+                        schema_df_enforced[schema_column_expected] = pd.to_datetime(
+                            schema_df_enforced[schema_column_expected], errors="coerce", utc=True
+                        )
+                    elif schema_data_type == str:
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].astype(str).fillna("")
                     else:
-                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected].astype(schema_data_type, errors="ignore")
+                        schema_df_enforced[schema_column_expected] = schema_df_enforced[schema_column_expected]
                 except Exception as e:
                     print(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
                     logging.warning(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")

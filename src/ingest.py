@@ -1186,6 +1186,12 @@ def ingest_campaign_insights(
                     ingest_sections_status[ingest_section_name] = "failed"
                     print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+                # DEBUG
+                print("🔍 [DEBUG] ingest_df_fetched dtypes:")
+                print(ingest_df_fetched.dtypes)
+
+                print("🔍 [DEBUG] ingest_df_fetched sample:")
+                print(ingest_df_fetched.head(5).to_dict(orient='records'))            
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
                 
@@ -1207,6 +1213,12 @@ def ingest_campaign_insights(
                     ingest_sections_status[ingest_section_name] = "failed"
                     print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
                     logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights schema enforcement for {ingest_date_separated} with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) due to failed section(s) {', '.join(ingest_summary_enforced['schema_sections_failed']) if ingest_summary_enforced['schema_sections_failed'] else 'unknown error'} in {ingest_summary_enforced['schema_time_elapsed']}s.")
+                # DEBUG:
+                print("🔍 [DEBUG] ingest_df_enforced dtypes:")
+                print(ingest_df_enforced.dtypes)
+
+                print("🔍 [DEBUG] ingest_df_enforced sample:")
+                print(ingest_df_enforced.head(5).to_dict(orient='records'))                    
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
         
@@ -1277,8 +1289,16 @@ def ingest_campaign_insights(
                         logging.error(f"❌ [INGEST] Failed to create Facebook Ads campaign insights table {raw_table_campaign} due to {e}.")
                 else:
                     ingest_dates_new = ingest_df_deduplicated["date_start"].dropna().unique().tolist()
+                    # DEBUG
+                    print("🔍 [DEBUG] ingest_dates_new sample:")
+                    for i, d in enumerate(ingest_dates_new[:10]):
+                        print(f"  {i}: {d} ({type(d)})")                    
                     ingest_query_existed = f"SELECT DISTINCT date_start FROM `{raw_table_campaign}`"
                     ingest_dates_existed = [row.date_start for row in google_bigquery_client.query(ingest_query_existed).result()]
+                    # DEBUG
+                    print("🔍 [DEBUG] ingest_dates_existed sample:")
+                    for i, d in enumerate(ingest_dates_existed[:10]):
+                        print(f"  {i}: {d} ({type(d)})")                    
                     ingest_dates_overlapped = set(ingest_dates_new) & set(ingest_dates_existed)
                     if ingest_dates_overlapped:
                         print(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
