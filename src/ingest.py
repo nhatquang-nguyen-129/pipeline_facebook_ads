@@ -6,15 +6,15 @@ This module ingests raw data from the Facebook Ads fetching module
 into Google BigQuery, establishing the foundational raw layer used 
 for centralized storage and historical retention.
 
-It manages the complete ingestion flow — from authentication and 
-data fetching, to enrichment, schema validation, and loading into 
-BigQuery tables segmented by campaign, ad, creative and metadata.
+It manages the complete ingestion flow — from authentication to 
+data fetching, schema validation and loading into Google BigQuery 
+tables segmented by campaign, ad, creative and metadata.
 
 ✔️ Supports both append and truncate modes via write_disposition
-✔️ Validates data structure using centralized schema utilities  
-✔️ Integrates enrichment routines before loading into BigQuery  
-✔️ Implements granular logging and CSV-based error traceability  
-✔️ Ensures pipeline reliability through retry and checkpoint logic  
+✔️ Validates data structure using centralized schema utilities
+✔️ Applies lightweight normalization required for raw-layer loading
+✔️ Implements granular logging and CSV-based error traceability
+✔️ Ensures pipeline reliability through retry and checkpoint logic
 
 ⚠️ This module is dedicated solely to *raw-layer ingestion*.  
 It does **not** handle advanced transformations, metric modeling, 
@@ -32,7 +32,6 @@ import logging
 
 # Add Python Pandas libraries for integration
 import pandas as pd
-
 
 # Add Python time ultilities for integration
 import time
