@@ -2,16 +2,16 @@
 ==================================================================
 FACEBOOK STAGING MODULE
 ------------------------------------------------------------------
-This module transforms raw Facebook Ads data into enriched,  
+This module transforms raw Facebook Ads data into enriched, 
 normalized staging tables in BigQuery, acting as the bridge  
-between raw API ingestion and final MART-level analytics.
+between raw API ingestion and final materialized analytics.
 
 It combines raw ad/campaign/creative data, applies business logic  
-(e.g., parsing naming conventions, standardizing fields), and  
+included parsing naming conventions, standardizing fields and  
 prepares clean, query-ready datasets for downstream consumption.
 
 ✔️ Joins raw ad insights with creative and campaign metadata  
-✔️ Enriches fields such as owner, placement, format  
+✔️ Enriches fields such as owner, placement and format  
 ✔️ Normalizes and writes standardized tables into dataset  
 ✔️ Validates data integrity and ensures field completeness  
 ✔️ Supports modular extension for new Facebook Ads entities  
