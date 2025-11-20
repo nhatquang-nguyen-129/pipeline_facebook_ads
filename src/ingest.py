@@ -46,11 +46,6 @@ from google.api_core.exceptions import NotFound
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add internal Facebook modules for handling
-from src.enrich import (
-    enrich_campaign_insights, 
-    enrich_ad_insights   
-)
 from src.fetch import (
     fetch_campaign_metadata, 
     fetch_adset_metadata,
