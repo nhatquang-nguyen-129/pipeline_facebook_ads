@@ -158,11 +158,10 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "campaign_id": str,
             "optimization_goal": str,
             "spend": float,
-            "impressions": str,
+            "impressions": int,
             "clicks": int,
             "date_start": str,
             "date_stop": str,
-            "delivery_status": str,
             "actions": str,
         },        
         "staging_campaign_insights": {            

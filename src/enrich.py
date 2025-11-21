@@ -113,25 +113,26 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_df_goal = enrich_df_input.copy()
             enrich_df_goal["actions"] = enrich_df_goal["actions"].apply(
                 lambda x: (
-                    x 
-                    if isinstance(x, list)
-                    else []
-                    if (
+                    x if isinstance(x, list)
+                    else [] if (
                         x is None
                         or (isinstance(x, float) and np.isnan(x))
-                        or (isinstance(x, str) and x.strip() in ["", "None", "null", "NULL"])
+                        or (isinstance(x, str) and x.strip().lower() in ["", "none", "null"])
                     )
                     else (
-                        (lambda cleaned: (
-                            json.loads(cleaned)
-                            if isinstance(cleaned, str) else []
-                        ))(
+                        (
+                            lambda cleaned: (
+                                json.loads(cleaned)
+                                if cleaned.startswith("[") or cleaned.startswith("{")
+                                else []
+                            )
+                        )(
+                            # sanitize string → đảm bảo JSON luôn hợp lệ nhất có thể
                             re.sub(
                                 r"(?<!\")'([^']*?)':",
                                 r'"\1":',
-                                x.replace("'", '"')
-                            ).strip()
-                            if isinstance(x, str) else x
+                                str(x).replace("'", '"').strip()
+                            )
                         )
                     )
                     if isinstance(x, str) else []
@@ -434,25 +435,26 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
             enrich_df_goal = enrich_df_input.copy()
             enrich_df_goal["actions"] = enrich_df_goal["actions"].apply(
                 lambda x: (
-                    x 
-                    if isinstance(x, list)
-                    else []
-                    if (
+                    x if isinstance(x, list)
+                    else [] if (
                         x is None
                         or (isinstance(x, float) and np.isnan(x))
-                        or (isinstance(x, str) and x.strip() in ["", "None", "null", "NULL"])
+                        or (isinstance(x, str) and x.strip().lower() in ["", "none", "null"])
                     )
                     else (
-                        (lambda cleaned: (
-                            json.loads(cleaned)
-                            if isinstance(cleaned, str) else []
-                        ))(
+                        (
+                            lambda cleaned: (
+                                json.loads(cleaned)
+                                if cleaned.startswith("[") or cleaned.startswith("{")
+                                else []
+                            )
+                        )(
+                            # sanitize string → đảm bảo JSON luôn hợp lệ nhất có thể
                             re.sub(
                                 r"(?<!\")'([^']*?)':",
                                 r'"\1":',
-                                x.replace("'", '"')
-                            ).strip()
-                            if isinstance(x, str) else x
+                                str(x).replace("'", '"').strip()
+                            )
                         )
                     )
                     if isinstance(x, str) else []
