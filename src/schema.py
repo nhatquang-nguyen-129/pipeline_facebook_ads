@@ -7,7 +7,7 @@ schema structures used throughout the Facebook Ads data pipeline.
 It shares a consistent structure and data type alignment.  
 
 Its main purpose is to validate, enforce, and standardize field 
-structures across every pipeline stage to support reliable ETL
+structures across every pipeline stage to support reliable
 execution and seamless data integration.
 
 ✔️ Define and store expected field names and data types
