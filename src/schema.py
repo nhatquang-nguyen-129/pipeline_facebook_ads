@@ -107,7 +107,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
             "optimization_goal": str,
             "date_start": str,
             "date_stop": str,
-            "delivery_status": str,
             "actions": str,
         },        
         "ingest_campaign_metadata": {
