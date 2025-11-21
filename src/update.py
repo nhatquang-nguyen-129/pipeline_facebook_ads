@@ -588,13 +588,4 @@ def update_ad_insights(start_date: str, end_date: str):
                         print(f"    {idx:>2}. {sub_step:<70} | {sub_status:<10} | {sub_total:>8.2f}")
         print("-" * 120)
         print(f"{'Total execution time':<80} | {'-':<10} | {update_time_total:>8.2f}s")
-        print("=" * 120)      
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Run Facebook Campaign Backfill")
-    parser.add_argument("--start_date", type=str, required=True, help="Start date (YYYY-MM-DD)")
-    parser.add_argument("--end_date", type=str, required=True, help="End date (YYYY-MM-DD)")
-    args = parser.parse_args()
-
-    update_ad_insights(start_date=args.start_date, end_date=args.end_date)
+        print("=" * 120)
