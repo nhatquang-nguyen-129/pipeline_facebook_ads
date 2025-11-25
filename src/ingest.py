@@ -906,7 +906,7 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
                 logging.warning(f"⚠️ [INGEST] Partially triggered Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 ingest_sections_status[ingest_section_name] = "partial"
             else:
-                ingest_sections_status["[INGEST] Trigger to fetch Facebook Ads ad creative"] = "failed"
+                ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads ad creative fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
         finally:
