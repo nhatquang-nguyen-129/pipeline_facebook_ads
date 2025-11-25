@@ -7,7 +7,7 @@ ads data updates from Facebook Ads based on command-line arguments
 and environment variables.
 
 It supports incremental daily ingestion for selected data layers  
-(e.g., campaign, ad) and allows flexible control over date ranges.
+(e.g. campaign, ad) and allows flexible control over date ranges.
 
 ✔️ Dynamic routing to the correct update module based on PLATFORM  
 ✔️ CLI flags to select data layers and date range mode  
