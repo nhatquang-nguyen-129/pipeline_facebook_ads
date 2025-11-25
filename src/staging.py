@@ -367,7 +367,7 @@ def staging_campaign_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                   
 
-    # 1.1.11. Summarize staging result(s) of Facebook Ads campaign insights
+    # 1.1.11. Summarize staging results of Facebook Ads campaign insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
@@ -451,7 +451,7 @@ def staging_ad_insights() -> dict:
             staging_table_ad = f"{PROJECT}.{staging_dataset}.{COMPANY}_table_{PLATFORM}_all_all_ad_insights"
             print(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for Facebook Ads ad insights...")
             logging.info(f"🔍 [STAGING] Preparing to build staging table {staging_table_ad} for Facebook Ads ad insights...")
-            staging_sections_status["[STAGING] Prepare table_id for Facebook Ads ad insights staging"] = "succeed"
+            staging_sections_status[staging_section_name] = "succeed"
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)
 
@@ -730,7 +730,7 @@ def staging_ad_insights() -> dict:
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)      
 
-    # 1.2.11. Summarize staging result(s) of Facebook Ads ad insights
+    # 1.2.11. Summarize staging results of Facebook Ads ad insights
     finally:
         staging_time_elapsed = round(time.time() - staging_time_start, 2)
         staging_df_final = staging_df_uploaded.copy() if not staging_df_uploaded.empty else pd.DataFrame()
