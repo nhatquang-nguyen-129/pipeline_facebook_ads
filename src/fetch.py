@@ -347,8 +347,8 @@ def fetch_adset_metadata(fetch_ids_adset: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
     
-    # 1.2.3. Prepare field(s) for Facebook Ads adset metadata fetching
-        fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"
+    # 1.2.3. Prepare fields for Facebook Ads adset metadata fetching
+        fetch_section_name = "[FETCH] Prepare fields for Facebook Ads adset metadata fetching"
         fetch_section_start = time.time()            
         try:
             fetch_fields_default = [
@@ -358,7 +358,7 @@ def fetch_adset_metadata(fetch_ids_adset: list[str]) -> pd.DataFrame:
                 "effective_status",
                 "campaign_id"
             ]
-            fetch_sections_status["[FETCH] Prepare field(s) for Facebook Ads adset metadata fetching"] = "succeed" 
+            fetch_sections_status[fetch_section_name] = "succeed" 
             print(f"🔍 [FETCH] Preparing to fetch Facebook Ads adset metadata with {fetch_fields_default} field(s)...")
             logging.info(f"🔍 [FETCH] Preparing to fetch  Ads adset metadata with {fetch_fields_default} field(s)...")
         finally:
@@ -956,9 +956,9 @@ def fetch_ad_creative(fetch_ids_ad: list[str]) -> pd.DataFrame:
             if fetch_status_enforced == "schema_succeed_all":
                 print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad creative "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad creative"] = "succeed"
+                fetch_sections_status[fetch_section_name] = "succeed"
             else:
-                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads ad creative"] = "failed"
+                fetch_sections_status[fetch_section_name] = "failed"
                 print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections {', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
                 logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad creative with failed sections {', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
         finally:
@@ -1186,9 +1186,9 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             if fetch_status_enforced == "schema_succeed_all":
                 print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
                 logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads campaign insights"] = "succeed"
+                fetch_sections_status[fetch_section_name] = "succeed"
             else:
-                fetch_sections_status["[FETCH] Enforce schema for Facebook Ads campaign insights"] = "failed"
+                fetch_sections_status[fetch_section_name] = "failed"
                 print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
                 logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
         finally:
