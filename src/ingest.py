@@ -1121,11 +1121,11 @@ def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
 
 # 2.1. Ingest Facebook Ads campaign insights to Google BigQuery
 def ingest_campaign_insights(
-    start_date: str,
-    end_date: str,
+    ingest_date_start: str,
+    ingest_date_end: str,
 ) -> pd.DataFrame:  
-    print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {start_date} to {end_date}...")
+    print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end}...")
+    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end}...")
 
     # 2.1.1. Start timing Facebook Ads campaign insights ingestion
     ingest_dates_uploaded = []
@@ -1139,8 +1139,8 @@ def ingest_campaign_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
     }
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -1162,7 +1162,7 @@ def ingest_campaign_insights(
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 2.1.3. Trigger to fetch Facebook Ads campaign insights
-        ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
+        ingest_date_list = pd.date_range(start=ingest_date_start, end=ingest_date_end).strftime("%Y-%m-%d").tolist()
         for ingest_date_separated in ingest_date_list:           
             ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads campaign insights"
             ingest_section_start = time.time()
@@ -1362,16 +1362,16 @@ def ingest_campaign_insights(
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
         if len(ingest_dates_uploaded) == 0:
-            print(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_failed > 0:
-            print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_partial"
         else:
-            print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
@@ -1392,11 +1392,11 @@ def ingest_campaign_insights(
 
 # 2.2. Ingest Facebook Ad ad insight to Google BigQuery raw tables
 def ingest_ad_insights(
-    start_date: str,
-    end_date: str,
+    ingest_date_start: str,
+    ingest_date_end: str,
 ) -> pd.DataFrame:  
-    print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {start_date} to {end_date}...")
+    print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end}...")
+    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end}...")
 
     # 2.2.1. Start timing Facebook Ads ad insights ingestion
     ingest_dates_uploaded = []
@@ -1410,8 +1410,8 @@ def ingest_ad_insights(
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads ad insights to Google BigQuery": 0.0,
     }
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -1433,7 +1433,7 @@ def ingest_ad_insights(
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 2.2.3. Trigger to fetch Facebook Ads ad insights
-        ingest_date_list = pd.date_range(start=start_date, end=end_date).strftime("%Y-%m-%d").tolist()
+        ingest_date_list = pd.date_range(start=ingest_date_start, end=ingest_date_end).strftime("%Y-%m-%d").tolist()
         for ingest_date_separated in ingest_date_list:
             ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad insights"
             ingest_section_start = time.time()
@@ -1633,16 +1633,16 @@ def ingest_ad_insights(
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
             }
         if len(ingest_dates_uploaded) == 0:
-            print(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
         elif ingest_dates_failed > 0:
-            print(f"⚠️ [INGEST] Partially completed Facebook Ads ad ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"⚠️ [INGEST] Partially completed Facebook Ads ad ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_partial"
         else:
-            print(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {start_date} to {end_date} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_succeed_all"
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
