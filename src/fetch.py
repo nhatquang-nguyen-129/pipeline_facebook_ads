@@ -1014,16 +1014,16 @@ def fetch_ad_creative(fetch_ids_ad: list[str]) -> pd.DataFrame:
 # 2. FETCH FACEBOOK ADS INSIGHTS
 
 # 2.1. Fetch campaign insights for Facebook Ads
-def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch raw Facebook Ads campaign insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [FETCH] Starting to fetch raw Facebook Ads campaign insights from {start_date} to {end_date}...")    
+def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to fetch raw Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")
+    logging.info(f"🚀 [FETCH] Starting to fetch raw Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")    
 
     # 2.1.1. Start timing the Facebook Ads campaign insights fetching
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -1034,7 +1034,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             fetch_params_default = {
             "level": "campaign",
             "time_increment": 1,
-            "time_range": {"since": start_date, "until": end_date},
+            "time_range": {"since": fetch_date_start, "until": fetch_date_end},
             }
             print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
             logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
@@ -1151,8 +1151,8 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         try:            
             for attempt in range(fetch_retries_campaign):
                 try:
-                    print(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign}...")
-                    logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign}...")
+                    print(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign}...")
+                    logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign}...")
                     fetch_response_campaign = account_id_prefixed.get_insights(
                         fields=fetch_fields_default,
                         params=fetch_params_default
@@ -1160,16 +1160,16 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
                     fetch_insights_campaign = [dict(fetch_insight_campaign) for fetch_insight_campaign in fetch_response_campaign]
                     fetch_df_flattened = pd.DataFrame(fetch_insights_campaign)
                     fetch_sections_status[fetch_section_name] = "succeed"
-                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {start_date} to {end_date}.")
-                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {start_date} to {end_date}.")
+                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {fetch_date_start} to {fetch_date_end}.")
+                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {fetch_date_start} to {fetch_date_end}.")
                     break
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
                     if attempt == fetch_retries_campaign - 1:
                         fetch_sections_status[fetch_section_name] = "failed"
-                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} due to maximum retry attempts exceeded.")
-                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
+                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
@@ -1177,20 +1177,20 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Trigger to enforce schema for Facebook Ads campaign insights"
         fetch_section_start = time.time()        
         try:            
-            print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")            
+            print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with {len(fetch_df_flattened)} row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with {len(fetch_df_flattened)} row(s)...")
             fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_campaign_insights")            
             fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
             fetch_status_enforced = fetch_results_schema["schema_status_final"]
             fetch_df_enforced = fetch_results_schema["schema_df_final"]    
             if fetch_status_enforced == "schema_succeed_all":
-                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {start_date} to {end_date} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
                 fetch_sections_status[fetch_section_name] = "succeed"
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -1201,7 +1201,7 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_sections_total = len(fetch_sections_status) 
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
-        fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
+        fetch_days_input = ((pd.to_datetime(fetch_date_end) - pd.to_datetime(fetch_date_start)).days + 1)
         fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
@@ -1216,16 +1216,16 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
             for fetch_section_summary in fetch_sections_summary
         }        
         if fetch_sections_failed:
-            print(f"❌ [FETCH] Failed to complete Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            print(f"❌ [FETCH] Failed to complete Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_failed_all"
         elif fetch_days_output < fetch_days_input:
-            print(f"⚠️ [FETCH] Partially completed Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            print(f"⚠️ [FETCH] Partially completed Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_partial"
         else:
-            print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            print(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_all"                     
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
@@ -1244,16 +1244,16 @@ def fetch_campaign_insights(start_date: str, end_date: str) -> pd.DataFrame:
     return fetch_results_final
 
 # 2.2. Fetch ad insights for Facebook Ads
-def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {start_date} to {end_date}...")
-    logging.info(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {start_date} to {end_date}...")    
+def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
+    logging.info(f"🚀 [FETCH] Starting to fetch raw Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")    
 
     # 2.2.1. Start timing the Facebook Ads ad insights fetching
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {start_date} to {end_date} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -1264,7 +1264,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             fetch_params_default = {
                 "level": "ad",
                 "time_increment": 1,
-                "time_range": {"since": start_date, "until": end_date},
+                "time_range": {"since": fetch_date_start, "until": fetch_date_end},
             }
             print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
             logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad insights with {fetch_params_default} parameter(s)...")
@@ -1380,8 +1380,8 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         try:            
             for attempt in range(fetch_retries_ad) :
                 try:
-                    print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad}...")
-                    logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad}...")
+                    print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad}...")
+                    logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad}...")
                     fetch_response_ad = account_id_prefixed.get_insights(
                         fields=fetch_fields_default,
                         params=fetch_params_default
@@ -1389,16 +1389,16 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
                     fetch_insights_ad = [dict(fetch_insight_ad) for fetch_insight_ad in fetch_response_ad]
                     fetch_df_flattened = pd.DataFrame(fetch_insights_ad)
                     fetch_sections_status[fetch_section_name] = "succeed"
-                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {start_date} to {end_date}.")
-                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {start_date} to {end_date}.")
+                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {fetch_date_start} to {fetch_date_end}.")
+                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {fetch_date_start} to {fetch_date_end}.")
                     break
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
                     if attempt == fetch_retries_ad - 1:
                         fetch_sections_status[fetch_section_name] = "failed"
-                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
-                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {start_date} to {end_date} due to maximum retry attempts exceeded.")
+                        print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
+                        logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -1406,20 +1406,20 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Trigger to enforce schema for Facebook Ads ad insights"
         fetch_section_start = time.time()              
         try:            
-            print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")
-            logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {len(fetch_df_flattened)} row(s)...")            
+            print(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with {len(fetch_df_flattened)} row(s)...")
+            logging.info(f"🔄 [FETCH] Trigger to enforce schema for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with {len(fetch_df_flattened)} row(s)...")
             fetch_results_schema = enforce_table_schema(fetch_df_flattened, "fetch_ad_insights")            
             fetch_summary_enforced = fetch_results_schema["schema_summary_final"]
             fetch_status_enforced = fetch_results_schema["schema_status_final"]
             fetch_df_enforced = fetch_results_schema["schema_df_final"]    
             if fetch_status_enforced == "schema_succeed_all":
-                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {start_date} to {end_date} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
                 fetch_sections_status[fetch_section_name] = "succeed"
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {start_date} to {end_date} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
@@ -1430,7 +1430,7 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
         fetch_sections_total = len(fetch_sections_status) 
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
-        fetch_days_input = ((pd.to_datetime(end_date) - pd.to_datetime(start_date)).days + 1)
+        fetch_days_input = ((pd.to_datetime(fetch_date_end) - pd.to_datetime(fetch_date_start)).days + 1)
         fetch_days_output = (fetch_df_final["date_start"].nunique() if not fetch_df_final.empty and "date_start" in fetch_df_final.columns else 0)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
@@ -1445,16 +1445,16 @@ def fetch_ad_insights(start_date: str, end_date: str) -> pd.DataFrame:
             for fetch_section_summary in fetch_sections_summary
         }        
         if fetch_sections_failed:
-            print(f"❌ [FETCH] Failed to complete Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            print(f"❌ [FETCH] Failed to complete Facebook Ads ad insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads ad insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_failed_all"
         elif fetch_days_output < fetch_days_input:
-            print(f"⚠️ [FETCH] Partially completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched days(s) in {fetch_time_elapsed}s.")
+            print(f"⚠️ [FETCH] Partially completed Facebook Ads ad insights fetching from from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads ad insights fetching from from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched days(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_partial"
         else:
-            print(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {start_date} to {end_date} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            print(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
+            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads ad insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_succeed_all"         
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
