@@ -1149,7 +1149,7 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
         fetch_insights_campaign = []
         fetch_retries_campaign = 2
         try:            
-            for attempt in range(fetch_retries_campaign):
+            for fetch_retry_campaign in range(fetch_retries_campaign):
                 try:
                     print(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign}...")
                     logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign}...")
@@ -1164,9 +1164,14 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                     logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {fetch_date_start} to {fetch_date_end}.")
                     break
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_campaign} due to {e} then retrying....")
-                    if attempt == fetch_retries_campaign - 1:
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_retry_campaign + 1}/{fetch_retries_campaign} due to {e}.")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_retry_campaign + 1}/{fetch_retries_campaign} due to {e}.")
+                    if fetch_retry_campaign < fetch_retries_campaign - 1:
+                        fetch_retry_delay = 60 + (fetch_retry_campaign * 30)
+                        print(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")
+                        logging.warning(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")
+                        time.sleep(fetch_retry_delay)                    
+                    if fetch_retry_delay == fetch_retries_campaign - 1:
                         fetch_sections_status[fetch_section_name] = "failed"
                         print(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
                         logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
@@ -1378,7 +1383,7 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
         fetch_insights_ad = []
         fetch_retries_ad = 2
         try:            
-            for attempt in range(fetch_retries_ad) :
+            for fetch_retry_ad in range(fetch_retries_ad) :
                 try:
                     print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad}...")
                     logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad}...")
@@ -1393,9 +1398,14 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
                     logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads ad insights with {len(fetch_insights_ad)} row(s) from {fetch_date_start} to {fetch_date_end}.")
                     break
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
-                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {attempt + 1}/{fetch_retries_ad} due to {e} then retrying....")
-                    if attempt == fetch_retries_ad - 1:
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {fetch_retry_ad + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} with attempt {fetch_retry_ad + 1}/{fetch_retries_ad} due to {e} then retrying....")
+                    if fetch_retry_ad < fetch_retries_ad - 1:
+                        fetch_retry_delay = 60 + (fetch_retry_ad * 30)
+                        print(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
+                        logging.warning(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
+                        time.sleep(fetch_retry_delay)                              
+                    if fetch_retry_ad == fetch_retries_ad - 1:
                         fetch_sections_status[fetch_section_name] = "failed"
                         print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
                         logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")

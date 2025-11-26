@@ -1186,7 +1186,7 @@ def ingest_campaign_insights(
                     print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                     logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign insights fetching for {ingest_date_separated} with {ingest_summary_fetched['fetch_days_output']}/{ingest_summary_fetched['fetch_days_input']} fetched day(s) due to {', '.join(ingest_summary_fetched['fetch_sections_failed'])} or unknown error in {ingest_summary_fetched['fetch_time_elapsed']}s.")     
             finally:
-                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
                 
     # 2.1.4. Trigger to enforce schema for Facebook Ads campaign insights
             ingest_section_name = "[INGEST] Trigger to enforce schema for Facebook Ads campaign insights"
