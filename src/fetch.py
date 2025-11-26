@@ -1403,10 +1403,10 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
                     print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued} due to {e}.")
                     logging.warning(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued} due to {e}.")
                     if fetch_attempt_queued < fetch_attempts_queued - 1:
-                        fetch_retry_delay = 60 + (fetch_attempt_queued * 60)
-                        print(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
-                        logging.warning(f"🔄 [FETCH] Waiting {fetch_retry_delay}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
-                        time.sleep(fetch_retry_delay)                              
+                        fetch_retry_delayed = 60 + (fetch_attempt_queued * 60)
+                        print(f"🔄 [FETCH] Waiting {fetch_retry_delayed}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
+                        logging.warning(f"🔄 [FETCH] Waiting {fetch_retry_delayed}s before retrying to retrieve Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end}...")
+                        time.sleep(fetch_retry_delayed)                              
                     else:
                         fetch_sections_status[fetch_section_name] = "failed"
                         print(f"❌ [FETCH] Failed to retrieve Facebook Ads ad insight from {fetch_date_start} to {fetch_date_end} due to maximum retry attempts exceeded.")
@@ -1436,7 +1436,7 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
-    # 2.2.10. Summarize fetch result(s) for Facebook Ads ad insights
+    # 2.2.10. Summarize fetch results for Facebook Ads ad insights
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
