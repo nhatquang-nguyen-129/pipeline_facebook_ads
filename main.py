@@ -75,8 +75,6 @@ except ModuleNotFoundError:
 # 1.2. Execution controller
 def main():
     main_date_today = datetime.today()
-
-    # 1.2.1. PLATFORM = facebook (keep original logic)
     if PLATFORM == "facebook":
         try:
             update_campaign_insights = update_module_location.update_campaign_insights
@@ -119,7 +117,7 @@ def main():
                 print(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
                 logging.error(f"❌ [MAIN] Failed to trigger update '{PLATFORM}' ad insights of '{COMPANY}' in '{MODE}' mode and '{LAYER}' layer from {main_date_start} to {main_date_end} due to {e}.")
 
-# 1.3. Entrypoint guard
+# 1.3. Execute main entrypoint function
 if __name__ == "__main__":
     try:
         main()
