@@ -16,7 +16,7 @@ execution and seamless data integration.
 ✔️ Automatically handle missing or mismatched columns  
 ✔️ Provide schema utilities for debugging and audit logging  
 
-⚠️ This module does *not* perform data fetching or transformation.  
+⚠️ This module does not perform data fetching or transformation.  
 It serves purely as a utility layer to support schema consistency  
 throughout the Facebook Ads ETL process.
 ===================================================================
@@ -30,9 +30,6 @@ import time
 
 # Add external Python Pandas libraries for integration
 import pandas as pd
-
-# Add external Python NumPy libraries for integration
-import numpy as np
 
 # 1. ENFORCE SCHEMA FOR GIVEN PYTHON DATAFRAME
 
