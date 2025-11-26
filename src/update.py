@@ -16,9 +16,9 @@ data sync jobs while maintaining historical accuracy and integrity.
 ✔️ Implements error handling and retry logic for partial failures  
 ✔️ Designed for integration in daily or on-demand sync pipelines  
 
-⚠️ This module is strictly responsible for *RAW layer updates only*.  
+⚠️ This module is strictly responsible for raw layer updates only.  
 It does not perform transformations, enrichment, or aggregations.  
-Processed data is consumed by the STAGING and MART modules.
+Processed data is consumed by the staging and materialized modules.
 ==================================================================
 """
 
@@ -27,19 +27,19 @@ import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 
-# Add logging ultilities for integration
+# Add Python logging ultilities for integration
 import logging
 
-# Add Python "re" libraries for integration
+# Add Python regular expression operations ultilities for integration
 import re
 
-# Add Python 'time' libraries for integration
+# Add Python time ultilities for integration
 import time
 
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add internal Facebook module for handling
+# Add internal Facebook Ads modules for handling
 from src.ingest import (
     ingest_campaign_metadata,
     ingest_adset_metadata,
