@@ -7,17 +7,17 @@ aggregating and transforming data sourced from staging tables
 produced during the raw data ingestion process.
 
 It serves as the final transformation stage, consolidating daily 
-performance and cost metrics into analytics-ready BigQuery tables 
-optimized for reporting, dashboarding, and business analysis.
+performance and cost metrics into Google BigQuery tables optimized
+for reporting, dashboarding, and business analysis.
 
 ✔️ Dynamically identifies all available Facebook Ads staging tables  
-✔️ Applies data transformation, standardization, and type enforcement  
+✔️ Applies data transformation, standardization and type enforcement  
 ✔️ Performs daily-level aggregation of campaign performance metrics  
 ✔️ Creates partitioned and clustered MART tables in Google BigQuery  
 ✔️ Ensures consistency and traceability across the data pipeline  
 
 ⚠️ This module is exclusively responsible for materialized layer  
-construction*. It does not perform data ingestion, API fetching, 
+construction. It does not perform data ingestion, API fetching, 
 or enrichment tasks.
 ==================================================================
 """
