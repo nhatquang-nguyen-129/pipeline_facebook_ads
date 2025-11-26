@@ -6,7 +6,7 @@ This module transforms raw Facebook Ads data into enriched,
 normalized staging tables in BigQuery, acting as the bridge  
 between raw API ingestion and final materialized analytics.
 
-It combines raw ad/campaign/creative data, applies business logic  
+It combines raw ad, campaign, creative data, applies business logic  
 included parsing naming conventions, standardizing fields and  
 prepares clean, query-ready datasets for downstream consumption.
 
@@ -39,7 +39,7 @@ import pandas as pd
 # Add Google Cloud modules for integration
 from google.cloud import bigquery
 
-# Add internal Facebook module for handling
+# Add internal Facebook Ads modules for handling
 from src.schema import enforce_table_schema
 from src.enrich import (
     enrich_campaign_fields,
