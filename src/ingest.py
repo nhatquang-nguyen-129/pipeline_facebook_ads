@@ -1351,7 +1351,7 @@ def ingest_campaign_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.1.9. Summarize ingestion result(s) for Facebook Ads campaign insights
+    # 2.1.9. Summarize ingestion results for Facebook Ads campaign insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
@@ -1427,6 +1427,7 @@ def ingest_ad_insights(
         "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
         "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads ad insights to Google BigQuery": 0.0,
+        "[INGEST] Cooldown before next Facebook Ads ad insights fetch": 0.0,
     }
     print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
     logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
@@ -1452,7 +1453,7 @@ def ingest_ad_insights(
 
     # 2.2.3. Trigger to fetch Facebook Ads ad insights
         ingest_date_list = pd.date_range(start=ingest_date_start, end=ingest_date_end).strftime("%Y-%m-%d").tolist()
-        for ingest_date_separated in ingest_date_list:
+        for ingest_date_indexed, ingest_date_separated in enumerate(ingest_date_list):
             ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad insights"
             ingest_section_start = time.time()
             try:
@@ -1622,7 +1623,24 @@ def ingest_ad_insights(
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
 
-    # 2.2.8. Summarize ingestion result(s) for Facebook Ads ad insights
+    # 2.2.8. Cooldown before next Facebook Ads ad insights fetch
+            ingest_section_name = "[INGEST] Cooldown before next Facebook Ads ad insights fetch"
+            ingest_section_start = time.time()
+            try:
+                if ingest_date_indexed < len(ingest_date_list) - 1:
+                    ingest_cooldown_queued = ingest_results_fetched["fetch_summary_final"].get("fetch_cooldown_queued", 60)
+                    print(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of Facebook Ads ad insights...")
+                    logging.info(f"🔁 [INGEST] Waiting {ingest_cooldown_queued}s cooldown before triggering to fetch next day of Facebook Ads ad insights...")
+                    time.sleep(ingest_cooldown_queued)
+                ingest_sections_status[ingest_section_name] = "succeed"
+            except Exception as e:
+                ingest_sections_status[ingest_section_name] = "failed"
+                print(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of Facebook Ads ad insights due to {e}")
+                logging.error(f"❌ [INGEST] Failed to set cooldown for {ingest_cooldown_queued}s before triggering to fetch next day of Facebook Ads ad insights due to {e}")
+            finally:
+                ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
+
+    # 2.2.9. Summarize ingestion results for Facebook Ads ad insights
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = pd.concat(ingest_dates_uploaded or [], ignore_index=True)
