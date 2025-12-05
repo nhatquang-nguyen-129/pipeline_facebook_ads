@@ -81,15 +81,15 @@ MODE = os.getenv("MODE")
 
 # 1.1. Ingest Facebook Ads campaign metadata to Google BigQuery
 def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest raw Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest raw Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
+    print(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
+    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign metadata for {len(ingest_ids_campaign)} campaign_id(s)...")
 
     # 1.1.1. Start timing Facebook Ads campaign metadata ingestion
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    print(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest raw Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign metadata at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
 
     try:
 
@@ -103,8 +103,8 @@ def ingest_campaign_metadata(ingest_ids_campaign: list) -> pd.DataFrame:
                 logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_campaign provided then ingestion is suspended.")
             else:
                 ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
-                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of raw Facebook Ads campaign metadata ingestion.")
+                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of Facebook Ads campaign metadata ingestion.")
+                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_campaign)} campaign_id(s) of Facebook Ads campaign metadata ingestion.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
