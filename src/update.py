@@ -542,7 +542,7 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
         finally:
             update_sections_time[update_section_name] = round(time.time() - update_section_start, 2)
 
-    # 1.2.10. Summarize update result(s) for Facebook Ads ad insights pipeline
+    # 1.2.10. Summarize update results for Facebook Ads ad insights pipeline
     finally:
         update_time_total = round(time.time() - update_time_start, 2)
         print("\n📊 [UPDATE] FACEBOOK ADS CREATIVE PERFORMANCE SUMMARY")
