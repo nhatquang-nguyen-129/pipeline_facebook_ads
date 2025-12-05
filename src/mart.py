@@ -59,7 +59,7 @@ MODE = os.getenv("MODE")
 
 # 1. BUILD MONTHLY MATERIALIZED TABLE FOR CAMPAIGN PERFORMANCE
 
-# 1.1. Build materialized table for Facebook campaign performance by union all staging table(s)
+# 1.1. Build materialized table for Facebook campaign performance by union all staging table
 def mart_campaign_all() -> dict:
     print(f"🚀 [MART] Starting to build materialized table for Facebook Ads campaign performance...")
     logging.info(f"🚀 [MART] Starting to build materialized table Facebook Ads campaign performance...")
@@ -107,8 +107,8 @@ def mart_campaign_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
     
-    # 1.1.4. Query all staging Facebook Ads campaign insights table(s)
-        mart_section_name = "[MART] Query all staging Facebook Ads campaign insights table(s)"
+    # 1.1.4. Query staging table for materialization
+        mart_section_name = "[MART] Query staging table for materialization"
         mart_section_start = time.time()    
         try:
             query = f"""
@@ -168,7 +168,7 @@ def mart_campaign_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 1.1.5. Summarize materialization result(s) for Facebook Ads campaign performance
+    # 1.1.5. Summarize materialization results for Facebook Ads campaign performance
     finally:
         mart_time_elapsed = round(time.time() - mart_time_start, 2)
         mart_sections_total = len(mart_sections_status) 
@@ -206,7 +206,7 @@ def mart_campaign_all() -> dict:
         }
     return mart_results_final
 
-# 2. BUILD MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLE(S)
+# 2. BUILD MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLES
 
 # 2.1. Build materialized table for Facebook creative performance by union all staging tables
 def mart_creative_all() -> dict:
@@ -256,8 +256,8 @@ def mart_creative_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.4. Query all staging table(s) for materialization
-        mart_section_name = "[MART] Query all staging table(s) for materialization"
+    # 2.1.4. Query staging table for materialization
+        mart_section_name = "[MART] Query staging table for materialization"
         mart_section_start = time.time()        
         try:
             query = f"""
@@ -316,7 +316,7 @@ def mart_creative_all() -> dict:
         finally:
             mart_sections_time[mart_section_name] = round(time.time() - mart_section_start, 2)
 
-    # 2.1.5. Summarize materialization result(s) for Facebook Ads creative performance
+    # 2.1.5. Summarize materialization results for Facebook Ads creative performance
     finally:
         mart_time_elapsed = round(time.time() - mart_time_start, 2)
         mart_sections_total = len(mart_sections_status) 
