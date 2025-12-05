@@ -17,7 +17,7 @@ tables segmented by campaign, ad, creative and metadata.
 ✔️ Ensures pipeline reliability through retry and checkpoint logic
 
 ⚠️ This module is dedicated solely to raw-layer ingestion.  
-It does not handle advanced transformations, metric modeling, 
+It does not handle advanced transformations, metric modeling 
 or aggregated data processing beyond the ingestion boundary.
 ==================================================================
 """
