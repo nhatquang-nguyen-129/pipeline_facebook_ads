@@ -325,7 +325,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         finally:
             schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)            
 
-    # 1.1.5. Summarize schema enforcement result(s) for Facebook Ads
+    # 1.1.5. Summarize schema enforcement results for Facebook Ads
     finally:
         schema_time_elapsed = round(time.time() - schema_time_start, 2)
         schema_df_final = schema_df_enforced.copy() if "schema_df_enforced" in locals() and not schema_df_enforced.empty else pd.DataFrame()        
