@@ -16,7 +16,7 @@ build insight-ready tables.
 ✔️ Cleans and validates data to ensure schema and field consistency  
 ✔️ Reduces payload size by removing redundant or raw field(s)
 
-⚠️ This module focuses *only* on enrichment and transformation logic.  
+⚠️ This module focuses only on enrichment and transformation logic.  
 It does **not** handle data fetching, ingestion or staging
 ==================================================================
 """
@@ -127,7 +127,6 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
                                 else []
                             )
                         )(
-                            # sanitize string → đảm bảo JSON luôn hợp lệ nhất có thể
                             re.sub(
                                 r"(?<!\")'([^']*?)':",
                                 r'"\1":',
@@ -428,7 +427,6 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
                                 else []
                             )
                         )(
-                            # sanitize string → đảm bảo JSON luôn hợp lệ nhất có thể
                             re.sub(
                                 r"(?<!\")'([^']*?)':",
                                 r'"\1":',
