@@ -333,7 +333,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)    
 
-    # 1.1.8. Summarize enrichment result(s) for staging Facebook Ads campaign insights
+    # 1.1.8. Summarize enrichment results for staging Facebook Ads campaign insights
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_date.copy() if not enrich_df_date.empty else pd.DataFrame()
@@ -656,7 +656,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    # 1.2.9. Summarize enrich result(s) for staging Facebook ad insights
+    # 1.2.9. Summarize enrich results for staging Facebook ad insights
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_date.copy() if not enrich_df_date.empty else pd.DataFrame()
