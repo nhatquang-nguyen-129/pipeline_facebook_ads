@@ -6,7 +6,7 @@ This module performs incremental updates to Facebook Ads data at
 the raw layer, providing an efficient mechanism for refreshing  
 recent or specific-date datasets without the need for full reloads.
 
-By supporting targeted updates (per day, layer, or entity), it  
+By supporting targeted updates (per day, layer or entity), it  
 enables faster turnaround for near-real-time dashboards and daily  
 data sync jobs while maintaining historical accuracy and integrity.
 

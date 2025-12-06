@@ -88,10 +88,10 @@ def main():
             main_date_start = main_date_end = main_date_today.strftime("%Y-%m-%d")
         elif MODE == "last3days":
             main_date_start = (main_date_today - timedelta(days=3)).strftime("%Y-%m-%d")
-            main_date_end = main_date_today.strftime("%Y-%m-%d")
+            main_date_end = (main_date_today - timedelta(days=1)).strftime("%Y-%m-%d")      
         elif MODE == "last7days":
             main_date_start = (main_date_today - timedelta(days=7)).strftime("%Y-%m-%d")
-            main_date_end = main_date_today.strftime("%Y-%m-%d")
+            main_date_end = (main_date_today - timedelta(days=1)).strftime("%Y-%m-%d")
         elif MODE == "thismonth":
             main_date_start = main_date_today.replace(day=1).strftime("%Y-%m-%d")
             main_date_end = main_date_today.strftime("%Y-%m-%d")
