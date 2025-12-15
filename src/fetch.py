@@ -113,7 +113,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         fetch_section_name = "[FETCH] Prepare fields for Facebook Ads campaign metadata fetching"
         fetch_section_start = time.time()        
         try:
-            fetch_fields_default = [
+            fetch_campaign_fields = [
                 "id", 
                 "name", 
                 "status",
@@ -123,8 +123,8 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 "buying_type"
             ]
             fetch_sections_status[fetch_section_name] = "succeed"   
-            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_fields_default} field(s)...")
+            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_campaign_fields} field(s)...")
+            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign metadata with {fetch_campaign_fields} field(s)...")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)             
    
@@ -230,8 +230,8 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign metadata for account_id {fetch_account_id} with {len(fetch_campaign_ids)} campaign_id(s).")        
             for fetch_campaign_id in fetch_campaign_ids:
                 try:
-                    campaign = Campaign(fbid=fetch_campaign_id).api_get(fields=fetch_fields_default)
-                    fetch_campaign_metadata = {f: campaign.get(f, None) for f in fetch_fields_default}
+                    campaign = Campaign(fbid=fetch_campaign_id).api_get(fields=fetch_campaign_fields)
+                    fetch_campaign_metadata = {f: campaign.get(f, None) for f in fetch_campaign_fields}
                     fetch_campaign_metadata["campaign_id"] = fetch_campaign_metadata.pop("id", None)
                     fetch_campaign_metadata["campaign_name"] = fetch_campaign_metadata.pop("name", None)
                     fetch_campaign_metadata["account_id"] = fetch_account_id
@@ -471,35 +471,35 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
     # 1.2.9. Make Facebook Ads API call for adset metadata
         fetch_section_name = "[FETCH] Make Facebook Ads API call for adset metadata"
         fetch_section_start = time.time()
-        fetch_metadatas_adset = []      
-        print(f"🔍 [FETCH] Retrieving Facebook Ads adset metadata for account_id {fetch_account_id} with {len(fetch_ids_adset)} adset_id(s)...")
-        logging.info(f"🔍 [FETCH] Retrieving Facebook Ads adset metadata for account_id {fetch_account_id} with {len(fetch_ids_adset)} adset_id(s)...")
+        fetch_adset_metadatas = []      
+        print(f"🔍 [FETCH] Retrieving Facebook Ads adset metadata for account_id {fetch_account_id} with {len(fetch_adset_ids)} adset_id(s)...")
+        logging.info(f"🔍 [FETCH] Retrieving Facebook Ads adset metadata for account_id {fetch_account_id} with {len(fetch_adset_ids)} adset_id(s)...")
         try:            
-            for fetch_id_adset in fetch_ids_adset:
+            for fetch_adset_id in fetch_adset_ids:
                 try:
-                    adset = AdSet(fbid=fetch_id_adset).api_get(fields=fetch_fields_default)
-                    fetch_metadata_adset = {f: adset.get(f, None) for f in fetch_fields_default}
-                    fetch_metadata_adset["adset_id"] = fetch_metadata_adset.pop("id", None)
-                    fetch_metadata_adset["adset_name"] = fetch_metadata_adset.pop("name", None)
-                    fetch_metadata_adset["account_id"] = account_id
-                    fetch_metadata_adset["account_name"] = account_name
-                    fetch_metadatas_adset.append(fetch_metadata_adset)
+                    adset = AdSet(fbid=fetch_adset_id).api_get(fields=fetch_adset_fields)
+                    fetch_adset_metadata = {f: adset.get(f, None) for f in fetch_adset_fields}
+                    fetch_adset_metadata["adset_id"] = fetch_adset_metadata.pop("id", None)
+                    fetch_adset_metadata["adset_name"] = fetch_adset_metadata.pop("name", None)
+                    fetch_adset_metadata["account_id"] = fetch_account_id
+                    fetch_adset_metadata["account_name"] = fetch_account_name
+                    fetch_adset_metadatas.append(fetch_adset_metadata)
                 except Exception as e:
-                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata for adset_id {fetch_id_adset} due to {e}.")
-                    logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata for adset_id {fetch_id_adset} due to {e}.")
-            fetch_df_flattened = pd.DataFrame(fetch_metadatas_adset)
-            if len(fetch_metadatas_adset) == len(fetch_ids_adset):
+                    print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata for adset_id {fetch_adset_ids} due to {e}.")
+                    logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads adset metadata for adset_id {fetch_adset_ids} due to {e}.")
+            fetch_df_flattened = pd.DataFrame(fetch_adset_metadatas)
+            if len(fetch_adset_metadatas) == len(fetch_adset_ids):
                 fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully retrieved Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
-                logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
-            elif 0 < len(fetch_metadatas_adset) < len(fetch_ids_adset):
+                print(f"✅ [FETCH] Successfully retrieved Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
+                logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
+            elif len(fetch_adset_ids) > 0 and len(fetch_adset_metadatas) < len(fetch_adset_ids):
                 fetch_sections_status[fetch_section_name] = "partial"
-                print(f"⚠️ [FETCH] Partially retrieved Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
-                logging.warning(f"⚠️ [FETCH] Partially retrieved Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
+                print(f"⚠️ [FETCH] Partially retrieved Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
+                logging.warning(f"⚠️ [FETCH] Partially retrieved Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata with {len(fetch_metadatas_adset)}/{len(fetch_ids_adset)} adset_id(s) for account_id {account_id}.")
+                print(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
+                logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads adset metadata with {len(fetch_adset_metadatas)}/{len(fetch_adset_ids)} adset_id(s) for account_id {fetch_account_id}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -514,13 +514,17 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
             fetch_status_enforced = fetch_results_schema["schema_status_final"]
             fetch_df_enforced = fetch_results_schema["schema_df_final"]    
             if fetch_status_enforced == "schema_succeed_all":
-                print(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads adset metadata with "f"{fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
-                logging.info(f"✅ [FETCH] Successfully triggered to enforce schema for Facebook Ads adset metadata "f"with {fetch_summary_enforced['schema_rows_output']} row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
                 fetch_sections_status[fetch_section_name] = "succeed"
+                print(f"✅ [FETCH] Successfully triggered Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.info(f"✅ [FETCH] Successfully triggered Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+            elif fetch_status_enforced == "schema_succeed_partial":
+                fetch_sections_status[fetch_section_name] = "partial"
+                print(f"⚠️ [FETCH] Partially triggered Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.warning(f"⚠️ [FETCH] Partially triggered Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
             else:
                 fetch_sections_status[fetch_section_name] = "failed"
-                print(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads adset metadata with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
-                logging.error(f"❌ [FETCH] Failed to retrieve schema enforcement final results(s) for Facebook Ads adset metadata with failed sections "f"{', '.join(fetch_summary_enforced['schema_sections_failed'])}.")
+                print(f"❌ [FETCH] Failed to trigger Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
+                logging.error(f"❌ [FETCH] Failed to trigger Facebook Ads adset metadata schema enforcement with {fetch_summary_enforced['schema_rows_output']}/{fetch_summary_enforced['schema_rows_input']} enforced row(s) in {fetch_summary_enforced['schema_time_elapsed']}s.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
@@ -531,7 +535,7 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
         fetch_sections_total = len(fetch_sections_status) 
         fetch_sections_failed = [k for k, v in fetch_sections_status.items() if v == "failed"] 
         fetch_sections_succeeded = [k for k, v in fetch_sections_status.items() if v == "succeed"]
-        fetch_rows_input = len(fetch_ids_adset)
+        fetch_rows_input = len(fetch_adset_ids)
         fetch_rows_output = len(fetch_df_final)
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
@@ -545,17 +549,17 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
             for fetch_section_summary in fetch_sections_summary
         }
         if fetch_sections_failed:
-            print(f"❌ [FETCH] Failed to complete Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
-            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
             fetch_status_final = "fetch_failed_all"
-        elif fetch_rows_output < fetch_rows_input:
-            print(f"⚠️ [FETCH] Partially completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_partial"
-        else:
+            print(f"❌ [FETCH] Failed to complete Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+            logging.error(f"❌ [FETCH] Failed to complete Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
+        elif fetch_rows_output == fetch_rows_input:
+            fetch_status_final = "fetch_succeed_all"
             print(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
-            fetch_status_final = "fetch_succeed_all"         
+            logging.info(f"🏆 [FETCH] Successfully completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")            
+        else:
+            fetch_status_final = "fetch_succeed_partial"
+            print(f"⚠️ [FETCH] Partially completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")
+            logging.warning(f"⚠️ [FETCH] Partially completed Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) in {fetch_time_elapsed}s.")            
         fetch_results_final = {
             "fetch_df_final": fetch_df_final,
             "fetch_status_final": fetch_status_final,
@@ -572,9 +576,9 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
     return fetch_results_final
 
 # 1.3. Fetch ad metadata for Facebook Ads
-def fetch_ad_metadata(fetch_ids_ad: list[str]) -> pd.DataFrame:
-    print(f"🚀 [FETCH] Starting to fetch Facebook Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
-    logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads ad metadata for {len(fetch_ids_ad)} ad_id(s)...")
+def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
+    print(f"🚀 [FETCH] Starting to fetch Facebook Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
+    logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads ad metadata for {len(fetch_ad_ids)} ad_id(s)...")
 
     # 1.3.1. Start timing the Facebook Ads ad metadata fetching
     fetch_time_start = time.time()   
