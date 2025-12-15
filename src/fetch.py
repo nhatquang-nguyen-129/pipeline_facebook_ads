@@ -1044,104 +1044,83 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
     logging.info(f"🚀 [FETCH] Starting to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end}...")    
 
     # 2.1.1. Start timing the Facebook Ads campaign insights fetching
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
     fetch_time_start = time.time()   
     fetch_sections_status = {}
     fetch_sections_time = {}
-    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [FETCH] Proceeding to fetch Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
-    # 2.1.2. Validate input for Facebook Ads campaign insights fetching
-        fetch_section_name = "[FETCH] Validate input for Facebook Ads campaign insights fetching"
-        fetch_section_start = time.time()        
-        try:        
-            fetch_params_default = {
-            "level": "campaign",
-            "time_increment": 1,
-            "time_range": {"since": fetch_date_start, "until": fetch_date_end},
-            }
-            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_params_default} parameter(s)...")
-            fetch_fields_default = [
-                "account_id", "campaign_id", "optimization_goal",
-                "spend", "impressions", "clicks", "actions",
-                "date_start", "date_stop"
-            ]        
-            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads campaign insights with {fetch_fields_default} field(s)...")
-            fetch_sections_status[fetch_section_name] = "succeed"
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 2.1.3. Initialize Google Secret Manager client
+    # 2.1.2. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
-        fetch_section_start = time.time()           
+        fetch_section_start = time.time()                
         try:
             print(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [FETCH] Initializing Google Secret Manager client for Google Cloud Platform project {PROJECT}...")
             google_secret_client = secretmanager.SecretManagerServiceClient()
-            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
-            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
             fetch_sections_status[fetch_section_name] = "succeed"
+            print(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")
+            logging.info(f"✅ [FETCH] Successfully initialized Google Secret Manager client for Google Cloud project {PROJECT}.")            
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Google Secret Manager client for Google Cloud Platform project {PROJECT} due to {e}.")
         finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)       
 
-    # 2.1.4. Get Facebook Ads access token from Google Secret Manager
+    # 2.1.3. Get Facebook Ads access token from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
-        fetch_section_start = time.time()          
+        fetch_section_start = time.time()               
         try: 
             print(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads access token for account {ACCOUNT} from Google Secret Manager...")
             token_secret_id = f"{COMPANY}_secret_all_{PLATFORM}_token_access_user"
             token_secret_name = f"projects/{PROJECT}/secrets/{token_secret_id}/versions/latest"
             token_secret_response = google_secret_client.access_secret_version(request={"name": token_secret_name})
-            token_access_user = token_secret_response.payload.data.decode("utf-8")
-            print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
-            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            fetch_access_user = token_secret_response.payload.data.decode("utf-8")
             fetch_sections_status[fetch_section_name] = "succeed"
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads access token for account {ACCOUNT} from Google Secret Manager.")            
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
             logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads access token for {ACCOUNT} from Google Secret Manager due to {e}.")
         finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
 
-    # 2.1.5. Initialize Facebook SDK session from access token
+    # 2.1.4. Initialize Facebook SDK session from access token
         fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
-        fetch_section_start = time.time()          
+        fetch_section_start = time.time()
         try:
             print(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
             logging.info(f"🔍 [FETCH] Initializing Facebook SDK session for account {ACCOUNT} with access token...")
-            FacebookAdsApi.init(access_token=token_access_user, timeout=180)
+            FacebookAdsApi.init(access_token=fetch_access_user, timeout=180)
+            fetch_sections_status[fetch_section_name] = "succeed"
             print(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
             logging.info(f"✅ [FETCH] Successfully initialized Facebook SDK session for account {ACCOUNT} with access token.")
-            fetch_sections_status[fetch_section_name] = "succeed"
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
             logging.error(f"❌ [FETCH] Failed to initialize Facebook SDK session for account {ACCOUNT} due to {e}.")
         finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)  
+            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)     
 
-    # 2.1.6. Get Facebook Ads account_id from Google Secret Manager
+    # 2.1.5. Get Facebook Ads account_id from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads account_id from Google Secret Manager"
-        fetch_section_start = time.time()        
+        fetch_section_start = time.time()         
         try:
             print(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad account ID for account {ACCOUNT} from Google Secret Manager...")
             account_secret_id = f"{COMPANY}_secret_{DEPARTMENT}_{PLATFORM}_account_id_{ACCOUNT}"
             account_secret_name = f"projects/{PROJECT}/secrets/{account_secret_id}/versions/latest"
             account_secret_response = google_secret_client.access_secret_version(request={"name": account_secret_name})
-            account_id = account_secret_response.payload.data.decode("utf-8")
-            print(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
-            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {account_id} for account {ACCOUNT} from Google Secret Manager.")
+            fetch_account_id = account_secret_response.payload.data.decode("utf-8")
             fetch_sections_status[fetch_section_name] = "succeed"
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {fetch_account_id} for account {ACCOUNT} from Google Secret Manager.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account_id {fetch_account_id} for account {ACCOUNT} from Google Secret Manager.")
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
             print(f"❌ [FETCH] Failed to retrieve Facebook Ads account_id for account {ACCOUNT} from Google Secret Manager due to {e}.")
@@ -1149,44 +1128,60 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.1.7. Make Facebook Ads API call for ad account information
+    # 2.1.6. Make Facebook Ads API call for ad account information
         fetch_section_name = "[FETCH] Make Facebook Ads API call for ad account information"
-        fetch_section_start = time.time()        
+        fetch_section_start = time.time()
         try: 
-            print(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")
-            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {account_id}...")    
-            account_id_prefixed = AdAccount(f"act_{account_id}")
-            account_info = account_id_prefixed.api_get(fields=["name"])
-            account_name = account_info.get("name", "Unknown")       
-            print(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {account_name} for account_id {account_id}.")
-            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {account_name} for account_id {account_id}.")        
+            print(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {fetch_account_id}...")
+            logging.info(f"🔍 [FETCH] Retrieving Facebook Ads account name for account_id {fetch_account_id}...")    
+            fetch_account_prefixed = AdAccount(f"act_{fetch_account_id}")
+            fetch_account_info = fetch_account_prefixed.api_get(fields=["name"])
+            fetch_account_name = fetch_account_info.get("name", "Unknown")       
             fetch_sections_status[fetch_section_name] = "succeed"
+            print(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {fetch_account_name} for account_id {fetch_account_id}.")
+            logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads account name {fetch_account_name} for account_id {fetch_account_id}.")                    
         except Exception as e:
             fetch_sections_status[fetch_section_name] = "failed"
-            print(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
-            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {account_id} due to {e}.")
+            print(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {fetch_account_id} due to {e}.")
+            logging.error(f"❌ [FETCH] Failed to retrieve Facebook Ads account name for account_id {fetch_account_id} due to {e}.")
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 2.1.8. Make Facebook Ads API call for campaign insights
+    # 2.1.7. Make Facebook Ads API call for campaign insights
         fetch_section_name = "[FETCH] Make Facebook Ads API call for campaign insights"
         fetch_section_start = time.time()        
-        fetch_insights_campaign = []
+        fetch_campaign_insights = []
         fetch_attempts_queued = 3
         try:            
+            fetch_campaign_params = {
+            "level": "campaign",
+            "time_increment": 1,
+            "time_range": {"since": fetch_date_start, "until": fetch_date_end},
+            }
+            fetch_campaign_fields = [
+                "account_id", 
+                "campaign_id", 
+                "optimization_goal",
+                "spend", 
+                "impressions", 
+                "clicks", 
+                "actions",
+                "date_start", 
+                "date_stop"
+            ]
             for fetch_attempt_queued in range(fetch_attempts_queued):
                 try:
                     print(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}...")
                     logging.info(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}...")
-                    fetch_response_campaign = account_id_prefixed.get_insights(
-                        fields=fetch_fields_default,
-                        params=fetch_params_default
+                    fetch_campaign_response = fetch_account_prefixed.get_insights(
+                        fields=fetch_campaign_fields,
+                        params=fetch_campaign_params
                     )
-                    fetch_insights_campaign = [dict(fetch_insight_campaign) for fetch_insight_campaign in fetch_response_campaign]
-                    fetch_df_flattened = pd.DataFrame(fetch_insights_campaign)
+                    fetch_campaign_insights = [dict(fetch_campaign_insight) for fetch_campaign_insight in fetch_campaign_response]
+                    fetch_df_flattened = pd.DataFrame(fetch_campaign_insights)
                     fetch_sections_status[fetch_section_name] = "succeed"
-                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {fetch_date_start} to {fetch_date_end}.")
-                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_insights_campaign)} row(s) from {fetch_date_start} to {fetch_date_end}.")
+                    print(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_df_flattened)} row(s) from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}.")
+                    logging.info(f"✅ [FETCH] Successfully retrieved Facebook Ads campaign insights with {len(fetch_df_flattened)} row(s) from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}.")
                     break
                 except Exception as e:
                     print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued} due to {e}.")
