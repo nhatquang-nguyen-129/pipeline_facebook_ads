@@ -202,7 +202,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 "objective",
                 "configured_status",
                 "buying_type"
-            ]
+                ]
             for fetch_campaign_id in fetch_campaign_ids:
                 try:
                     campaign = Campaign(fbid=fetch_campaign_id).api_get(fields=fetch_campaign_fields)
@@ -424,7 +424,7 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
                 "status",
                 "effective_status",
                 "campaign_id"
-            ]            
+                ]            
             for fetch_adset_id in fetch_adset_ids:
                 try:
                     adset = AdSet(fbid=fetch_adset_id).api_get(fields=fetch_adset_fields)
@@ -540,39 +540,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
 
     try:
 
-    # 1.3.2. Validate input for Facebook Ads ad metadata fetching
-        fetch_section_name = "[FETCH] Validate input for Facebook Ads ad metadata fetching"
-        fetch_section_start = time.time()        
-        try:
-            if not fetch_ad_ids:
-                fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty Facebook Ads fetch_ad_ids list provided then fetching is suspended.")
-                logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ad_ids list provided then fetching is suspended.")
-            else:
-                fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of Facebook Ads ad metadata fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of Facebook Ads ad metadata fetching.")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.3.3. Prepare fields for Facebook Ads ad metadata fetching
-        fetch_section_name = "[FETCH] Prepare field(s) for Facebook Ads ad metadata fetching"
-        fetch_section_start = time.time()
-        try:
-            fetch_ad_fields = [
-                "id",
-                "name",
-                "adset_id",
-                "campaign_id",
-                "status",
-                "effective_status"]
-            fetch_sections_status[fetch_section_name] = "succeed" 
-            print(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_ad_fields} field(s)...")
-            logging.info(f"🔍 [FETCH] Preparing to fetch Facebook Ads ad metadata with {fetch_ad_fields} field(s)...")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.3.4 Initialize Google Secret Manager client
+    # 1.3.2. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()          
         try:
@@ -589,7 +557,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
-    # 1.3.5. Get Facebook Ads access token from Google Secret Manager
+    # 1.3.3. Get Facebook Ads access token from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
         fetch_section_start = time.time()            
         try: 
@@ -609,7 +577,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.3.6. Initialize Facebook SDK session from access token
+    # 1.3.4. Initialize Facebook SDK session from access token
         fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
         fetch_section_start = time.time()           
         try:
@@ -626,7 +594,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)          
 
-    # 1.3.7. Get Facebook Ads account_id from Google Secret Manager
+    # 1.3.5. Get Facebook Ads account_id from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads account_id from Google Secret Manager"
         fetch_section_start = time.time()
         try:
@@ -646,7 +614,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.3.8. Make Facebook Ads API call for ad account information
+    # 1.3.6. Make Facebook Ads API call for ad account information
         fetch_section_name = "[FETCH] Make Facebook Ads API call for ad account information"
         fetch_section_start = time.time()
         try: 
@@ -665,13 +633,22 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.3.9. Make Facebook Ads API call for ad metadata
+    # 1.3.7. Make Facebook Ads API call for ad metadata
         fetch_section_name = "[FETCH] Make Facebook Ads API call for ad metadata"
         fetch_section_start = time.time()
-        fetch_ad_metadatas = []        
+        
         try:            
             print(f"🔍 [FETCH] Retrieving Facebook Ads ad metadata for account_id {fetch_account_id} with {len(fetch_ad_ids)} ad_id(s)...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad metadata for account_id {fetch_account_id} with {len(fetch_ad_ids)} ad_id(s)...")
+            fetch_ad_metadatas = []
+            fetch_ad_fields = [
+                "id",
+                "name",
+                "adset_id",
+                "campaign_id",
+                "status",
+                "effective_status"
+                ]
             for fetch_ad_id in fetch_ad_ids:
                 try:
                     ad = Ad(fbid=fetch_ad_id).api_get(fields=fetch_ad_fields)
@@ -700,7 +677,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.3.10. Trigger to enforce schema for Facebook Ads ad metadata
+    # 1.3.8. Trigger to enforce schema for Facebook Ads ad metadata
         fetch_section_name = "[FETCH] Trigger to enforce schema for Facebook Ads ad metadata"
         fetch_section_start = time.time()        
         try:
@@ -725,7 +702,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.3.11. Summarize fetch result(s) for Facebook Ads ad metadata
+    # 1.3.11. Summarize fetch results for Facebook Ads ad metadata
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
