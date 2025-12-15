@@ -764,22 +764,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
 
     try:
 
-    # 1.4.2. Validate input for Facebook Ads ad creative fetching
-        fetch_section_name = "[FETCH] Validate input for Facebook Ads ad creative fetching"
-        fetch_section_start = time.time()        
-        try:
-            if not fetch_ad_ids:
-                fetch_sections_status[fetch_section_name] = "failed"        
-                print("⚠️ [FETCH] Empty Facebook Ads fetch_ad_ids list provided then fetching is suspended.")
-                logging.warning("⚠️ [FETCH] Empty Facebook Ads fetch_ad_ids list provided then fetching is suspended.")
-            else:
-                fetch_sections_status[fetch_section_name] = "succeed"
-                print(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of Facebook Ads ad creative fetching.")
-                logging.info(f"✅ [FETCH] Successfully validated input for {len(fetch_ad_ids)} ad_id(s) of Facebook Ads ad creative fetching.")
-        finally:
-            fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
-
-    # 1.4.3. Initialize Google Secret Manager client
+    # 1.4.2. Initialize Google Secret Manager client
         fetch_section_name = "[FETCH] Initialize Google Secret Manager client"
         fetch_section_start = time.time()          
         try:
@@ -796,7 +781,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
-    # 1.4.4. Get Facebook Ads access token from Google Secret Manager
+    # 1.4.3. Get Facebook Ads access token from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads access token from Google Secret Manager"
         fetch_section_start = time.time()            
         try: 
@@ -816,7 +801,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.4.5. Initialize Facebook SDK session from access token
+    # 1.4.4. Initialize Facebook SDK session from access token
         fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
         fetch_section_start = time.time()           
         try:
@@ -833,7 +818,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)         
 
-    # 1.4.6. Get Facebook Ads account_id from Google Secret Manager
+    # 1.4.5. Get Facebook Ads account_id from Google Secret Manager
         fetch_section_name = "[FETCH] Get Facebook Ads account_id from Google Secret Manager"
         fetch_section_start = time.time()
         try:
@@ -853,13 +838,13 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.4.7. Make Facebook Ads API call for ad creative
+    # 1.4.6. Make Facebook Ads API call for ad creative
         fetch_section_name = "[FETCH] Make Facebook Ads API call for ad creative"
-        fetch_section_start = time.time()
-        fetch_ad_creatives = [] 
+        fetch_section_start = time.time()        
         try:            
             print(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for account_id {fetch_account_id} with {len(fetch_ad_ids)} ad_id(s)...")
             logging.info(f"🔍 [FETCH] Retrieving Facebook Ads ad creative for account_id {fetch_account_id} with {len(fetch_ad_ids)} ad_id(s)...")
+            fetch_ad_creatives = []
             for fetch_ad_id in fetch_ad_ids:
                 try:
                     ad = Ad(fbid=fetch_ad_id).api_get(fields=["creative"])
@@ -891,7 +876,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
         
-    # 1.4.8. Trigger to enforce schema for Facebook Ads ad creative
+    # 1.4.7. Trigger to enforce schema for Facebook Ads ad creative
         fetch_section_name = "[FETCH] Trigger to enforce schema for Facebook Ads ad creative"
         fetch_section_start = time.time()            
         try:
@@ -916,7 +901,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2)
 
-    # 1.4.9. Summarize fetch results for Facebook Ads ad metadata
+    # 1.4.8. Summarize fetch results for Facebook Ads ad metadata
     finally:
         fetch_time_elapsed = round(time.time() - fetch_time_start, 2)
         fetch_df_final = fetch_df_enforced.copy() if "fetch_df_enforced" in locals() and not fetch_df_enforced.empty else pd.DataFrame()
@@ -1017,7 +1002,6 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
         finally:
             fetch_sections_time[fetch_section_name] = round(time.time() - fetch_section_start, 2) 
 
-
     # 2.1.4. Initialize Facebook SDK session from access token
         fetch_section_name = "[FETCH] Initialize Facebook SDK session from access token"
         fetch_section_start = time.time()
@@ -1076,10 +1060,10 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
 
     # 2.1.7. Make Facebook Ads API call for campaign insights
         fetch_section_name = "[FETCH] Make Facebook Ads API call for campaign insights"
-        fetch_section_start = time.time()        
-        fetch_campaign_insights = []
-        fetch_attempts_queued = 3
+        fetch_section_start = time.time()
         try:            
+            fetch_campaign_insights = []
+            fetch_attempts_queued = 3
             fetch_campaign_params = {
             "level": "campaign",
             "time_increment": 1,
