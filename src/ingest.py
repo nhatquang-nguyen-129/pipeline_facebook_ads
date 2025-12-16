@@ -248,14 +248,14 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                         for col in ["account_id", "campaign_id"]
-                    ])
+                        ])
                     query_delete_config = f"""
                         DELETE FROM `{raw_table_campaign}` AS main
                         WHERE EXISTS (
                             SELECT 1 FROM `{table_id_temporary}` AS temp
                             WHERE {query_delete_condition}
-                        )
-                    """
+                            )
+                        """
                     query_delete_load = google_bigquery_client.query(query_delete_config)
                     query_delete_result = query_delete_load.result()
                     ingest_rows_deleted = query_delete_result.num_dml_affected_rows
@@ -276,57 +276,63 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.8. Upload Facebook Ads campaign metadata to Google BigQuery
+    # 1.1.7. Upload Facebook Ads campaign metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads campaign metadata to Google BigQuery"
         ingest_section_start = time.time()
         try:
-            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
-            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
-            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            google_bigquery_client.load_table_from_dataframe(ingest_df_deduplicated, raw_table_campaign, job_config=job_config).result()
+            print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
+            logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
+            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job_load_load = google_bigquery_client.load_table_from_dataframe(
+                ingest_df_deduplicated, 
+                raw_table_campaign, 
+                job_config=job_load_config
+                )
+            job_load_result = job_load_load.result()
+            ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
-            print(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
-            logging.info(f"✅ [INGEST] Successfully uploaded {len(ingest_df_uploaded)} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
             ingest_sections_status[ingest_section_name] = "succeed"
+            print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
+            logging.info(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}.")
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign} due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign} due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.9. Summarize ingestion result(s) for Facebook Ads campaign metadata
+    # 1.1.8. Summarize ingestion results for Facebook Ads campaign metadata
     finally:
         ingest_time_elapsed = round(time.time() - ingest_time_start, 2)
         ingest_df_final = (ingest_df_uploaded.copy() if "ingest_df_uploaded" in locals() and not ingest_df_uploaded.empty else pd.DataFrame())
         ingest_sections_total = len(ingest_sections_status) 
         ingest_sections_failed = [k for k, v in ingest_sections_status.items() if v == "failed"] 
         ingest_sections_succeeded = [k for k, v in ingest_sections_status.items() if v == "succeed"]
-        ingest_rows_input = len(ingest_ids_campaign)
+        ingest_rows_input = len(ingest_campaign_ids)
         ingest_rows_output = len(ingest_df_final)
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
-        ))
+            ))
         ingest_sections_detail = {
             ingest_section_summary: {
                 "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
                 "time": ingest_sections_time.get(ingest_section_summary, None),
-            }
+                }
             for ingest_section_summary in ingest_sections_summary
-        }     
+            }     
         if ingest_sections_failed:
-            print(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
-            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             ingest_status_final = "ingest_failed_all"
-        elif ingest_rows_output < ingest_rows_input:
-            print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            ingest_status_final = "ingest_succeed_partial"
-        else:
-            print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
-            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            print(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
+            logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")            
+        elif ingest_rows_output == ingest_rows_input:
             ingest_status_final = "ingest_succeed_all"
+            print(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.info(f"🏆 [INGEST] Successfully completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")    
+        else:
+            ingest_status_final = "ingest_succeed_partial"
+            print(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")
+            logging.warning(f"⚠️ [INGEST] Partially completed Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) in {ingest_time_elapsed}s.")       
         ingest_results_final = {
             "ingest_df_final": ingest_df_final,
             "ingest_status_final": ingest_status_final,
@@ -338,8 +344,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 "ingest_sections_detail": ingest_sections_detail, 
                 "ingest_rows_input": ingest_rows_input, 
                 "ingest_rows_output": ingest_rows_output
-            },
-        }
+                },
+            }
     return ingest_results_final
 
 # 1.2. Ingest Facebook Ads adset metadata to Google BigQuery
