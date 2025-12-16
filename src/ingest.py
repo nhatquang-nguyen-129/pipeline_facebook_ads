@@ -1148,6 +1148,7 @@ def ingest_campaign_insights(
     logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end}...")
 
     # 2.1.1. Start timing Facebook Ads campaign insights ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh") 
     ingest_dates_uploaded = []
     ingest_time_start = time.time()
     ingest_sections_status = {}
@@ -1160,8 +1161,8 @@ def ingest_campaign_insights(
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
         "[INGEST] Cooldown before next Facebook Ads campaign insights fetch": 0.0,
     }
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads campaign insights from {ingest_date_start} to {ingest_date_end} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
 
