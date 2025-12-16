@@ -875,42 +875,27 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
     return ingest_results_final
 
 # 1.4. Ingest Facebook Ads ad creative to Google BigQuery
-def ingest_ad_creative(ingest_ids_ad: list) -> pd.DataFrame:
-    print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
-    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
+def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
+    print(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ad_ids)} ad_id(s)...")
+    logging.info(f"🚀 [INGEST] Starting to ingest Facebook Ads ad creative for {len(ingest_ad_ids)} ad_id(s)...")
 
     # 1.4.1. Start timing Facebook Ads ad creative ingestion
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     ingest_time_start = time.time()
     ingest_sections_status = {}
     ingest_sections_time = {}
-    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
+    print(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [INGEST] Proceeding to ingest Facebook Ads ad creative at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
-
-    # 1.4.2. Validate input for Facebook Ads ad creative ingestion
-        ingest_section_name = "[INGEST] Validate input for Facebook Ads ad creative ingestion"
-        ingest_section_start = time.time()
-        try:
-            if not ingest_ids_ad:
-                ingest_sections_status[ingest_section_name] = "failed"
-                print("⚠️ [INGEST] Empty Facebook Ads ad_id_list provided then ingestion is suspended.")
-                logging.warning("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
-                raise ValueError("⚠️ [INGEST] Empty Facebook Ads ingest_ids_ad provided then ingestion is suspended.")
-            else:
-                ingest_sections_status[ingest_section_name] = "succeed"
-                print(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
-                logging.info(f"✅ [INGEST] Successfully validated input for {len(ingest_ids_ad)} ad_id(s) of Facebook Ads ad creative ingestion.")
-        finally:
-            ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
   
-    # 1.4.3. Trigger to fetch Facebook Ads ad creative
+    # 1.4.2. Trigger to fetch Facebook Ads ad creative
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads ad creative"
         ingest_section_start = time.time()
         try:
-            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
-            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ingest_ids_ad)} ad_id(s)...")
-            ingest_results_fetched = fetch_ad_creative(fetch_ids_ad=ingest_ids_ad)
+            print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ingest_ad_ids)} ad_id(s)...")
+            logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad creative for {len(ingest_ad_ids)} ad_id(s)...")
+            ingest_results_fetched = fetch_ad_creative(fetch_ad_ids=ingest_ad_ids)
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
