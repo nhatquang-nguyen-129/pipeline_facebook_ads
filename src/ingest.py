@@ -107,9 +107,9 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             ingest_results_fetched = fetch_campaign_metadata(fetch_campaign_ids=ingest_campaign_ids)
-            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]            
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             if ingest_status_fetched == "fetch_succeed_all":
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully triggered Facebook Ads campaign metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
@@ -633,9 +633,9 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
             ingest_results_fetched = fetch_ad_metadata(fetch_ids_ad=ingest_ad_ids)
-            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]
-            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
+            ingest_df_fetched = ingest_results_fetched["fetch_df_final"]            
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
+            ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
             if ingest_status_fetched == "fetch_succeed_all":
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully triggered Facebook Ads ad metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
