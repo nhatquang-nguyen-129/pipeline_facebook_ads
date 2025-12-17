@@ -37,6 +37,9 @@ import importlib
 # Add Python logging ultilities for integration
 import logging
 
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
+
 # Get environment variable for Company
 COMPANY = os.getenv("COMPANY") 
 
@@ -74,7 +77,8 @@ except ModuleNotFoundError:
 
 # 1.2. Execution controller
 def main():
-    main_date_today = datetime.today()
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+    main_date_today = datetime.now(ICT)
     if PLATFORM == "facebook":
         try:
             update_campaign_insights = update_module_location.update_campaign_insights
