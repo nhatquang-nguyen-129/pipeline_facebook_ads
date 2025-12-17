@@ -244,7 +244,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                             ingest_keys_unique, 
                             temporary_table_id, 
                             job_config=job_load_config
-                            )
+                        )
                         job_load_result = job_load_load.result()
                         created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
                         print(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {created_table_id} for batch deletion.")
@@ -256,21 +256,21 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "campaign_id"]
-                            ])
+                        ])
                         query_delete_config = f"""
                             DELETE FROM `{raw_table_campaign}` AS main
                             WHERE EXISTS (
                                 SELECT 1 FROM `{created_table_id}` AS temp
                                 WHERE {query_delete_condition}
-                                )
-                            """
+                            )
+                        """
                         query_delete_load = google_bigquery_client.query(query_delete_config)
                         query_delete_result = query_delete_load.result()
                         ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                         google_bigquery_client.delete_table(
                             created_table_id, 
                             not_found_ok=True
-                            )                    
+                        )                    
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                     except Exception as e:
@@ -298,7 +298,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 ingest_df_deduplicated, 
                 raw_table_campaign, 
                 job_config=job_load_config
-                )
+            )
             job_load_result = job_load_load.result()
             ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
@@ -324,14 +324,14 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
-            ))
+        ))
         ingest_sections_detail = {
             ingest_section_summary: {
                 "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
                 "time": ingest_sections_time.get(ingest_section_summary, None),
-                }
+            }
             for ingest_section_summary in ingest_sections_summary
-            }     
+        }     
         if ingest_sections_failed:
             ingest_status_final = "ingest_failed_all"
             print(f"❌ [INGEST] Failed to complete Facebook Ads campaign metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -355,8 +355,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 "ingest_sections_detail": ingest_sections_detail, 
                 "ingest_rows_input": ingest_rows_input, 
                 "ingest_rows_output": ingest_rows_output
-                },
-            }
+            },
+        }
     return ingest_results_final
 
 # 1.2. Ingest Facebook Ads adset metadata to Google BigQuery
@@ -518,7 +518,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                             ingest_keys_unique, 
                             temporary_table_id, 
                             job_config=job_load_config
-                            )
+                        )
                         job_load_result = job_load_load.result()
                         created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
                         print(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {created_table_id} for batch deletion.")
@@ -530,21 +530,21 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "adset_id"]
-                            ])
+                        ])
                         query_delete_config = f"""
                             DELETE FROM `{raw_table_adset}` AS main
                             WHERE EXISTS (
                                 SELECT 1 FROM `{temporary_table_id}` AS temp
                                 WHERE {query_delete_condition}
-                                )
-                            """
+                            )
+                        """
                         query_delete_load = google_bigquery_client.query(query_delete_config)
                         query_delete_result = query_delete_load.result()
                         ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                         google_bigquery_client.delete_table(
                             temporary_table_id, 
                             not_found_ok=True
-                            )                    
+                        )                    
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads adset metadata table {raw_table_adset}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads adset metadata table {raw_table_adset}.")
                     except Exception as e:
@@ -572,7 +572,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                 ingest_df_deduplicated, 
                 raw_table_adset, 
                 job_config=job_load_config
-                )
+            )
             job_load_result = job_load_load.result()
             ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
@@ -598,14 +598,14 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
-            ))
+        ))
         ingest_sections_detail = {
             ingest_section_summary: {
                 "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
                 "time": ingest_sections_time.get(ingest_section_summary, None),
-                }
+            }
             for ingest_section_summary in ingest_sections_summary
-            }     
+        }     
         if ingest_sections_failed:
             ingest_status_final = "ingest_failed_all"
             print(f"❌ [INGEST] Failed to complete Facebook Ads adset metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -792,7 +792,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                             ingest_keys_unique, 
                             temporary_table_id, 
                             job_config=job_load_config
-                            )
+                        )
                         job_load_result = job_load_load.result()
                         created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
                         print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {created_table_id} for batch deletion.")
@@ -804,21 +804,21 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "ad_id"]
-                            ])
+                        ])
                         query_delete_config = f"""
                             DELETE FROM `{raw_table_ad}` AS main
                             WHERE EXISTS (
                                 SELECT 1 FROM `{temporary_table_id}` AS temp
                                 WHERE {query_delete_condition}
-                                )
-                            """
+                            )
+                        """
                         query_delete_load = google_bigquery_client.query(query_delete_config)
                         query_delete_result = query_delete_load.result()
                         ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                         google_bigquery_client.delete_table(
                             temporary_table_id, 
                             not_found_ok=True
-                            )                    
+                        )                    
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
                     except Exception as e:
@@ -846,7 +846,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_df_deduplicated, 
                 raw_table_ad, 
                 job_config=job_load_config
-                )
+            )
             job_load_result = job_load_load.result()
             ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
@@ -872,14 +872,14 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
-            ))
+        ))
         ingest_sections_detail = {
             ingest_section_summary: {
                 "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
                 "time": ingest_sections_time.get(ingest_section_summary, None),
-                }
+            }
             for ingest_section_summary in ingest_sections_summary
-            }     
+        }     
         if ingest_sections_failed:
             ingest_status_final = "ingest_failed_all"
             print(f"❌ [INGEST] Failed to complete Facebook Ads ad metadata ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -1064,7 +1064,7 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                             ingest_keys_unique, 
                             temporary_table_id, 
                             job_config=job_load_config
-                            )
+                        )
                         job_load_result = job_load_load.result()
                         created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
                         print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {created_table_id} for batch deletion.")
@@ -1076,21 +1076,21 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "ad_id"]
-                            ])
+                        ])
                         query_delete_config = f"""
                             DELETE FROM `{raw_table_creative}` AS main
                             WHERE EXISTS (
                                 SELECT 1 FROM `{temporary_table_id}` AS temp
                                 WHERE {query_delete_condition}
-                                )
-                            """
+                            )
+                        """
                         query_delete_load = google_bigquery_client.query(query_delete_config)
                         query_delete_result = query_delete_load.result()
                         ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                         google_bigquery_client.delete_table(
                             temporary_table_id, 
                             not_found_ok=True
-                            )                    
+                        )                    
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                     except Exception as e:
@@ -1118,7 +1118,7 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_df_deduplicated, 
                 raw_table_creative, 
                 job_config=job_load_config
-                )
+            )
             job_load_result = job_load_load.result()
             ingest_rows_uploaded = job_load_load.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
@@ -1144,14 +1144,14 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
         ingest_sections_summary = list(dict.fromkeys(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys())
-            ))
+        ))
         ingest_sections_detail = {
             ingest_section_summary: {
                 "status": ingest_sections_status.get(ingest_section_summary, "unknown"),
                 "time": ingest_sections_time.get(ingest_section_summary, None),
-                }
+            }
             for ingest_section_summary in ingest_sections_summary
-            }     
+        }     
         if ingest_sections_failed:
             ingest_status_final = "ingest_failed_all"
             print(f"❌ [INGEST] Failed to complete Facebook Ads ad creative ingestion with {ingest_rows_output}/{ingest_rows_input} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -1330,7 +1330,7 @@ def ingest_campaign_insights(
                             table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
                                 type_=bigquery.TimePartitioningType.DAY,
                                 field=table_partition_effective
-                                )                    
+                            )                    
                         table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
                         if table_clusters_filtered:
                             table_configuration_defined.clustering_fields = table_clusters_filtered
@@ -1364,10 +1364,10 @@ def ingest_campaign_insights(
                                 query_delete_config = f"""
                                     DELETE FROM `{raw_table_campaign}`
                                     WHERE date_start = @date_value
-                                    """
+                                """
                                 job_query_config = bigquery.QueryJobConfig(
                                     query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
-                                    )                                
+                                )                                
                                 query_delete_load = google_bigquery_client.query(query_delete_config, job_config=job_query_config)
                                 query_delete_result = query_delete_load.result()
                                 ingest_rows_deleted = query_delete_result.num_dml_affected_rows
@@ -1398,7 +1398,7 @@ def ingest_campaign_insights(
                     ingest_df_deduplicated,
                     raw_table_campaign,
                     job_config=job_load_config
-                    )
+                )
                 job_load_result = job_load_load.result()
                 ingest_rows_uploaded = job_load_load.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
@@ -1444,19 +1444,19 @@ def ingest_campaign_insights(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys()) +
             list(ingest_loops_time.keys())
-            ))
+        ))
         ingest_sections_detail = {}
         for ingest_section_separated in ingest_section_all:
             ingest_section_time = (
                 ingest_loops_time.get(ingest_section_separated)
                 if ingest_section_separated in ingest_loops_time
                 else ingest_sections_time.get(ingest_section_separated)
-                )
+            )
             ingest_sections_detail[ingest_section_separated] = {
                 "status": ingest_sections_status.get(ingest_section_separated, "unknown"),
                 "time": round(ingest_section_time or 0.0, 2),
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
-                }
+            }
         if ingest_sections_failed:
             print(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             logging.error(f"❌ [INGEST] Failed to complete Facebook Ads campaign insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -1482,8 +1482,8 @@ def ingest_campaign_insights(
                 "ingest_dates_output": ingest_dates_output,
                 "ingest_dates_failed": ingest_dates_failed,
                 "ingest_rows_output": ingest_rows_output,
-                }
             }
+        }
     return ingest_results_final
 
 # 2.2. Ingest Facebook Ad ad insight to Google BigQuery raw tables
@@ -1635,7 +1635,7 @@ def ingest_ad_insights(
                             table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
                                 type_=bigquery.TimePartitioningType.DAY,
                                 field=table_partition_effective
-                                )                    
+                            )                    
                         table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns] if table_clusters_defined else []
                         if table_clusters_filtered:
                             table_configuration_defined.clustering_fields = table_clusters_filtered
@@ -1672,7 +1672,7 @@ def ingest_ad_insights(
                                 """
                                 job_query_config = bigquery.QueryJobConfig(
                                     query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
-                                    )                            
+                                )                            
                                 query_delete_load = google_bigquery_client.query(query_delete_config, job_config=job_query_config)
                                 query_delete_result = query_delete_load.result()
                                 ingest_rows_deleted = query_delete_result.num_dml_affected_rows
@@ -1703,7 +1703,7 @@ def ingest_ad_insights(
                     ingest_df_deduplicated,
                     raw_table_ad,
                     job_config=job_load_config
-                    )
+                )
                 job_load_result = job_load_load.result()
                 ingest_rows_uploaded = job_load_load.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
@@ -1749,19 +1749,19 @@ def ingest_ad_insights(
             list(ingest_sections_status.keys()) +
             list(ingest_sections_time.keys()) +
             list(ingest_loops_time.keys())
-            ))
+        ))
         ingest_sections_detail = {}
         for ingest_section_separated in ingest_section_all:
             ingest_section_time = (
                 ingest_loops_time.get(ingest_section_separated)
                 if ingest_section_separated in ingest_loops_time
                 else ingest_sections_time.get(ingest_section_separated)
-                )
+            )
             ingest_sections_detail[ingest_section_separated] = {
                 "status": ingest_sections_status.get(ingest_section_separated, "unknown"),
                 "time": round(ingest_section_time or 0.0, 2),
                 "type": "loop" if ingest_section_separated in ingest_loops_time else "single"
-                }
+            }
         if ingest_sections_failed:
             print(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
             logging.error(f"❌ [INGEST] Failed to complete Facebook Ads ad insights ingestion from {ingest_date_start} to {ingest_date_end} with {ingest_dates_output}/{ingest_dates_input} ingested day(s) and {ingest_rows_output} ingested row(s) due to {', '.join(ingest_sections_failed)} failed section(s) in {ingest_time_elapsed}s.")
@@ -1787,6 +1787,6 @@ def ingest_ad_insights(
                 "ingest_dates_output": ingest_dates_output,
                 "ingest_dates_failed": ingest_dates_failed,
                 "ingest_rows_output": ingest_rows_output,
-                }
             }
+        }
     return ingest_results_final
