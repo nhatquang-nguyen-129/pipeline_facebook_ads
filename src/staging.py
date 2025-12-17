@@ -162,20 +162,20 @@ def staging_campaign_insights() -> dict:
         staging_section_start = time.time()            
         try:
             for raw_table_campaign in raw_tables_campaign:
-                query_select_config = f"""
-                    SELECT
-                        raw.*,
-                        metadata.campaign_name,
-                        metadata.account_name,
-                        metadata.effective_status AS delivery_status
-                    FROM `{raw_table_campaign}` AS raw
-                    LEFT JOIN `{raw_campaign_metadata}` AS metadata
-                        ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
-                        AND CAST(raw.account_id  AS STRING) = CAST(metadata.account_id  AS STRING)
-                """
-                try:
+                try:                
                     print(f"🔄 [STAGING] Querying Facebook Ads campaign insights table {raw_table_campaign}...")
                     logging.info(f"🔄 [STAGING] Querying Facebook Ads campaign insights table {raw_table_campaign}...")
+                    query_select_config = f"""
+                        SELECT
+                            raw.*,
+                            metadata.campaign_name,
+                            metadata.account_name,
+                            metadata.effective_status AS delivery_status
+                        FROM `{raw_table_campaign}` AS raw
+                        LEFT JOIN `{raw_campaign_metadata}` AS metadata
+                            ON CAST(raw.campaign_id AS STRING) = CAST(metadata.campaign_id AS STRING)
+                            AND CAST(raw.account_id  AS STRING) = CAST(metadata.account_id  AS STRING)
+                    """
                     query_select_load = google_bigquery_client.query(query_select_config)
                     staging_df_queried = query_select_load.to_dataframe()
                     staging_tables_queried.append({"raw_table_campaign": raw_table_campaign, "staging_df_queried": staging_df_queried})
@@ -244,8 +244,7 @@ def staging_campaign_insights() -> dict:
                 staging_df_concatenated = pd.DataFrame()
                 staging_sections_status[staging_section_name] = "failed"
                 print("⚠️ [STAGING] No enriched DataFrame found for Facebook Ads campaign insights then concatenation is failed.")
-                logging.warning("⚠️ [STAGING] No enriched DataFrame found for Facebook Ads campaign insights then concatenation is failed.")
-                
+                logging.warning("⚠️ [STAGING] No enriched DataFrame found for Facebook Ads campaign insights then concatenation is failed.")                
         finally:
             staging_sections_time[staging_section_name] = round(time.time() - staging_section_start, 2)                   
 
@@ -289,34 +288,32 @@ def staging_campaign_insights() -> dict:
             except Exception:
                 staging_table_exists = False
             if not staging_table_exists:
-                print(f"⚠️ [STAGING] Staging Facebook Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
-                logging.warning(f"⚠️ [STAGING] Staging Facebook Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
-                for col, dtype in staging_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        google_bigquery_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        google_bigquery_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        google_bigquery_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        google_bigquery_type = "TIMESTAMP"
-                    else:
-                        google_bigquery_type = "STRING"
-                    table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
-                table_configuration_defined = bigquery.Table(staging_table_campaign, schema=table_schemas_defined)
-                table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
-                if table_partition_effective:
-                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=table_partition_effective
-                    )
-                table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
-                table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
-                if table_clusters_filtered:  
-                    table_configuration_defined.clustering_fields = table_clusters_filtered  
                 try:
-                    print(f"🔍 [STAGING] Creating staging Facebook Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
-                    logging.info(f"🔍 [STAGING] Creating staging Facebook Ads campaign insights table {staging_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
+                    print(f"⚠️ [STAGING] Staging Facebook Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
+                    logging.warning(f"⚠️ [STAGING] Staging Facebook Ads campaign insights table {staging_table_campaign} not found then new table creation will be proceeding...")
+                    for col, dtype in staging_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            google_bigquery_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            google_bigquery_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            google_bigquery_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            google_bigquery_type = "TIMESTAMP"
+                        else:
+                            google_bigquery_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, google_bigquery_type))
+                    table_configuration_defined = bigquery.Table(staging_table_campaign, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in staging_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
+                        )
+                    table_clusters_defined = ["chuong_trinh", "ma_ngan_sach_cap_1", "nhan_su"]
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in staging_df_deduplicated.columns]
+                    if table_clusters_filtered:  
+                        table_configuration_defined.clustering_fields = table_clusters_filtered  
                     staging_table_create = google_bigquery_client.create_table(table_configuration_defined)
                     staging_table_id = staging_table_create.full_table_id
                     staging_sections_status[staging_section_name] = "succeed"
@@ -346,14 +343,14 @@ def staging_campaign_insights() -> dict:
                         time_partitioning=bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
                             field="date"
-                        ),
+                            ),
                         clustering_fields=table_clusters_filtered if table_clusters_filtered else None
-                    )
+                        )
                     job_load_load = google_bigquery_client.load_table_from_dataframe(
                         staging_df_deduplicated,
                         staging_table_campaign, 
                         job_config=job_load_config
-                    )
+                        )
                     job_load_result = job_load_load.result()
                     staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
@@ -370,12 +367,12 @@ def staging_campaign_insights() -> dict:
                     logging.warning(f"🔍 [STAGING] Found existing Google BigQuery table {staging_table_campaign} and {len(staging_df_deduplicated)} deduplicated row(s) of staging Facebook Ads campaign insights will be overwritten...")
                     job_load_config = bigquery.LoadJobConfig(
                         write_disposition="WRITE_TRUNCATE",
-                    )
+                        )
                     job_load_load = google_bigquery_client.load_table_from_dataframe(
                         staging_df_deduplicated,
                         staging_table_campaign, 
                         job_config=job_load_config
-                    )
+                        )
                     job_load_result = job_load_load.result()
                     staging_rows_uploaded = job_load_load.output_rows
                     staging_df_uploaded = staging_df_deduplicated.copy()
@@ -403,14 +400,14 @@ def staging_campaign_insights() -> dict:
         staging_sections_summary = list(dict.fromkeys(
             list(staging_sections_status.keys()) +
             list(staging_sections_time.keys())
-        ))
+            ))
         staging_sections_detail = {
             staging_section_summary: {
                 "status": staging_sections_status.get(staging_section_summary, "unknown"),
                 "time": round(staging_sections_time.get(staging_section_summary, 0.0), 2),
-            }
+                }
             for staging_section_summary in staging_sections_summary
-        }
+            }
         if staging_sections_failed:
             staging_status_final = "staging_failed_all"
             print(f"❌ [STAGING] Failed to complete Facebook Ads campaign insights staging with {staging_tables_output}/{staging_tables_input} queried table(s) and {staging_rows_output} uploaded row(s) due to {', '.join(staging_sections_failed)} failed section(s) in {staging_time_elapsed}s.")
@@ -436,8 +433,8 @@ def staging_campaign_insights() -> dict:
                 "staging_tables_output": staging_tables_output,
                 "staging_tables_failed": staging_tables_failed,
                 "staging_rows_output": staging_rows_output,
+                }
             }
-        }
     return staging_results_final
 
 # 1.2. Transform Facebook Ads ad insights from raw tables into cleaned staging tables
