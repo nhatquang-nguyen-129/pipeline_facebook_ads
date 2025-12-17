@@ -505,7 +505,7 @@ def staging_ad_insights() -> dict:
                     table_name,
                     r'^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m[0-1][0-9][0-9]{{4}}$'
                 )
-            """
+                """
             query_select_load = google_bigquery_client.query(query_select_config)
             query_select_result = query_select_load.result()
             raw_tables_name = [row.table_name for row in query_select_result]

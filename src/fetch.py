@@ -202,7 +202,7 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 "objective",
                 "configured_status",
                 "buying_type"
-                ]
+            ]
             for fetch_campaign_id in fetch_campaign_ids:
                 try:
                     campaign = Campaign(fbid=fetch_campaign_id).api_get(fields=fetch_campaign_fields)
@@ -268,14 +268,14 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
+            }
             for fetch_section_summary in fetch_sections_summary
-            }          
+        }          
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete Facebook Ads campaign metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -299,8 +299,8 @@ def fetch_campaign_metadata(fetch_campaign_ids: list[str]) -> pd.DataFrame:
                 "fetch_sections_detail": fetch_sections_detail, 
                 "fetch_rows_input": fetch_rows_input, 
                 "fetch_rows_output": fetch_rows_output
-                },
-            }
+            },
+        }
     return fetch_results_final
 
 # 1.2. Fetch adset metadata for Facebook Ads
@@ -424,7 +424,7 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
                 "status",
                 "effective_status",
                 "campaign_id"
-                ]            
+            ]            
             for fetch_adset_id in fetch_adset_ids:
                 try:
                     adset = AdSet(fbid=fetch_adset_id).api_get(fields=fetch_adset_fields)
@@ -490,14 +490,14 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
-            for fetch_section_summary in fetch_sections_summary
             }
+            for fetch_section_summary in fetch_sections_summary
+        }
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete Facebook Ads adset metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -521,8 +521,8 @@ def fetch_adset_metadata(fetch_adset_ids: list[str]) -> pd.DataFrame:
                 "fetch_sections_detail": fetch_sections_detail, 
                 "fetch_rows_input": fetch_rows_input, 
                 "fetch_rows_output": fetch_rows_output
-                },
-            }
+            },
+        }
     return fetch_results_final
 
 # 1.3. Fetch ad metadata for Facebook Ads
@@ -648,7 +648,7 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
                 "campaign_id",
                 "status",
                 "effective_status"
-                ]
+            ]
             for fetch_ad_id in fetch_ad_ids:
                 try:
                     ad = Ad(fbid=fetch_ad_id).api_get(fields=fetch_ad_fields)
@@ -714,14 +714,14 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
-            for fetch_section_summary in fetch_sections_summary
             }
+            for fetch_section_summary in fetch_sections_summary
+        }
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete Facebook Ads ad metadata fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -745,8 +745,8 @@ def fetch_ad_metadata(fetch_ad_ids: list[str]) -> pd.DataFrame:
                 "fetch_sections_detail": fetch_sections_detail, 
                 "fetch_rows_input": fetch_rows_input, 
                 "fetch_rows_output": fetch_rows_output
-                },
-            }
+            },
+        }
     return fetch_results_final
 
 # 1.4. Fetch ad creative for Facebook Ads
@@ -856,7 +856,7 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
                         "creative_id": creative_id,
                         "thumbnail_url": thumbnail_url,
                         "account_id": fetch_account_id,
-                        })
+                    })
                 except Exception as e:
                     print(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {fetch_ad_id} due to {e}.")
                     logging.error(f"⚠️ [FETCH] Failed to retrieve Facebook Ads ad creative for ad_id {fetch_ad_id} due to {e}.")
@@ -913,14 +913,14 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
+            }
             for fetch_section_summary in fetch_sections_summary
-            }        
+        }        
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"
             print(f"❌ [FETCH] Failed to complete Facebook Ads ad creative fetching with {fetch_rows_output}/{fetch_rows_input} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -944,8 +944,8 @@ def fetch_ad_creative(fetch_ad_ids: list[str]) -> pd.DataFrame:
                 "fetch_sections_detail": fetch_sections_detail, 
                 "fetch_rows_input": fetch_rows_input, 
                 "fetch_rows_output": fetch_rows_output
-                },
-            }
+            },
+        }
     return fetch_results_final
 
 # 2. FETCH FACEBOOK ADS INSIGHTS
@@ -1068,7 +1068,7 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                 "level": "campaign",
                 "time_increment": 1,
                 "time_range": {"since": fetch_date_start, "until": fetch_date_end},
-                }
+            }
             fetch_campaign_fields = [
                 "account_id", 
                 "campaign_id", 
@@ -1079,7 +1079,7 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                 "actions",
                 "date_start", 
                 "date_stop"
-                ]
+            ]
             for fetch_attempt_queued in range(fetch_attempts_queued):
                 try:
                     print(f"🔍 [FETCH] Retrieving Facebook Ads campaign insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}...")
@@ -1087,7 +1087,7 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                     fetch_campaign_response = fetch_account_prefixed.get_insights(
                         fields=fetch_campaign_fields,
                         params=fetch_campaign_params
-                        )
+                    )
                     fetch_campaign_insights = [dict(fetch_campaign_insight) for fetch_campaign_insight in fetch_campaign_response]
                     fetch_df_flattened = pd.DataFrame(fetch_campaign_insights)
                     fetch_sections_status[fetch_section_name] = "succeed"
@@ -1148,14 +1148,14 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
-            for fetch_section_summary in fetch_sections_summary
             }
+            for fetch_section_summary in fetch_sections_summary
+        }
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"            
             print(f"❌ [FETCH] Failed to complete Facebook Ads campaign insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) and {fetch_rows_output} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
@@ -1181,8 +1181,8 @@ def fetch_campaign_insights(fetch_date_start: str, fetch_date_end: str) -> pd.Da
                 "fetch_sections_failed": fetch_sections_failed,
                 "fetch_sections_detail": fetch_sections_detail,
                 "fetch_rows_output": fetch_rows_output,
-                },
-            }
+            },
+        }
     return fetch_results_final
 
 # 2.2. Fetch ad insights for Facebook Ads
@@ -1316,7 +1316,7 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
                 "actions", 
                 "date_start", 
                 "date_stop"
-                ]
+            ]
             for fetch_attempt_queued in range(fetch_attempts_queued) :
                 try:
                     print(f"🔍 [FETCH] Retrieving Facebook Ads ad insights from {fetch_date_start} to {fetch_date_end} with attempt {fetch_attempt_queued + 1}/{fetch_attempts_queued}...")
@@ -1385,14 +1385,14 @@ def fetch_ad_insights(fetch_date_start: str, fetch_date_end: str) -> pd.DataFram
         fetch_sections_summary = list(dict.fromkeys(
             list(fetch_sections_status.keys()) +
             list(fetch_sections_time.keys())
-            ))
+        ))
         fetch_sections_detail = {
             fetch_section_summary: {
                 "status": fetch_sections_status.get(fetch_section_summary, "unknown"),
                 "time": fetch_sections_time.get(fetch_section_summary, None),
-                }
-            for fetch_section_summary in fetch_sections_summary
             }
+            for fetch_section_summary in fetch_sections_summary
+        }
         if fetch_sections_failed:
             fetch_status_final = "fetch_failed_all"            
             print(f"❌ [FETCH] Failed to complete Facebook Ads ad insights fetching from {fetch_date_start} to {fetch_date_end} with {fetch_days_output}/{fetch_days_input} fetched day(s) and {fetch_rows_output} fetched row(s) due to {', '.join(fetch_sections_failed)} failed section(s) in {fetch_time_elapsed}s.")
