@@ -21,6 +21,7 @@ It serves purely as a utility layer to support schema consistency
 throughout the Facebook Ads ETL process.
 ===================================================================
 """
+
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
