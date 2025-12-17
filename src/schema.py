@@ -21,12 +21,22 @@ It serves purely as a utility layer to support schema consistency
 throughout the Facebook Ads ETL process.
 ===================================================================
 """
+# Add root directory to sys.path for absolute imports of internal modules
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+
+# Add Python datetime utilities for integration
+from datetime import datetime
 
 # Add Python logging ultilities for integration
 import logging
 
 # Add Python time ultilities for integration
 import time
+
+# Add Python IANA time zone ultilities for integration
+from zoneinfo import ZoneInfo
 
 # Add external Python Pandas libraries for integration
 import pandas as pd
@@ -37,235 +47,236 @@ import pandas as pd
 def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str) -> pd.DataFrame:
 
     # 1.1.1. Start timing the raw Facebook Ads enrichment
+    ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     schema_time_start = time.time()
     schema_sections_status = {}
     schema_sections_time = {}
-    print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {time.strftime('%Y-%m-%d %H:%M:%S')}...")
-
-    # 1.1.2. Define schema mapping for Facebook Ads data type
-    schema_section_name = "[SCHEMA] Define schema mapping for Facebook Ads data type"
-    schema_section_start = time.time()    
-    schema_types_mapping = {        
-        "fetch_campaign_metadata": {
-            "campaign_id": str,
-            "campaign_name": str,
-            "status": str,
-            "effective_status": str,
-            "objective": str,
-            "configured_status": str,
-            "buying_type": str,
-            "account_id": str,
-            "account_name": str,
-        },        
-        "fetch_adset_metadata": {
-            "adset_id": str,
-            "adset_name": str,
-            "campaign_id": str,
-            "status": str,
-            "effective_status": str,
-            "account_id": str,
-            "account_name": str,
-        },        
-        "fetch_ad_metadata": {
-            "ad_id": str,
-            "ad_name": str,
-            "adset_id": str,
-            "campaign_id": str,
-            "status": str,
-            "effective_status": str,
-            "account_id": str,
-            "account_name": str,
-        },        
-        "fetch_ad_creative": {
-            "ad_id": str,
-            "thumbnail_url": str,
-            "account_id": str,
-        },        
-        "fetch_campaign_insights": {
-            "account_id": str,
-            "campaign_id": str,
-            "optimization_goal": str,
-            "spend": str,
-            "impressions": str,
-            "clicks": str,
-            "date_start": str,
-            "date_stop": str,
-            "actions": str,
-        },        
-        "fetch_ad_insights": {
-            "account_id": str,
-            "ad_id": str,
-            "adset_id": str,
-            "campaign_id": str,
-            "spend": str,
-            "impressions": str,
-            "clicks": str,
-            "optimization_goal": str,
-            "date_start": str,
-            "date_stop": str,
-            "actions": str,
-        },        
-        "ingest_campaign_metadata": {
-            "campaign_id": str,
-            "campaign_name": str,
-            "effective_status": str,
-            "account_id": str,
-            "account_name": str,
-        },
-        "ingest_adset_metadata": {
-            "adset_id": str,
-            "adset_name": str,
-            "campaign_id": str,
-            "status": str,
-            "effective_status": str,
-            "account_id": str,
-            "account_name": str,
-        },        
-        "ingest_ad_metadata": {
-            "ad_id": str,
-            "ad_name": str,
-            "adset_id": str,
-            "campaign_id": str,
-            "status": str,
-            "effective_status": str,
-            "account_id": str,
-            "account_name": str,
-        },        
-        "ingest_ad_creative": {
-            "ad_id": str,
-            "thumbnail_url": str,
-            "account_id": str,
-        },        
-        "ingest_campaign_insights": {
-            "account_id": str,
-            "campaign_id": str,
-            "optimization_goal": str,
-            "spend": float,
-            "impressions": int,
-            "clicks": int,
-            "date_start": str,
-            "date_stop": str,
-            "actions": str,
-        },        
-        "ingest_ad_insights": {
-            "account_id": str,
-            "ad_id": str,
-            "adset_id": str,
-            "campaign_id": str,
-            "optimization_goal": str,
-            "spend": float,
-            "impressions": int,
-            "clicks": int,
-            "date_start": str,
-            "date_stop": str,
-            "actions": str,
-        },        
-        "staging_campaign_insights": {            
-            
-            # Original staging campaign fields
-            "account_id": str,
-            "campaign_id": str,
-            "campaign_name": str,
-            "account_name": str,
-            "delivery_status": str,
-            "spend": float,
-            "impressions": int,
-            "clicks": int,
-            "result": int,
-            "result_type": str,
-            "purchase": int,
-            "messaging_conversations_started": int,
-            
-            # Enriched dimensions from campaign_name and specific to campaign settings
-            "enrich_campaign_objective": str,
-            "enrich_campaign_region": str,
-            "enrich_campaign_personnel": str,            
-            
-            # Enriched dimensions from campaign_name and specific to budget classfication
-            "enrich_budget_group": str,
-            "enrich_budget_type": str,
-            
-            # Enriched dimensions from campaign_name and specific to category classification
-            "enrich_category_group": str,            
-            
-            # Enriched dimensions from campaign_name and specific to advertising strategy
-            "enrich_program_track": str,
-            "enrich_program_group": str,
-            "enrich_program_type": str,
-            
-            # Standardized time columns
-            "date": "datetime64[ns, UTC]",
-            "year": str,
-            "month": str,
-            "last_updated_at": "datetime64[ns, UTC]",
-            
-            # Enriched dimensions from table_id and specific to internal company structure
-            "enrich_account_platform": str,
-            "enrich_account_department": str,
-            "enrich_account_name": str
-        },        
-        "staging_ad_insights": {            
-            
-            # Original staging ad fields
-            "ad_id": str,
-            "ad_name": str,
-            "adset_id": str,
-            "adset_name": str,
-            "campaign_id": str,
-            "campaign_name": str,
-            "spend": float,
-            "delivery_status": str,
-            "result": int,
-            "result_type": str,
-            "purchase": int,
-            "messaging_conversations_started": int,
-            "impressions": int,
-            "clicks": int,
-            "thumbnail_url": str,
-            
-            # Enriched dimensions from campaign_name and specific to campaign settings
-            "enrich_campaign_objective": str,
-            "enrich_campaign_region": str,
-            "enrich_campaign_personnel": str,
-            
-            # Enriched dimensions from campaign_name and specific to budget classfication
-            "enrich_budget_group": str,
-            "enrich_budget_type": str,
-            
-            # Enriched dimensions from campaign_name and specific to category classification
-            "enrich_category_group": str,
-            
-            # Enriched dimensions from campaign_name and specific to advertising strategy
-            "enrich_program_track": str,
-            "enrich_program_group": str,
-            "enrich_program_type": str,
-            
-            # Enriched dimensions from adset_name and specific to advertising strategy
-            "enrich_adset_strategy": str,
-            "enrich_adset_subtype": str,
-            
-            # Enriched dimensions from adset_name and specific to targeting
-            "enrich_adset_location": str,
-            "enrich_adset_audience": str,
-            "enrich_adset_format": str,
-            
-            # Enriched dimensions from table_id and specific to internal company structure
-            "enrich_account_platform": str,
-            "enrich_account_department": str,
-            "enrich_account_name": str,
-            
-            # Standardized time columns
-            "date": "datetime64[ns, UTC]",
-            "year": str,
-            "month": str,
-            "last_updated_at": "datetime64[ns, UTC]"
-        }
-    }    
-    schema_sections_status[schema_section_name] = "succeed"
-    schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)
+    print(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
+    logging.info(f"🔍 [SCHEMA] Proceeding to enforce schema for Facebook Ads with {len(schema_df_input)} given row(s) for mapping type {schema_type_mapping} at {datetime.now(ICT).strftime("%Y-%m-%d %H:%M:%S")}...")
 
     try:
+
+    # 1.1.2. Define schema mapping for Facebook Ads data type
+        schema_section_name = "[SCHEMA] Define schema mapping for Facebook Ads data type"
+        schema_section_start = time.time()    
+        schema_types_mapping = {        
+            "fetch_campaign_metadata": {
+                "campaign_id": str,
+                "campaign_name": str,
+                "status": str,
+                "effective_status": str,
+                "objective": str,
+                "configured_status": str,
+                "buying_type": str,
+                "account_id": str,
+                "account_name": str,
+            },        
+            "fetch_adset_metadata": {
+                "adset_id": str,
+                "adset_name": str,
+                "campaign_id": str,
+                "status": str,
+                "effective_status": str,
+                "account_id": str,
+                "account_name": str,
+            },        
+            "fetch_ad_metadata": {
+                "ad_id": str,
+                "ad_name": str,
+                "adset_id": str,
+                "campaign_id": str,
+                "status": str,
+                "effective_status": str,
+                "account_id": str,
+                "account_name": str,
+            },        
+            "fetch_ad_creative": {
+                "ad_id": str,
+                "thumbnail_url": str,
+                "account_id": str,
+            },        
+            "fetch_campaign_insights": {
+                "account_id": str,
+                "campaign_id": str,
+                "optimization_goal": str,
+                "spend": str,
+                "impressions": str,
+                "clicks": str,
+                "date_start": str,
+                "date_stop": str,
+                "actions": str,
+            },        
+            "fetch_ad_insights": {
+                "account_id": str,
+                "ad_id": str,
+                "adset_id": str,
+                "campaign_id": str,
+                "spend": str,
+                "impressions": str,
+                "clicks": str,
+                "optimization_goal": str,
+                "date_start": str,
+                "date_stop": str,
+                "actions": str,
+            },        
+            "ingest_campaign_metadata": {
+                "campaign_id": str,
+                "campaign_name": str,
+                "effective_status": str,
+                "account_id": str,
+                "account_name": str,
+            },
+            "ingest_adset_metadata": {
+                "adset_id": str,
+                "adset_name": str,
+                "campaign_id": str,
+                "status": str,
+                "effective_status": str,
+                "account_id": str,
+                "account_name": str,
+            },        
+            "ingest_ad_metadata": {
+                "ad_id": str,
+                "ad_name": str,
+                "adset_id": str,
+                "campaign_id": str,
+                "status": str,
+                "effective_status": str,
+                "account_id": str,
+                "account_name": str,
+            },        
+            "ingest_ad_creative": {
+                "ad_id": str,
+                "thumbnail_url": str,
+                "account_id": str,
+            },        
+            "ingest_campaign_insights": {
+                "account_id": str,
+                "campaign_id": str,
+                "optimization_goal": str,
+                "spend": float,
+                "impressions": int,
+                "clicks": int,
+                "date_start": str,
+                "date_stop": str,
+                "actions": str,
+            },        
+            "ingest_ad_insights": {
+                "account_id": str,
+                "ad_id": str,
+                "adset_id": str,
+                "campaign_id": str,
+                "optimization_goal": str,
+                "spend": float,
+                "impressions": int,
+                "clicks": int,
+                "date_start": str,
+                "date_stop": str,
+                "actions": str,
+            },        
+            "staging_campaign_insights": {            
+                
+                # Original staging campaign fields
+                "account_id": str,
+                "campaign_id": str,
+                "campaign_name": str,
+                "account_name": str,
+                "delivery_status": str,
+                "spend": float,
+                "impressions": int,
+                "clicks": int,
+                "result": int,
+                "result_type": str,
+                "purchase": int,
+                "messaging_conversations_started": int,
+                
+                # Enriched dimensions from campaign_name and specific to campaign settings
+                "enrich_campaign_objective": str,
+                "enrich_campaign_region": str,
+                "enrich_campaign_personnel": str,            
+                
+                # Enriched dimensions from campaign_name and specific to budget classfication
+                "enrich_budget_group": str,
+                "enrich_budget_type": str,
+                
+                # Enriched dimensions from campaign_name and specific to category classification
+                "enrich_category_group": str,            
+                
+                # Enriched dimensions from campaign_name and specific to advertising strategy
+                "enrich_program_track": str,
+                "enrich_program_group": str,
+                "enrich_program_type": str,
+                
+                # Standardized time columns
+                "date": "datetime64[ns, UTC]",
+                "year": str,
+                "month": str,
+                "last_updated_at": "datetime64[ns, UTC]",
+                
+                # Enriched dimensions from table_id and specific to internal company structure
+                "enrich_account_platform": str,
+                "enrich_account_department": str,
+                "enrich_account_name": str
+            },        
+            "staging_ad_insights": {            
+                
+                # Original staging ad fields
+                "ad_id": str,
+                "ad_name": str,
+                "adset_id": str,
+                "adset_name": str,
+                "campaign_id": str,
+                "campaign_name": str,
+                "spend": float,
+                "delivery_status": str,
+                "result": int,
+                "result_type": str,
+                "purchase": int,
+                "messaging_conversations_started": int,
+                "impressions": int,
+                "clicks": int,
+                "thumbnail_url": str,
+                
+                # Enriched dimensions from campaign_name and specific to campaign settings
+                "enrich_campaign_objective": str,
+                "enrich_campaign_region": str,
+                "enrich_campaign_personnel": str,
+                
+                # Enriched dimensions from campaign_name and specific to budget classfication
+                "enrich_budget_group": str,
+                "enrich_budget_type": str,
+                
+                # Enriched dimensions from campaign_name and specific to category classification
+                "enrich_category_group": str,
+                
+                # Enriched dimensions from campaign_name and specific to advertising strategy
+                "enrich_program_track": str,
+                "enrich_program_group": str,
+                "enrich_program_type": str,
+                
+                # Enriched dimensions from adset_name and specific to advertising strategy
+                "enrich_adset_strategy": str,
+                "enrich_adset_subtype": str,
+                
+                # Enriched dimensions from adset_name and specific to targeting
+                "enrich_adset_location": str,
+                "enrich_adset_audience": str,
+                "enrich_adset_format": str,
+                
+                # Enriched dimensions from table_id and specific to internal company structure
+                "enrich_account_platform": str,
+                "enrich_account_department": str,
+                "enrich_account_name": str,
+                
+                # Standardized time columns
+                "date": "datetime64[ns, UTC]",
+                "year": str,
+                "month": str,
+                "last_updated_at": "datetime64[ns, UTC]"
+            }
+        }    
+        schema_sections_status[schema_section_name] = "succeed"
+        schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)    
 
     # 1.1.3. Validate that the given schema_type_mapping exists
         schema_section_name = "[SCHEMA] Validate that the given schema_type_mapping exists"
@@ -315,9 +326,9 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                     print(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
                     logging.warning(f"⚠️ [SCHEMA] Failed to coerce column {schema_column_expected} to {schema_data_type} due to {e}.")
             schema_df_enforced = schema_df_enforced[list(schema_columns_expected.keys())]       
+            schema_sections_status[schema_section_name] = "succeed"
             print(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
-            logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")
-            schema_sections_status[schema_section_name] = "succeed"        
+            logging.info(f"✅ [SCHEMA] Successfully enforced schema for Facebook Ads with {len(schema_df_enforced)} row(s) and schema type {schema_type_mapping}.")            
         except Exception as e:
             schema_sections_status[schema_section_name] = "failed"
             print(f"❌ [SCHEMA] Failed to enforce schema for Facebook Ads with schema type {schema_type_mapping} due to {e}.")
@@ -337,22 +348,26 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         schema_sections_summary = list(dict.fromkeys(
             list(schema_sections_status.keys()) +
             list(schema_sections_time.keys())
-        ))
+            ))
         schema_sections_detail = {
             schema_section_summary: {
                 "status": schema_sections_status.get(schema_section_summary, "unknown"),
                 "time": round(schema_sections_time.get(schema_section_summary, 0.0), 2),
-            }
+                }
             for schema_section_summary in schema_sections_summary
-        }         
-        if any(v == "failed" for v in schema_sections_status.values()):
-            print(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
-            logging.error(f"❌ [SCHEMA] Failed to complete schema enforcement for Facebook Ads due to section(s): {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            }         
+        if schema_sections_failed:
             schema_status_final = "schema_failed_all"
+            print(f"❌ [SCHEMA] Failed to complete Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+            logging.error(f"❌ [SCHEMA] Failed to complete Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
+        elif schema_rows_output == schema_rows_input:
+            schema_status_final = "schema_succeed_all"
+            print(f"🏆 [SCHEMA] Successfully completed Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
+            logging.info(f"🏆 [SCHEMA] Successfully completed Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")            
         else:
-            print(f"🏆 [SCHEMA] Successfully completed schema enforcement for Facebook Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
-            logging.info(f"🏆 [SCHEMA] Successfully completed schema enforcement for Facebook Ads with {schema_rows_output} enforced row(s) output in {schema_time_elapsed}s.")
-            schema_status_final = "schema_succeed_all"        
+            schema_status_final = "schema_succeed_partial"
+            print(f"⚠️ [SCHEMA] Partially completed Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
+            logging.warning(f"⚠️ [SCHEMA] Partially completed Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) in {schema_time_elapsed}s.")
         schema_results_final = {
             "schema_df_final": schema_df_final,
             "schema_status_final": schema_status_final,
@@ -364,6 +379,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "schema_sections_detail": schema_sections_detail,
                 "schema_rows_input": schema_rows_input,
                 "schema_rows_output": schema_rows_output,
-            },
-        }    
-    return schema_results_final
+                },
+            }
+    return schema_results_final        
