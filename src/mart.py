@@ -187,14 +187,14 @@ def mart_campaign_all() -> dict:
         mart_sections_summary = list(dict.fromkeys(
             list(mart_sections_status.keys()) +
             list(mart_sections_time.keys())
-            ))
+        ))
         mart_sections_detail = {
             mart_section_summary: {
                 "status": mart_sections_status.get(mart_section_summary, "unknown"),
                 "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
-                }
+            }
             for mart_section_summary in mart_sections_summary
-            }       
+        }       
         if mart_sections_failed:
             mart_status_final = "mart_failed_all"
             print(f"❌ [MART] Failed to complete Facebook Ads campaign performance materialization with {mart_rows_output} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
@@ -213,8 +213,8 @@ def mart_campaign_all() -> dict:
                 "mart_sections_failed": mart_sections_failed,
                 "mart_sections_detail": mart_sections_detail,
                 "mart_rows_output": mart_rows_output,
-                },
-            }
+            },
+        }
     return mart_results_final
 
 # 2. BUILD MONTHLY MATERIALIZED TABLE FOR CREATIVE PERFORMANCE FROM STAGING TABLES
@@ -339,14 +339,14 @@ def mart_creative_all() -> dict:
         mart_sections_summary = list(dict.fromkeys(
             list(mart_sections_status.keys()) +
             list(mart_sections_time.keys())
-            ))
+        ))
         mart_sections_detail = {
             mart_section_summary: {
                 "status": mart_sections_status.get(mart_section_summary, "unknown"),
                 "time": round(mart_sections_time.get(mart_section_summary, 0.0), 2),
-                }
-            for mart_section_summary in mart_sections_summary
             }
+            for mart_section_summary in mart_sections_summary
+        }
         if mart_sections_failed:
             mart_status_final = "mart_failed_all"
             print(f"❌ [MART] Failed to complete Facebook Ads creative performance materialization with {mart_rows_output} materialized row(s) due to {', '.join(mart_sections_failed)} failed section(s) in {mart_time_elapsed}s.")
