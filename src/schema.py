@@ -71,7 +71,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "buying_type": str,
                 "account_id": str,
                 "account_name": str,
-                },        
+            },        
             "fetch_adset_metadata": {
                 "adset_id": str,
                 "adset_name": str,
@@ -80,7 +80,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "effective_status": str,
                 "account_id": str,
                 "account_name": str,
-                },        
+            },        
             "fetch_ad_metadata": {
                 "ad_id": str,
                 "ad_name": str,
@@ -90,12 +90,12 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "effective_status": str,
                 "account_id": str,
                 "account_name": str,
-                },        
+            },        
             "fetch_ad_creative": {
                 "ad_id": str,
                 "thumbnail_url": str,
                 "account_id": str,
-                },        
+            },        
             "fetch_campaign_insights": {
                 "account_id": str,
                 "campaign_id": str,
@@ -106,7 +106,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "date_start": str,
                 "date_stop": str,
                 "actions": str,
-                },        
+            },        
             "fetch_ad_insights": {
                 "account_id": str,
                 "ad_id": str,
@@ -119,14 +119,14 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "date_start": str,
                 "date_stop": str,
                 "actions": str,
-                },        
+            },        
             "ingest_campaign_metadata": {
                 "campaign_id": str,
                 "campaign_name": str,
                 "effective_status": str,
                 "account_id": str,
                 "account_name": str,
-                },
+            },
             "ingest_adset_metadata": {
                 "adset_id": str,
                 "adset_name": str,
@@ -135,7 +135,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "effective_status": str,
                 "account_id": str,
                 "account_name": str,
-                },        
+            },        
             "ingest_ad_metadata": {
                 "ad_id": str,
                 "ad_name": str,
@@ -145,12 +145,12 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "effective_status": str,
                 "account_id": str,
                 "account_name": str,
-                },        
+            },        
             "ingest_ad_creative": {
                 "ad_id": str,
                 "thumbnail_url": str,
                 "account_id": str,
-                },        
+            },        
             "ingest_campaign_insights": {
                 "account_id": str,
                 "campaign_id": str,
@@ -161,7 +161,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "date_start": str,
                 "date_stop": str,
                 "actions": str,
-                },        
+            },        
             "ingest_ad_insights": {
                 "account_id": str,
                 "ad_id": str,
@@ -174,7 +174,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "date_start": str,
                 "date_stop": str,
                 "actions": str,
-                },        
+            },        
             "staging_campaign_insights": {            
                 
                 # Original staging campaign fields
@@ -218,7 +218,7 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "enrich_account_platform": str,
                 "enrich_account_department": str,
                 "enrich_account_name": str
-                },        
+            },        
             "staging_ad_insights": {            
                 
                 # Original staging ad fields
@@ -274,8 +274,8 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "year": str,
                 "month": str,
                 "last_updated_at": "datetime64[ns, UTC]"
-                }
-            }    
+            }
+        }    
         schema_sections_status[schema_section_name] = "succeed"
         schema_sections_time[schema_section_name] = round(time.time() - schema_section_start, 2)    
 
@@ -349,14 +349,14 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
         schema_sections_summary = list(dict.fromkeys(
             list(schema_sections_status.keys()) +
             list(schema_sections_time.keys())
-            ))
+        ))
         schema_sections_detail = {
             schema_section_summary: {
                 "status": schema_sections_status.get(schema_section_summary, "unknown"),
                 "time": round(schema_sections_time.get(schema_section_summary, 0.0), 2),
-                }
+            }
             for schema_section_summary in schema_sections_summary
-            }         
+        }         
         if schema_sections_failed:
             schema_status_final = "schema_failed_all"
             print(f"❌ [SCHEMA] Failed to complete Facebook Ads schema enforcement with {schema_rows_output}/{schema_rows_input} enforced row(s) due to section(s) {', '.join(schema_sections_failed)} in {schema_time_elapsed}s.")
@@ -380,6 +380,6 @@ def enforce_table_schema(schema_df_input: pd.DataFrame, schema_type_mapping: str
                 "schema_sections_detail": schema_sections_detail,
                 "schema_rows_input": schema_rows_input,
                 "schema_rows_output": schema_rows_output,
-                },
-            }
+            },
+        }
     return schema_results_final        
