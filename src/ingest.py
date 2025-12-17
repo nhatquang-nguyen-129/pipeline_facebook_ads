@@ -654,7 +654,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         try:
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads ad metadata for {len(ingest_ad_ids)} ad_id(s)...")
-            ingest_results_fetched = fetch_ad_metadata(fetch_ids_ad=ingest_ad_ids)
+            ingest_results_fetched = fetch_ad_metadata(fetch_ad_ids=ingest_ad_ids)
             ingest_df_fetched = ingest_results_fetched["fetch_df_final"]            
             ingest_summary_fetched = ingest_results_fetched["fetch_summary_final"]
             ingest_status_fetched = ingest_results_fetched["fetch_status_final"]
