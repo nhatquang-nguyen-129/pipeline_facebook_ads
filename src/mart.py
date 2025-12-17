@@ -151,8 +151,7 @@ def mart_campaign_all() -> dict:
                             WHEN REGEXP_CONTAINS(delivery_status, r"ACTIVE") THEN "🟢"
                             WHEN REGEXP_CONTAINS(delivery_status, r"PAUSED") THEN "⚪"
                             ELSE "❓ Unrecognized"
-                        END AS trang_thai,
-                        SAFE_CAST(last_updated_at AS TIMESTAMP) AS last_updated_at
+                        END AS trang_thai                        
                     FROM `{staging_table_campaign}`
                     WHERE date IS NOT NULL
                 )
