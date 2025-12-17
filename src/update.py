@@ -377,19 +377,25 @@ def update_ad_insights(update_date_start: str, update_date_end: str):
         update_section_name = "[UPDATE] Trigger to ingest Facebook Ads adset metadata"
         update_section_start = time.time()
         try:
+            print(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(update_ad_ids)} ad_id(s)...")
+            logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(update_ad_ids)} ad_id(s)...")            
             if update_ad_ids:
-                print(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(update_ad_ids)} ad_id(s)...")
-                logging.info(f"🔄 [UPDATE] Triggering to ingest Facebook adset metadata for {len(update_ad_ids)} ad_id(s)...")
-                raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
-                raw_tables_all = google_bigquery_client.list_tables(dataset=raw_dataset)
-                raw_table_pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
-                raw_tables_ad = [
-                    f"{PROJECT}.{raw_dataset}.{raw_table_all.table_id}"
-                    for raw_table_all in raw_tables_all if re.match(raw_table_pattern, raw_table_all.table_id)
-                ]
-                if not raw_tables_ad:
-                    raise ValueError("❌ [UPDATE] No matching ad raw tables found for Facebook Ads adset metadata ingestion.")
                 try:
+                    print(f"🔍 [UPDATE] Querying all Facebook Ads ad insights tables for adset metadata ingestion...")
+                    logging.info(f"🔍 [UPDATE] Querying all Facebook Ads ad insights tables for adset metadata ingestion...")
+                    raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
+                    raw_tables_all = google_bigquery_client.list_tables(dataset=raw_dataset)
+                    raw_table_pattern = rf"^{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_ad_m\d{{2}}\d{{4}}$"
+                    raw_tables_ad = [
+                        f"{PROJECT}.{raw_dataset}.{raw_table_all.table_id}"
+                        for raw_table_all in raw_tables_all if re.match(raw_table_pattern, raw_table_all.table_id)
+                    ]
+                    print(f"✅ [UPDATE] Successfully queried {len(raw_tables_ad)} Facebook Ads ad insights tables for adset metadata ingestion.")
+                    logging.info(f"✅ [UPDATE] Successfully queried {len(raw_tables_ad)} Facebook Ads ad insights tables for adset metadata ingestion.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to query Facebook Ads ad insights tables due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to query Facebook Ads ad insights tables due to {e}.")
+                try:                     
                     print(f"🔍 [UPDATE] Querying adset_id(s) from {len(raw_tables_ad)} Facebook Ads ad insights table(s)...")
                     logging.info(f"🔍 [UPDATE] Querying adset_id(s) from {len(raw_tables_ad)} Facebook Ads ad insights table(s)...")
                     query_union_config = " UNION DISTINCT ".join([
