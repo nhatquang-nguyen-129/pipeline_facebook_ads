@@ -746,31 +746,31 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 print(f"❌ [INGEST] Failed to check Facebook Ads ad metadata table {raw_table_ad} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check Facebook Ads ad metadata table {raw_table_ad} existence due to {e}.")
             if not ingest_table_existed:
-                print(f"⚠️ [INGEST] Facebook Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
-                logging.info(f"⚠️ [INGEST] Facebook Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
-                for col, dtype in ingest_df_deduplicated.dtypes.items():
-                    if dtype.name.startswith("int"):
-                        bq_type = "INT64"
-                    elif dtype.name.startswith("float"):
-                        bq_type = "FLOAT64"
-                    elif dtype.name == "bool":
-                        bq_type = "BOOL"
-                    elif "datetime" in dtype.name:
-                        bq_type = "TIMESTAMP"
-                    else:
-                        bq_type = "STRING"
-                    table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
-                table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
-                table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
-                if table_partition_effective:
-                    table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
-                        type_=bigquery.TimePartitioningType.DAY,
-                        field=table_partition_effective
-                    )
-                table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
-                if table_clusters_filtered:  
-                    table_configuration_defined.clustering_fields = table_clusters_filtered  
-                try:    
+                try:
+                    print(f"⚠️ [INGEST] Facebook Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
+                    logging.info(f"⚠️ [INGEST] Facebook Ads ad metadata table {raw_table_ad} not found then table creation will be proceeding...")
+                    for col, dtype in ingest_df_deduplicated.dtypes.items():
+                        if dtype.name.startswith("int"):
+                            bq_type = "INT64"
+                        elif dtype.name.startswith("float"):
+                            bq_type = "FLOAT64"
+                        elif dtype.name == "bool":
+                            bq_type = "BOOL"
+                        elif "datetime" in dtype.name:
+                            bq_type = "TIMESTAMP"
+                        else:
+                            bq_type = "STRING"
+                        table_schemas_defined.append(bigquery.SchemaField(col, bq_type))
+                    table_configuration_defined = bigquery.Table(raw_table_ad, schema=table_schemas_defined)
+                    table_partition_effective = "date" if "date" in ingest_df_deduplicated.columns else None
+                    if table_partition_effective:
+                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                            type_=bigquery.TimePartitioningType.DAY,
+                            field=table_partition_effective
+                        )
+                    table_clusters_filtered = [f for f in table_clusters_defined if f in ingest_df_deduplicated.columns]
+                    if table_clusters_filtered:  
+                        table_configuration_defined.clustering_fields = table_clusters_filtered  
                     print(f"🔍 [INGEST] Creating Facebook Ads ad metadata table defined name {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
                     logging.info(f"🔍 [INGEST] Creating Facebook Ads ad metadata table defined name {raw_table_ad} with partition on {table_partition_effective} and cluster on {table_clusters_filtered}...")
                     query_table_create = google_bigquery_client.create_table(table_configuration_defined)
@@ -785,34 +785,45 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad metadata table {raw_table_ad} then existing row(s) deletion will be proceeding...")
                 ingest_keys_unique = ingest_df_deduplicated[["account_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
-                    table_id_temporary = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    job_load_load = google_bigquery_client.load_table_from_dataframe(
-                        ingest_keys_unique, 
-                        table_id_temporary, 
-                        job_config=job_load_config
-                        )
-                    job_load_result = job_load_load.result()
-                    query_delete_condition = " AND ".join([
-                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in ["account_id", "ad_id"]
-                        ])
-                    query_delete_config = f"""
-                        DELETE FROM `{raw_table_ad}` AS main
-                        WHERE EXISTS (
-                            SELECT 1 FROM `{table_id_temporary}` AS temp
-                            WHERE {query_delete_condition}
+                    try:
+                        temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                        job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                        job_load_load = google_bigquery_client.load_table_from_dataframe(
+                            ingest_keys_unique, 
+                            temporary_table_id, 
+                            job_config=job_load_config
                             )
-                        """
-                    query_delete_load = google_bigquery_client.query(query_delete_config)
-                    query_delete_result = query_delete_load.result()
-                    ingest_rows_deleted = query_delete_result.num_dml_affected_rows
-                    google_bigquery_client.delete_table(
-                        table_id_temporary, 
-                        not_found_ok=True
-                        )                    
-                    print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
-                    logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
+                        job_load_result = job_load_load.result()
+                        created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
+                        print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {created_table_id} for batch deletion.")
+                        logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {created_table_id} for batch deletion.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")                            
+                    try:                        
+                        query_delete_condition = " AND ".join([
+                            f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                            for col in ["account_id", "ad_id"]
+                            ])
+                        query_delete_config = f"""
+                            DELETE FROM `{raw_table_ad}` AS main
+                            WHERE EXISTS (
+                                SELECT 1 FROM `{temporary_table_id}` AS temp
+                                WHERE {query_delete_condition}
+                                )
+                            """
+                        query_delete_load = google_bigquery_client.query(query_delete_config)
+                        query_delete_result = query_delete_load.result()
+                        ingest_rows_deleted = query_delete_result.num_dml_affected_rows
+                        google_bigquery_client.delete_table(
+                            temporary_table_id, 
+                            not_found_ok=True
+                            )                    
+                        print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
+                        logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
+                    except Exception as e:
+                        print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
                 else:
                     print(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
                     logging.warning(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
