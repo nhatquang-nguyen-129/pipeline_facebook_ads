@@ -253,6 +253,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
                     try:
+                        print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads campaign metadata using batch deletion...")
+                        logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads campaign metadata using batch deletion...")                        
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "campaign_id"]
@@ -274,16 +276,16 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                        print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
                 else:
                     print(f"⚠️ [INGEST] No unique account_id and campaign_id keys found in Facebook Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
                     logging.warning(f"⚠️ [INGEST] No unique account_id and campaign_id keys found in Facebook Ads campaign metadata table {raw_table_campaign} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -527,6 +529,8 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")                        
                     try:
+                        print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads adset metadata using batch deletion...")
+                        logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads adset metadata using batch deletion...")                           
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "adset_id"]
@@ -548,16 +552,16 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads adset metadata table {raw_table_adset}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads adset metadata table {raw_table_adset}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
+                        print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
                 else:
                     print(f"⚠️ [INGEST] No unique account_id and adset_id keys found in Facebook Ads adset metadata table {raw_table_adset} then existing row(s) deletion is skipped.")
                     logging.warning(f"⚠️ [INGEST] No unique account_id and adset_id keys found in Facebook Ads adset metadata table {raw_table_adset} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -801,6 +805,8 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")                            
                     try:                        
+                        print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads ad metadata using batch deletion...")
+                        logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads ad metadata using batch deletion...")                         
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "ad_id"]
@@ -822,16 +828,16 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad metadata table {raw_table_ad}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
+                        print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad metadata table {raw_table_ad} by batch deletion due to {e}.")
                 else:
                     print(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
                     logging.warning(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad metadata table {raw_table_ad} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_ad} if it not exist for Facebook Ads ad metadata due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -1073,6 +1079,8 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                         print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
                         logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")                            
                     try:
+                        print(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads ad creative using batch deletion...")
+                        logging.info(f"🔍 [INGEST] Deleting {len(ingest_keys_unique)} row(s) of Facebook Ads ad creative using batch deletion...")                        
                         query_delete_condition = " AND ".join([
                             f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
                             for col in ["account_id", "ad_id"]
@@ -1094,16 +1102,16 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                         print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                         logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to delete existing row(s) of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
+                        print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
                 else:
                     print(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
                     logging.warning(f"⚠️ [INGEST] No unique account_id and ad_id keys found in Facebook Ads ad creative table {raw_table_creative} then existing row(s) deletion is skipped.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
-            print(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing row(s) or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
+            print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
