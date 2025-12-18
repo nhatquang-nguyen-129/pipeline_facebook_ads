@@ -1369,6 +1369,8 @@ def ingest_campaign_insights(
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
                             try:
+                                print(f"🔍 [INGEST] Deleting {len(ingest_dates_existed)} row(s) of Facebook Ads campaign insights in Google BigQuery table {raw_table_campaign}...")
+                                logging.info(f"🔍 [INGEST] Deleting {len(ingest_dates_existed)} row(s) of Facebook Ads campaign insights in Google BigQuery table {raw_table_campaign}...")
                                 query_delete_config = f"""
                                     DELETE FROM `{raw_table_campaign}`
                                     WHERE date_start = @date_value
