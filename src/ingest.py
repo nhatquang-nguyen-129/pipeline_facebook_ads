@@ -790,6 +790,8 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_keys_unique = ingest_df_deduplicated[["account_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
                     try:
+                        print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata for batch deletion...")
+                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata for batch deletion...")
                         temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                         job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                         job_load_load = google_bigquery_client.load_table_from_dataframe(
@@ -1064,6 +1066,8 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_keys_unique = ingest_df_deduplicated[["account_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
                     try:
+                        print(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad creative for batch deletion...")
+                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad creative for batch deletion...")                        
                         temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
                         job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                         job_load_load = google_bigquery_client.load_table_from_dataframe(
