@@ -1066,8 +1066,8 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                 ingest_keys_unique = ingest_df_deduplicated[["account_id", "ad_id"]].dropna().drop_duplicates()
                 if not ingest_keys_unique.empty:
                     try:
-                        print(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad creative for batch deletion...")
-                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated TikTok Ads ad creative for batch deletion...")                        
+                        print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative for batch deletion...")
+                        logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative for batch deletion...")                        
                         temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
                         job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                         job_load_load = google_bigquery_client.load_table_from_dataframe(
@@ -1680,6 +1680,8 @@ def ingest_ad_insights(
                         logging.warning(f"⚠️ [INGEST] Found {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads ad insights {raw_table_ad} table then deletion will be proceeding...")
                         for ingest_date_overlapped in ingest_dates_overlapped:
                             try:
+                                print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad insights in Google BigQuery table {raw_table_ad}...")
+                                logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad insights in Google BigQuery table {raw_table_ad}...")                                
                                 query_delete_config = f"""
                                     DELETE FROM `{raw_table_ad}`
                                     WHERE date_start = @date_value
