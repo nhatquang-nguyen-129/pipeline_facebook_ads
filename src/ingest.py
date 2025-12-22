@@ -265,15 +265,32 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
-        
-        # Configuration for table delete keys
+            
+                try:
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
+                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
+                        unique_keys_effective, 
+                        temporary_table_id, 
+                        job_config=load_table_config
+                    )
+                    load_table_result = load_table_execute.result()
+                    load_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {load_table_id} for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {load_table_id} for batch deletion.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
+
+        # Configuration for batch deletion
+                temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                 unique_keys_defined = [
                     "account_id", 
                     "campaign_id"
                 ]                
         
-        # Definition for table delete keys
-                temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+        # Definition for batch deletion
                 unique_keys_effective = (
                         ingest_df_deduplicated[unique_keys_defined]
                         .dropna()
@@ -282,42 +299,23 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         else None
                 )
 
-        # Execute temporary table creation         
-                try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
-                    job_load_load = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
-                        temporary_table_id, 
-                        job_config=bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    )
-                    job_load_result = job_load_load.result()
-                    created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {created_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {created_table_id} for batch deletion.")
-                except Exception as e:
-                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
-
-        # Configuration for table delete query
-                query_delete_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in unique_keys_effective
-                ])
-                query_delete_config = f"""
-                    DELETE FROM `{raw_table_campaign}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temporary_table_id}` AS temp
-                        WHERE {query_delete_condition}
-                    )
-                """
-
-        # Execute batch delete                
+        # Execute batch deletion
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")
-                    logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")
-                    query_delete_load = google_bigquery_client.query(query_delete_config)
-                    query_delete_result = query_delete_load.result()
+                    logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")                    
+                    query_delete_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in unique_keys_effective
+                    ])
+                    query_delete_config = f"""
+                        DELETE FROM `{raw_table_campaign}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temporary_table_id}` AS temp
+                            WHERE {query_delete_condition}
+                        )
+                    """                    
+                    query_delete_execute = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_execute.result()
                     ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
                         temporary_table_id, 
