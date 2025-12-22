@@ -1249,36 +1249,36 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                 try:    
                     print(f"🔍 [INGEST] Creating Facebook Ads ad creative table defined name {raw_table_creative} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
                     logging.info(f"🔍 [INGEST] Creating Facebook Ads ad creative table defined name {raw_table_creative} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    table_configuration_defined = bigquery.Table(
+                    create_table_config = bigquery.Table(
                         raw_table_creative,
                         schema=table_schemas_effective
                     )
                     if table_partition_effective:
-                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                        create_table_config.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
                         )
                     if table_clusters_effective:
-                        table_configuration_defined.clustering_fields = table_clusters_effective
-                    query_table_create = google_bigquery_client.create_table(table_configuration_defined)
-                    query_table_id = query_table_create.full_table_id
-                    print(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
-                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                        create_table_config.clustering_fields = table_clusters_effective                  
+                    create_table_execute = google_bigquery_client.create_table(create_table_config)
+                    create_table_id = create_table_execute.full_table_id
+                    print(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads ad creative table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create Facebook Ads ad creative table {raw_table_creative} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create Facebook Ads ad creative table {raw_table_creative} due to {e}.")
+            
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
         
-        # Configuration for table delete keys
+        # Configuration for batch deletion
                 unique_keys_defined = [
                     "account_id", 
                     "ad_id"
                 ]                
         
-        # Definition for table delete keys
-                temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+        # Definition for batch deletion             
                 unique_keys_effective = (
                         ingest_df_deduplicated[unique_keys_defined]
                         .dropna()
@@ -1287,75 +1287,77 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                         else None
                 )
 
-        # Execute temporary table creation         
+        # Execute batch deletion       
                 try:
                     print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
                     logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
-                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    job_load_load = google_bigquery_client.load_table_from_dataframe(
+                    temporary_table_id = f"{PROJECT}{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
                         unique_keys_effective, 
                         temporary_table_id, 
-                        job_config=job_load_config
+                        job_config=load_table_config
                     )
-                    job_load_result = job_load_load.result()
-                    created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {created_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {created_table_id} for batch deletion.")
+                    load_table_result = load_table_execute.result()
+                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} for batch deletion.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
-
-        # Configuration for table delete query
-                query_delete_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in unique_keys_effective
-                ])
-                query_delete_config = f"""
-                    DELETE FROM `{raw_table_creative}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temporary_table_id}` AS temp
-                        WHERE {query_delete_condition}
-                    )
-                """
 
         # Execute batch delete                
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
-                    query_delete_load = google_bigquery_client.query(query_delete_config)
-                    query_delete_result = query_delete_load.result()
+                    query_delete_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in unique_keys_effective
+                    ])
+                    query_delete_config = f"""
+                        DELETE FROM `{raw_table_creative}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temporary_table_id}` AS temp
+                            WHERE {query_delete_condition}
+                        )
+                    """                    
+                    query_delete_execute = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_execute.result()
                     ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
                         temporary_table_id, 
                         not_found_ok=True
-                    )                    
+                    )                     
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads ad creative table {raw_table_creative} by batch deletion due to {e}.")
             ingest_sections_status[ingest_section_name] = "succeed"
+        
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
             logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_creative} if it not exist for Facebook Ads ad creative due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.4.7. Upload Facebook Ads ad creative to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads ad creative to Google BigQuery"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}...")
-            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            job_load_load = google_bigquery_client.load_table_from_dataframe(
+            load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            load_table_execute = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_creative, 
-                job_config=job_load_config
+                job_config=load_table_config
             )
-            job_load_result = job_load_load.result()
-            ingest_rows_uploaded = job_load_load.output_rows
+            load_table_result = load_table_execute.result()
+            ingest_rows_uploaded = load_table_execute.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of Facebook Ads ad creative to Google BigQuery table {raw_table_creative}.")
@@ -1364,6 +1366,7 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebook Ads ad creative to Google BigQuery table {raw_table_creative} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads ad creative to Google BigQuery table {raw_table_creative} due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
