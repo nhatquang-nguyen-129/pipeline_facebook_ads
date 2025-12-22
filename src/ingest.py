@@ -322,8 +322,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads campaign metadata table {raw_table_campaign}.")
                 except Exception as e:
-                    print(f"❌ [INGEST] Failed to delete existing rows of Google Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to delete existing rows of Google Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                    print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
             ingest_sections_status[ingest_section_name] = "succeed"
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
