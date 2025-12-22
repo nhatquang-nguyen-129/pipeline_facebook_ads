@@ -273,7 +273,23 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
-            
+        
+        # Configuration for batch deletion                
+                unique_keys_defined = [
+                    "account_id", 
+                    "campaign_id"
+                ]                
+        
+        # Definition for batch deletion
+                unique_keys_effective = (
+                        ingest_df_deduplicated[unique_keys_defined]
+                        .dropna()
+                        .drop_duplicates()
+                        if unique_keys_defined
+                        else None
+                )
+
+        # Execute batch deletion
                 try:
                     print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
                     logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
@@ -292,22 +308,6 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads campaign metadata table {temporary_table_id} for batch deletion due to {e}.")
 
-        # Configuration for batch deletion                
-                unique_keys_defined = [
-                    "account_id", 
-                    "campaign_id"
-                ]                
-        
-        # Definition for batch deletion
-                unique_keys_effective = (
-                        ingest_df_deduplicated[unique_keys_defined]
-                        .dropna()
-                        .drop_duplicates()
-                        if unique_keys_defined
-                        else None
-                )
-
-        # Execute batch deletion
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")                    
@@ -1617,14 +1617,24 @@ def ingest_campaign_insights(
 
             # Definition for table delete keys validation
                     unique_keys_effective = (
-                            ingest_df_deduplicated[unique_keys_defined]
+                        unique_keys_defined
+                        if unique_keys_defined
+                        and set(unique_keys_defined).issubset(ingest_df_deduplicated.columns)
+                        else None
+                    )                  
+                    if unique_keys_effective:
+                        ingest_dates_new = (
+                            ingest_df_deduplicated[unique_keys_effective[0]]
                             .dropna()
                             .drop_duplicates()
-                            if unique_keys_defined
-                            else None
-                    )                    
-                    ingest_dates_new = ingest_df_deduplicated[unique_keys_effective].dropna().unique().tolist()
-                    query_select_config = f"SELECT DISTINCT {unique_keys_effective} FROM `{raw_table_campaign}`"
+                            .tolist()
+                        )
+                    else:
+                        ingest_dates_new = []
+                    query_select_config = f"""
+                        SELECT DISTINCT {unique_keys_effective[0]}
+                        FROM `{raw_table_campaign}`
+                    """
 
             # Execution for table delete keys validation
                     try: 
