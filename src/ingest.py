@@ -182,8 +182,11 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
     # 1.1.6. Delete existing rows or create new table if it not exist
         ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
         ingest_section_start = time.time()
+        
         try:
+            
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+            
             try:
                 print(f"🔍 [INGEST] Checking Facebook Ads campaign metadata table {raw_table_campaign} existence...")
                 logging.info(f"🔍 [INGEST] Checking Facebook Ads campaign metadata table {raw_table_campaign} existence...")
@@ -194,6 +197,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             except Exception:
                 print(f"❌ [INGEST] Failed to check Facebook Ads campaign metadata table {raw_table_campaign} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check Facebook Ads campaign metadata table {raw_table_campaign} existence due to {e}.")
+            
             if not ingest_table_existed:
                 print(f"⚠️ [INGEST] Facebook Ads campaign metadata table {raw_table_campaign} not found then table creation will be proceeding...")
                 logging.info(f"⚠️ [INGEST] Facebook Ads campaign metadata table {raw_table_campaign} not found then table creation will be proceeding...")
@@ -238,25 +242,26 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         # Execute table creation                
                 try:    
                     print(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    table_config_defined = bigquery.Table(
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")                    
+                    create_table_config = bigquery.Table(
                         raw_table_campaign,
                         schema=table_schemas_effective
                     )
                     if table_partition_effective:
-                        table_config_defined.time_partitioning = bigquery.TimePartitioning(
+                        create_table_config.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
                         )
                     if table_clusters_effective:
-                        table_config_defined.clustering_fields = table_clusters_effective
-                    create_table_execute = google_bigquery_client.create_table(table_config_defined)
+                        create_table_config.clustering_fields = table_clusters_effective                  
+                    create_table_execute = google_bigquery_client.create_table(create_table_config)
                     create_table_id = create_table_execute.full_table_id
                     print(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
                     logging.info(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
+            
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
