@@ -103,6 +103,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
     # 1.1.2. Trigger to fetch Facebook Ads campaign metadata
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads campaign metadata"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads campaign metadata for {len(ingest_campaign_ids)} campaign_id(s)...")
@@ -122,12 +123,14 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.1.3. Trigger to enforce schema for Facebook Ads campaign metadata
         ingest_section_name = "[INGEST] Trigger to enforce schema for Facebook Ads campaign metadata"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads campaign metadata with {len(ingest_df_fetched)} row(s)...")
             logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads campaign metadata with {len(ingest_df_fetched)} row(s)...")
@@ -147,24 +150,28 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads campaign metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.1.4. Prepare Google BigQuery table_id for ingestion
         ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
+        
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
             raw_table_campaign = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
             ingest_sections_status[ingest_section_name] = "succeed"   
             print(f"🔍 [INGEST] Preparing to ingest Facebook campaign metadata for {len(ingest_df_enforced)} enforced row(s) to Google BigQuery table_id {raw_table_campaign}...")
             logging.info(f"🔍 [INGEST] Preparing to ingest Facebook campaign metadata for {len(ingest_df_enforced)} enforced row(s) to Google BigQuery table_id {raw_table_campaign}...")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.1.5. Initialize Google BigQuery client
         ingest_section_name = "[INGEST] Initialize Google BigQuery client"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -176,6 +183,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -276,7 +284,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                         job_config=load_table_config
                     )
                     load_table_result = load_table_execute.result()
-                    load_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
+                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
                     print(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {load_table_id} for batch deletion.")
                     logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads campaign metadata table {load_table_id} for batch deletion.")
                 except Exception as e:
@@ -327,16 +335,19 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads campaign metadata table {raw_table_campaign} by batch deletion due to {e}.")
             ingest_sections_status[ingest_section_name] = "succeed"
+        
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
-            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")
+            logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_campaign} if it not exist for Facebook Ads campaign metadata due to {e}.")        
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.1.7. Upload Facebook Ads campaign metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads campaign metadata to Google BigQuery"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign}...")
@@ -356,6 +367,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads campaign metadata to Google BigQuery table {raw_table_campaign} due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
@@ -424,6 +436,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
     # 1.2.2. Trigger to fetch Facebook Ads adset metadata
         ingest_section_name = "[INGEST] Trigger to fetch Facebook Ads adset metadata"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔁 [INGEST] Triggering to fetch Facebook Ads adset metadata for {len(ingest_adset_ids)} adset_id(s)...")
             logging.info(f"🔁 [INGEST] Triggering to fetch Facebook Ads adset metadata for {len(ingest_adset_ids)} adset_id(s)...")
@@ -443,12 +456,14 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger Facebook Ads adset metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
                 logging.error(f"❌ [INGEST] Failed to trigger Facebook Ads adset metadata fetching with {ingest_summary_fetched['fetch_rows_output']}/{ingest_summary_fetched['fetch_rows_input']} fetched row(s) in {ingest_summary_fetched['fetch_time_elapsed']}s.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.3. Trigger to enforce schema for Facebook Ads adset metadata
         ingest_section_name = "[INGEST] Trigger to enforce schema for Facebook Ads adset metadata"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads adset metadata with {len(ingest_df_fetched)} row(s)...")
             logging.info(f"🔄 [INGEST] Triggering to enforce schema for Facebook Ads adset metadata with {len(ingest_df_fetched)} row(s)...")
@@ -468,24 +483,28 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                 ingest_sections_status[ingest_section_name] = "failed"
                 print(f"❌ [INGEST] Failed to trigger Facebook Ads adset metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
                 logging.error(f"❌ [INGEST] Failed to trigger TikFacebookTok Ads adset metadata schema enforcement with {ingest_summary_enforced['schema_rows_output']}/{ingest_summary_enforced['schema_rows_input']} enforced row(s) in {ingest_summary_enforced['schema_time_elapsed']}s.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.4. Prepare Google BigQuery table_id for ingestion
         ingest_section_name = "[INGEST] Prepare Google BigQuery table_id for ingestion"
         ingest_section_start = time.time()
+        
         try:
             raw_dataset = f"{COMPANY}_dataset_{PLATFORM}_api_raw"
             raw_table_adset = f"{PROJECT}.{raw_dataset}.{COMPANY}_table_{PLATFORM}_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"🔍 [INGEST] Preparing to ingest Facebook Ads adset metadata for {len(ingest_df_enforced)} enforced row(s) with Google BigQuery table_id {raw_table_adset}...")
             logging.info(f"🔍 [INGEST] Preparing to ingest Facebook Ads adset metadata for {len(ingest_df_enforced)} enforced row(s) with Google BigQuery table_id {raw_table_adset}...")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.5. Initialize Google BigQuery client
         ingest_section_name = "[INGEST] Initialize Google BigQuery client"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
             logging.info(f"🔍 [INGEST] Initializing Google BigQuery client for Google Cloud Platform project {PROJECT}...")
@@ -497,14 +516,18 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to initialize Google BigQuery client for Google Cloud Platform project {PROJECT} due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.6. Delete existing row(s) or create new table if it not exist
         ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
         ingest_section_start = time.time()
+        
         try:
+            
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
+            
             try:
                 print(f"🔍 [INGEST] Checking Facebook Ads adset metadata table {raw_table_adset} existence...")
                 logging.info(f"🔍 [INGEST] Checking Facebook Ads adset metadata table {raw_table_adset} existence...")
@@ -515,6 +538,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
             except Exception:
                 print(f"❌ [INGEST] Failed to check Facebook Ads adset metadata table {raw_table_adset} existence due to {e}.")
                 logging.error(f"❌ [INGEST] Failed to check Facebook Ads adset metadata table {raw_table_adset} existence due to {e}.")
+            
             if not ingest_table_existed:
                 print(f"⚠️ [INGEST] Facebook Ads adset metadata table {raw_table_adset} not found then table creation will be proceeding...")
                 logging.info(f"⚠️ [INGEST] Facebook Ads adset metadata table {raw_table_adset} not found then table creation will be proceeding...")
@@ -560,36 +584,54 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                 try:    
                     print(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
                     logging.info(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    table_configuration_defined = bigquery.Table(
+                    create_table_config = bigquery.Table(
                         raw_table_adset,
                         schema=table_schemas_effective
                     )
                     if table_partition_effective:
-                        table_configuration_defined.time_partitioning = bigquery.TimePartitioning(
+                        create_table_config.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
                             field=table_partition_effective
                         )
                     if table_clusters_effective:
-                        table_configuration_defined.clustering_fields = table_clusters_effective
-                    query_table_create = google_bigquery_client.create_table(table_configuration_defined)
-                    query_table_id = query_table_create.full_table_id
-                    print(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
-                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {query_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                        create_table_config.clustering_fields = table_clusters_effective                  
+                    create_table_execute = google_bigquery_client.create_table(create_table_config)
+                    create_table_id = create_table_execute.full_table_id
+                    print(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create Facebook Ads adset metadata table {raw_table_adset} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create Facebook Ads adset metadata table {raw_table_adset} due to {e}.")
+            
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads adset metadata table {raw_table_adset} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads adset metadata table {raw_table_adset} then existing rows deletion will be proceeding...")
-        
-        # Configuration for table delete keys
+
+                try:
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
+                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
+                        unique_keys_effective, 
+                        temporary_table_id, 
+                        job_config=load_table_config
+                    )
+                    load_table_result = load_table_execute.result()
+                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} for batch deletion.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
+
+        # Configuration for batch deletion
+                temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                 unique_keys_defined = [
                     "account_id", 
                     "adset_id"
                 ]                
         
-        # Definition for table delete keys
-                temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+        # Definition for batch deletion                
                 unique_keys_effective = (
                         ingest_df_deduplicated[unique_keys_defined]
                         .dropna()
@@ -598,43 +640,23 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                         else None
                 )
 
-        # Execute temporary table creation         
-                try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
-                    job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    job_load_load = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
-                        temporary_table_id, 
-                        job_config=job_load_config
-                    )
-                    job_load_result = job_load_load.result()
-                    created_table_id = f"{job_load_load.destination.project}.{job_load_load.destination.dataset_id}.{job_load_load.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {created_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {created_table_id} for batch deletion.")
-                except Exception as e:
-                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
-
-        # Configuration for table delete query
-                query_delete_condition = " AND ".join([
-                    f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                    for col in unique_keys_effective
-                ])
-                query_delete_config = f"""
-                    DELETE FROM `{raw_table_adset}` AS main
-                    WHERE EXISTS (
-                        SELECT 1 FROM `{temporary_table_id}` AS temp
-                        WHERE {query_delete_condition}
-                    )
-                """
-
-        # Execute batch delete                
+        # Execute batch deletion          
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
-                    query_delete_load = google_bigquery_client.query(query_delete_config)
-                    query_delete_result = query_delete_load.result()
+                    query_delete_condition = " AND ".join([
+                        f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
+                        for col in unique_keys_effective
+                    ])
+                    query_delete_config = f"""
+                        DELETE FROM `{raw_table_adset}` AS main
+                        WHERE EXISTS (
+                            SELECT 1 FROM `{temporary_table_id}` AS temp
+                            WHERE {query_delete_condition}
+                        )
+                    """                    
+                    query_delete_execute = google_bigquery_client.query(query_delete_config)
+                    query_delete_result = query_delete_execute.result()
                     ingest_rows_deleted = query_delete_result.num_dml_affected_rows
                     google_bigquery_client.delete_table(
                         temporary_table_id, 
@@ -646,27 +668,30 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to delete existing rows of Facebook Ads adset metadata table {raw_table_adset} by batch deletion due to {e}.")
             ingest_sections_status[ingest_section_name] = "succeed"
+        
         except Exception as e:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
             logging.error(f"❌ [INGEST] Failed to delete existing rows or create new table {raw_table_adset} if it not exist for Facebook Ads adset metadata due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
     # 1.2.7. Upload Facebook Ads adset metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads adset metadata to Google BigQuery"
         ingest_section_start = time.time()
+        
         try:
             print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads adset metadata to Google BigQuery table {raw_table_adset}...")
             logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads adset metadata to Google BigQuery table {raw_table_adset}...")
-            job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-            job_load_load = google_bigquery_client.load_table_from_dataframe(
+            load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            load_table_execute = google_bigquery_client.load_table_from_dataframe(
                 ingest_df_deduplicated, 
                 raw_table_adset, 
-                job_config=job_load_config
+                job_config=load_table_config
             )
-            job_load_result = job_load_load.result()
-            ingest_rows_uploaded = job_load_load.output_rows
+            load_table_result = load_table_execute.result()
+            ingest_rows_uploaded = load_table_execute.output_rows
             ingest_df_uploaded = ingest_df_deduplicated.copy()
             ingest_sections_status[ingest_section_name] = "succeed"
             print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of Facebook Ads adset metadata to Google BigQuery table {raw_table_adset}.")
@@ -675,6 +700,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
             ingest_sections_status[ingest_section_name] = "failed"
             print(f"❌ [INGEST] Failed to upload Facebook Ads adset metadata to Google BigQuery table {raw_table_adset} due to {e}.")
             logging.error(f"❌ [INGEST] Failed to upload Facebook Ads adset metadata to Google BigQuery table {raw_table_adset} due to {e}.")
+        
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
