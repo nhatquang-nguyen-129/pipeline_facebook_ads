@@ -969,7 +969,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
-    
+
                 try:
                     print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys for batch deletion...")
                     logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys for batch deletion...")
@@ -988,13 +988,13 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
 
-        # Configuration for batch deletion
+        # Configuration for batch deletion                
                 unique_keys_defined = [
                     "account_id", 
                     "ad_id"
                 ]                
         
-        # Definition for batch deletion             
+        # Definition for batch deletion                
                 unique_keys_effective = (
                         ingest_df_deduplicated[unique_keys_defined]
                         .dropna()
@@ -1003,7 +1003,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
                         else None
                 )
 
-        # Execute batch deletion              
+        # Execute batch deletion          
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
@@ -1040,7 +1040,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.3.7. Upload Facebook Ads ad metadata to Google BigQuery
+    # 1.2.7. Upload Facebook Ads ad metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads ad metadata to Google BigQuery"
         ingest_section_start = time.time()
         
