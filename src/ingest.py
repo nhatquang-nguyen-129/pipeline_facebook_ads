@@ -707,7 +707,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.1.7. Upload Facebook Ads adset metadata to Google BigQuery
+    # 1.2.7. Upload Facebook Ads adset metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads adset metadata to Google BigQuery"
         ingest_section_start = time.time()
         
@@ -1040,7 +1040,7 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.7. Upload Facebook Ads ad metadata to Google BigQuery
+    # 1.3.7. Upload Facebook Ads ad metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads ad metadata to Google BigQuery"
         ingest_section_start = time.time()
         
@@ -1221,6 +1221,7 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
         ingest_section_start = time.time()
         
         try:
+            
             ingest_df_deduplicated = ingest_df_enforced.drop_duplicates()
             
             try:
@@ -1301,27 +1302,11 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
-        
-        # Configuration for batch deletion
-                unique_keys_defined = [
-                    "account_id", 
-                    "ad_id"
-                ]                
-        
-        # Definition for batch deletion             
-                unique_keys_effective = (
-                        ingest_df_deduplicated[unique_keys_defined]
-                        .dropna()
-                        .drop_duplicates()
-                        if unique_keys_defined
-                        else None
-                )
 
-        # Execute batch deletion       
                 try:
                     print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
                     logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
-                    temporary_table_id = f"{PROJECT}{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                    temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
                     load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     load_table_execute = google_bigquery_client.load_table_from_dataframe(
                         unique_keys_effective, 
@@ -1336,7 +1321,22 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                     print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
 
-        # Execute batch delete                
+        # Configuration for batch deletion                
+                unique_keys_defined = [
+                    "account_id", 
+                    "ad_id"
+                ]                
+        
+        # Definition for batch deletion                
+                unique_keys_effective = (
+                        ingest_df_deduplicated[unique_keys_defined]
+                        .dropna()
+                        .drop_duplicates()
+                        if unique_keys_defined
+                        else None
+                )
+
+        # Execute batch deletion          
                 try:                        
                     print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
@@ -1357,7 +1357,7 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
                     google_bigquery_client.delete_table(
                         temporary_table_id, 
                         not_found_ok=True
-                    )                     
+                    )                    
                     print(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                     logging.info(f"✅ [INGEST] Successfully deleted {ingest_rows_deleted} existing row(s) of Facebook Ads ad creative table {raw_table_creative}.")
                 except Exception as e:
