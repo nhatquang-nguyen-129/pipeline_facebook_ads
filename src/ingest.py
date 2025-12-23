@@ -535,8 +535,8 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.6. Delete existing row(s) or create new table if it not exist
-        ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
+    # 1.2.6. Delete existing rows or create new table if not exist
+        ingest_section_name = "[INGEST] Delete existing rows or create new table if not exist"
         ingest_section_start = time.time()
         
         try:
@@ -558,62 +558,59 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
                 print(f"⚠️ [INGEST] Facebook Ads adset metadata table {raw_table_adset} not found then table creation will be proceeding...")
                 logging.info(f"⚠️ [INGEST] Facebook Ads adset metadata table {raw_table_adset} not found then table creation will be proceeding...")
         
-        # Configuration for table creation               
+        # Defined table creation               
                 table_schemas_defined = []
                 table_clusters_defined = []
                 table_partition_defined = []      
 
-        # Definition for table schemas
-                if not table_schemas_defined:
-                    table_schemas_effective = []
-                    for col, dtype in ingest_df_deduplicated.dtypes.items():
-                        if dtype.name.startswith("int"):
-                            bq_type = "INT64"
-                        elif dtype.name.startswith("float"):
-                            bq_type = "FLOAT64"
-                        elif dtype.name == "bool":
-                            bq_type = "BOOL"
-                        elif "datetime" in dtype.name:
-                            bq_type = "TIMESTAMP"
-                        else:
-                            bq_type = "STRING"
-                        table_schemas_effective.append(bigquery.SchemaField(col, bq_type))
-                else:
-                    table_schemas_effective = table_schemas_defined                                    
-        
-        # Definition for table partition     
-                table_partition_effective = (
+        # Config table creation
+                table_schemas_config = (
+                    table_schemas_defined
+                    if table_schemas_defined
+                    else [
+                        bigquery.SchemaField(
+                            col,
+                            "INT64" if dtype.name.startswith("int")
+                            else "FLOAT64" if dtype.name.startswith("float")
+                            else "BOOL" if dtype.name == "bool"
+                            else "TIMESTAMP" if "datetime" in dtype.name
+                            else "STRING"
+                        )
+                        for col, dtype in ingest_df_deduplicated.dtypes.items()
+                    ]
+                )
+            
+                table_partition_config = (
                     table_partition_defined
                     if table_partition_defined in ingest_df_deduplicated.columns
                     else None
                 )
         
-        # Definition for table clusters
-                table_clusters_effective = (
-                    [c for c in table_clusters_defined if c in ingest_df_deduplicated.columns]
+                table_clusters_config = (
+                    [col for col in table_clusters_defined if col in ingest_df_deduplicated.columns]
                     if table_clusters_defined
                     else None
                 )
         
         # Execute table creation                
                 try:    
-                    print(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    logging.info(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
+                    print(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads adset metadata table defined name {raw_table_adset} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
                     create_table_config = bigquery.Table(
                         raw_table_adset,
-                        schema=table_schemas_effective
+                        schema=table_schemas_config
                     )
-                    if table_partition_effective:
+                    if table_partition_config:
                         create_table_config.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
-                            field=table_partition_effective
+                            field=table_partition_config
                         )
-                    if table_clusters_effective:
-                        create_table_config.clustering_fields = table_clusters_effective                  
+                    if table_clusters_config:
+                        create_table_config.clustering_fields = table_clusters_config
                     create_table_execute = google_bigquery_client.create_table(create_table_config)
                     create_table_id = create_table_execute.full_table_id
-                    print(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
-                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                    print(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
+                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads adset metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create Facebook Ads adset metadata table {raw_table_adset} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create Facebook Ads adset metadata table {raw_table_adset} due to {e}.")
@@ -621,47 +618,65 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads adset metadata table {raw_table_adset} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads adset metadata table {raw_table_adset} then existing rows deletion will be proceeding...")
+        
+        # Define batch deletion              
+                unique_keys_defined = [
+                    "account_id", 
+                    "adset_id"
+                ]                
+        
+            # Config batch deletion
+                unique_keys_config = [
+                    unique_key_defined
+                    for unique_key_defined in unique_keys_defined
+                    if unique_key_defined in ingest_df_deduplicated.columns
+                ]                
+        
+                if len(unique_keys_config) == 1:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config[0]]
+                        .dropna()
+                        .astype(str)
+                        .unique()
+                        .tolist()
+                    )
 
+                else:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config]
+                        .dropna()
+                        .astype(str)
+                        .drop_duplicates()
+                        .apply(tuple, axis=1)
+                        .tolist()
+                    )
+
+        # Execute batch deletion
                 try:
                     print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
                     logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
                     temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     load_table_execute = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
+                        unique_keys_config, 
                         temporary_table_id, 
                         job_config=load_table_config
                     )
                     load_table_result = load_table_execute.result()
                     load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} for batch deletion.")
+                    load_table_rows = google_bigquery_client.get_table(load_table_id).num_rows
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads adset metadata table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads adset metadata table {temporary_table_id} for batch deletion due to {e}.")
 
-        # Configuration for batch deletion                
-                unique_keys_defined = [
-                    "account_id", 
-                    "adset_id"
-                ]                
-        
-        # Definition for batch deletion                
-                unique_keys_effective = (
-                        ingest_df_deduplicated[unique_keys_defined]
-                        .dropna()
-                        .drop_duplicates()
-                        if unique_keys_defined
-                        else None
-                )
-
-        # Execute batch deletion          
                 try:                        
-                    print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
-                    logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
+                    print(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
+                    logging.info(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads adset metadata using batch deletion with unique key(s) {unique_keys_defined}...")
                     query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in unique_keys_effective
+                        for col in unique_keys_config
                     ])
                     query_delete_config = f"""
                         DELETE FROM `{raw_table_adset}` AS main
@@ -692,7 +707,7 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
         finally:
             ingest_sections_time[ingest_section_name] = round(time.time() - ingest_section_start, 2)
 
-    # 1.2.7. Upload Facebook Ads adset metadata to Google BigQuery
+    # 1.1.7. Upload Facebook Ads adset metadata to Google BigQuery
         ingest_section_name = "[INGEST] Upload Facebook Ads adset metadata to Google BigQuery"
         ingest_section_start = time.time()
         
