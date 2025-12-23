@@ -1730,21 +1730,18 @@ def ingest_campaign_insights(
     # 2.1.7. Upload Facebook Ads campaign insights to Google BigQuery
             ingest_section_name = "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery"
             ingest_section_start = time.time()
-            
-            # DEBUG:
-            print("🚨 DEBUG: ENTERING 2.1.7 UPLOAD BLOCK")
 
             try:
                 print(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
                 logging.info(f"🔍 [INGEST] Uploading {len(ingest_df_deduplicated)} deduplicated row(s) of Facebook Ads campaign insights to Google BigQuery table {raw_table_campaign}...")
-                job_load_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-                job_load_load = google_bigquery_client.load_table_from_dataframe(
+                load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+                load_table_execute = google_bigquery_client.load_table_from_dataframe(
                     ingest_df_deduplicated,
                     raw_table_campaign,
-                    job_config=job_load_config
+                    job_config=load_table_config
                 )
-                job_load_result = job_load_load.result()
-                ingest_rows_uploaded = job_load_load.output_rows
+                load_table_result = load_table_execute.result()
+                ingest_rows_uploaded = load_table_execute.output_rows
                 ingest_dates_uploaded.append(ingest_df_deduplicated.copy())
                 ingest_sections_status[ingest_section_name] = "succeed"
                 print(f"✅ [INGEST] Successfully uploaded {ingest_rows_uploaded} row(s) of Facebook Ads campaign insights to Google BigQuery table {raw_table_campaign}.")
