@@ -1646,11 +1646,22 @@ def ingest_campaign_insights(
                         if unique_key_defined in ingest_df_deduplicated.columns
                     ]                
             
-                    ingest_new_dates = (
+                    if len(unique_keys_config) == 1:
+                        unique_keys_value = (
                             ingest_df_deduplicated[unique_keys_config[0]]
                             .dropna()
                             .astype(str)
                             .unique()
+                            .tolist()
+                        )
+
+                    else:
+                        unique_keys_value = (
+                            ingest_df_deduplicated[unique_keys_config]
+                            .dropna()
+                            .astype(str)
+                            .drop_duplicates()
+                            .apply(tuple, axis=1)
                             .tolist()
                         )
 
@@ -1667,7 +1678,8 @@ def ingest_campaign_insights(
                         ingest_existing_dates = [
                             str(getattr(row, unique_keys_config))
                             for row in query_select_result
-                        ]                    
+                        ]  
+                        ingest_new_dates = unique_keys_value                  
                         ingest_dates_overlapped = set(ingest_new_dates) & set(ingest_existing_dates)
                         print(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table.")
                         logging.info(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table.")
