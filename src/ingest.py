@@ -305,8 +305,8 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
 
         # Execute batch deletion
                 try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys for batch deletion...")
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys {unique_keys_config} for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads campaign metadata unique keys {unique_keys_config} for batch deletion...")
                     temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     load_table_execute = google_bigquery_client.load_table_from_dataframe(
@@ -653,8 +653,8 @@ def ingest_adset_metadata(ingest_adset_ids: list) -> pd.DataFrame:
 
         # Execute batch deletion
                 try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys for batch deletion...")
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys {unique_keys_config} for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads adset metadata unique keys {unique_keys_config} for batch deletion...")
                     temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_adset_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     load_table_execute = google_bigquery_client.load_table_from_dataframe(
@@ -969,47 +969,65 @@ def ingest_ad_metadata(ingest_ad_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad metadata table {raw_table_ad} then existing rows deletion will be proceeding...")
-
-                try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys for batch deletion...")
-                    temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
-                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
-                        temporary_table_id, 
-                        job_config=load_table_config
-                    )
-                    load_table_result = load_table_execute.result()
-                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {load_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {load_table_id} for batch deletion.")
-                except Exception as e:
-                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
-
-        # Configuration for batch deletion                
+        
+        # Define batch deletion              
                 unique_keys_defined = [
                     "account_id", 
                     "ad_id"
                 ]                
         
-        # Definition for batch deletion                
-                unique_keys_effective = (
-                        ingest_df_deduplicated[unique_keys_defined]
+            # Config batch deletion
+                unique_keys_config = [
+                    unique_key_defined
+                    for unique_key_defined in unique_keys_defined
+                    if unique_key_defined in ingest_df_deduplicated.columns
+                ]                
+        
+                if len(unique_keys_config) == 1:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config[0]]
                         .dropna()
-                        .drop_duplicates()
-                        if unique_keys_defined
-                        else None
-                )
+                        .astype(str)
+                        .unique()
+                        .tolist()
+                    )
 
-        # Execute batch deletion          
+                else:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config]
+                        .dropna()
+                        .astype(str)
+                        .drop_duplicates()
+                        .apply(tuple, axis=1)
+                        .tolist()
+                    )
+
+        # Execute batch deletion
+                try:
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys {unique_keys_config} for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad metadata unique keys {unique_keys_config} for batch deletion...")
+                    temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
+                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
+                        unique_keys_config, 
+                        temporary_table_id, 
+                        job_config=load_table_config
+                    )
+                    load_table_result = load_table_execute.result()
+                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
+                    load_table_rows = google_bigquery_client.get_table(load_table_id).num_rows
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad metadata table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad metadata table {temporary_table_id} for batch deletion due to {e}.")
+
                 try:                        
-                    print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
-                    logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
+                    print(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
+                    logging.info(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads ad metadata using batch deletion with unique key(s) {unique_keys_defined}...")
                     query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in unique_keys_effective
+                        for col in unique_keys_config
                     ])
                     query_delete_config = f"""
                         DELETE FROM `{raw_table_ad}` AS main
@@ -1302,47 +1320,65 @@ def ingest_ad_creative(ingest_ad_ids: list) -> pd.DataFrame:
             else:
                 print(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads ad creative table {raw_table_creative} then existing rows deletion will be proceeding...")
-
-                try:
-                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
-                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys for batch deletion...")
-                    temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
-                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
-                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
-                        temporary_table_id, 
-                        job_config=load_table_config
-                    )
-                    load_table_result = load_table_execute.result()
-                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
-                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} for batch deletion.")
-                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} for batch deletion.")
-                except Exception as e:
-                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
-                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
-
-        # Configuration for batch deletion                
+        
+        # Define batch deletion              
                 unique_keys_defined = [
                     "account_id", 
                     "ad_id"
                 ]                
         
-        # Definition for batch deletion                
-                unique_keys_effective = (
-                        ingest_df_deduplicated[unique_keys_defined]
+            # Config batch deletion
+                unique_keys_config = [
+                    unique_key_defined
+                    for unique_key_defined in unique_keys_defined
+                    if unique_key_defined in ingest_df_deduplicated.columns
+                ]                
+        
+                if len(unique_keys_config) == 1:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config[0]]
                         .dropna()
-                        .drop_duplicates()
-                        if unique_keys_defined
-                        else None
-                )
+                        .astype(str)
+                        .unique()
+                        .tolist()
+                    )
 
-        # Execute batch deletion          
+                else:
+                    unique_keys_value = (
+                        ingest_df_deduplicated[unique_keys_config]
+                        .dropna()
+                        .astype(str)
+                        .drop_duplicates()
+                        .apply(tuple, axis=1)
+                        .tolist()
+                    )
+
+        # Execute batch deletion
+                try:
+                    print(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys {unique_keys_config} for batch deletion...")
+                    logging.info(f"🔍 [INGEST] Creating temporary table contains duplicated Facebook Ads ad creative unique keys {unique_keys_config} for batch deletion...")
+                    temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_ad_creative_delete_keys_{uuid.uuid4().hex[:8]}"
+                    load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
+                    load_table_execute = google_bigquery_client.load_table_from_dataframe(
+                        unique_keys_config, 
+                        temporary_table_id, 
+                        job_config=load_table_config
+                    )
+                    load_table_result = load_table_execute.result()
+                    load_table_id = f"{load_table_execute.destination.project}.{load_table_execute.destination.dataset_id}.{load_table_execute.destination.table_id}"
+                    load_table_rows = google_bigquery_client.get_table(load_table_id).num_rows
+                    print(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
+                    logging.info(f"✅ [INGEST] Successfully created temporary Facebook Ads ad creative table {load_table_id} with {load_table_rows} row(s) for batch deletion.")
+                except Exception as e:
+                    print(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
+                    logging.error(f"❌ [INGEST] Failed to create temporary Facebook Ads ad creative table {temporary_table_id} for batch deletion due to {e}.")
+
                 try:                        
-                    print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
-                    logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
+                    print(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
+                    logging.info(f"🔍 [INGEST] Deleting {len(unique_keys_value)} existing rows of Facebook Ads ad creative using batch deletion with unique key(s) {unique_keys_defined}...")
                     query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in unique_keys_effective
+                        for col in unique_keys_config
                     ])
                     query_delete_config = f"""
                         DELETE FROM `{raw_table_creative}` AS main
