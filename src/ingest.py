@@ -210,38 +210,37 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 print(f"⚠️ [INGEST] Facebook Ads campaign metadata table {raw_table_campaign} not found then table creation will be proceeding...")
                 logging.info(f"⚠️ [INGEST] Facebook Ads campaign metadata table {raw_table_campaign} not found then table creation will be proceeding...")
         
-        # Configuration for table creation               
+        # Defined table creation               
                 table_schemas_defined = []
                 table_clusters_defined = []
                 table_partition_defined = []      
 
-        # Definition for table schemas
-                if not table_schemas_defined:
-                    table_schemas_effective = []
-                    for col, dtype in ingest_df_deduplicated.dtypes.items():
-                        if dtype.name.startswith("int"):
-                            bq_type = "INT64"
-                        elif dtype.name.startswith("float"):
-                            bq_type = "FLOAT64"
-                        elif dtype.name == "bool":
-                            bq_type = "BOOL"
-                        elif "datetime" in dtype.name:
-                            bq_type = "TIMESTAMP"
-                        else:
-                            bq_type = "STRING"
-                        table_schemas_effective.append(bigquery.SchemaField(col, bq_type))
-                else:
-                    table_schemas_effective = table_schemas_defined                                    
+        # Config table schemas
+                table_schemas_config = (
+                    table_schemas_defined
+                    if table_schemas_defined
+                    else [
+                        bigquery.SchemaField(
+                            col,
+                            "INT64" if dtype.name.startswith("int")
+                            else "FLOAT64" if dtype.name.startswith("float")
+                            else "BOOL" if dtype.name == "bool"
+                            else "TIMESTAMP" if "datetime" in dtype.name
+                            else "STRING"
+                        )
+                        for col, dtype in ingest_df_deduplicated.dtypes.items()
+                    ]
+                )
         
-        # Definition for table partition     
-                table_partition_effective = (
+        # Config table partition     
+                table_partition_config = (
                     table_partition_defined
                     if table_partition_defined in ingest_df_deduplicated.columns
                     else None
                 )
         
-        # Definition for table clusters
-                table_clusters_effective = (
+        # Config table clusters
+                table_clusters_config = (
                     [c for c in table_clusters_defined if c in ingest_df_deduplicated.columns]
                     if table_clusters_defined
                     else None
@@ -249,23 +248,23 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
         
         # Execute table creation                
                 try:    
-                    print(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")
-                    logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_effective} and cluster on {table_clusters_effective}...")                    
+                    print(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
+                    logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
                     create_table_config = bigquery.Table(
                         raw_table_campaign,
-                        schema=table_schemas_effective
+                        schema=table_schemas_config
                     )
-                    if table_partition_effective:
+                    if table_partition_config:
                         create_table_config.time_partitioning = bigquery.TimePartitioning(
                             type_=bigquery.TimePartitioningType.DAY,
-                            field=table_partition_effective
+                            field=table_partition_config
                         )
-                    if table_clusters_effective:
-                        create_table_config.clustering_fields = table_clusters_effective                  
+                    if table_clusters_config:
+                        create_table_config.clustering_fields = table_clusters_config
                     create_table_execute = google_bigquery_client.create_table(create_table_config)
                     create_table_id = create_table_execute.full_table_id
-                    print(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
-                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_effective} and cluster on {table_clusters_effective}.")
+                    print(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
+                    logging.info(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
                 except Exception as e:
                     print(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
                     logging.error(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
@@ -274,19 +273,18 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                 print(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
                 logging.info(f"🔄 [INGEST] Found Facebook Ads campaign metadata table {raw_table_campaign} then existing rows deletion will be proceeding...")
         
-        # Configuration for batch deletion                
+        # Define batch deletion              
                 unique_keys_defined = [
                     "account_id", 
                     "campaign_id"
                 ]                
         
-        # Definition for batch deletion
-                unique_keys_effective = (
-                    unique_keys_defined
-                    if unique_keys_defined
-                    and set(unique_keys_defined).issubset(ingest_df_deduplicated.columns)
-                    else None
-                )
+        # Config batch deletion
+                unique_keys_config = [
+                    unique_key_defined
+                    for unique_key_defined in unique_keys_defined
+                    if unique_key_defined in ingest_df_deduplicated.columns
+                ]
 
         # Execute batch deletion
                 try:
@@ -295,7 +293,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     temporary_table_id = f"{PROJECT}.{raw_dataset}.temp_table_campaign_metadata_delete_keys_{uuid.uuid4().hex[:8]}"
                     load_table_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
                     load_table_execute = google_bigquery_client.load_table_from_dataframe(
-                        unique_keys_effective, 
+                        unique_keys_config, 
                         temporary_table_id, 
                         job_config=load_table_config
                     )
@@ -312,7 +310,7 @@ def ingest_campaign_metadata(ingest_campaign_ids: list) -> pd.DataFrame:
                     logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign metadata using batch deletion with unique key(s) {unique_keys_defined}...")                    
                     query_delete_condition = " AND ".join([
                         f"CAST(main.{col} AS STRING) = CAST(temp.{col} AS STRING)"
-                        for col in unique_keys_effective
+                        for col in unique_keys_config
                     ])
                     query_delete_config = f"""
                         DELETE FROM `{raw_table_campaign}` AS main
@@ -1436,7 +1434,7 @@ def ingest_campaign_insights(
         "[INGEST] Trigger to fetch Facebook Ads campaign insights": 0.0,
         "[INGEST] Trigger to enforce schema for Facebook Ads campaign insights": 0.0,
         "[INGEST] Prepare Google BigQuery table_id for ingestion": 0.0,
-        "[INGEST] Delete existing row(s) or create new table if not exist": 0.0,
+        "[INGEST] Delete existing rows or create new table if not exist": 0.0,
         "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery": 0.0,
         "[INGEST] Cooldown before next Facebook Ads campaign insights fetch": 0.0,
     }
@@ -1538,7 +1536,7 @@ def ingest_campaign_insights(
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)          
 
     # 2.1.6. Delete existing rows or create new table if not exist
-            ingest_section_name = "[INGEST] Delete existing rows or create new table if it not exist"
+            ingest_section_name = "[INGEST] Delete existing rows or create new table if not exist"
             ingest_section_start = time.time()
             
             try:
@@ -1564,7 +1562,7 @@ def ingest_campaign_insights(
                     table_schemas_defined = []
                     table_partition_defined = "date"   
 
-            # Config table schemas
+            # Config table creation
                     table_schemas_config = (
                         table_schemas_defined
                         if table_schemas_defined
@@ -1580,25 +1578,23 @@ def ingest_campaign_insights(
                             for col, dtype in ingest_df_deduplicated.dtypes.items()
                         ]
                     )
-            
-            # Config table partition     
+             
                     table_partition_config = (
                         table_partition_defined
                         if table_partition_defined in ingest_df_deduplicated.columns
                         else None
                     )
             
-            # Config table clusters
                     table_clusters_config = (
-                        [c for c in table_clusters_defined if c in ingest_df_deduplicated.columns]
+                        [col for col in table_clusters_defined if col in ingest_df_deduplicated.columns]
                         if table_clusters_defined
                         else None
                     )
             
             # Execute table creation                
                     try:    
-                        print(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
-                        logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign metadata table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
+                        print(f"🔍 [INGEST] Creating Facebook Ads campaign insights table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
+                        logging.info(f"🔍 [INGEST] Creating Facebook Ads campaign insights table defined name {raw_table_campaign} with partition on {table_partition_config} and cluster on {table_clusters_config}...")
                         create_table_config = bigquery.Table(
                             raw_table_campaign,
                             schema=table_schemas_config
@@ -1612,48 +1608,60 @@ def ingest_campaign_insights(
                             create_table_config.clustering_fields = table_clusters_config
                         create_table_execute = google_bigquery_client.create_table(create_table_config)
                         create_table_id = create_table_execute.full_table_id
-                        print(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
-                        logging.info(f"✅ [INGEST] Successfully created Facebook Ads campaign metadata table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
+                        print(f"✅ [INGEST] Successfully created Facebook Ads campaign insights table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
+                        logging.info(f"✅ [INGEST] Successfully created Facebook Ads campaign insights table actual name {create_table_id} with partition on {table_partition_config} and cluster on {table_clusters_config}.")
                     except Exception as e:
-                        print(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
-                        logging.error(f"❌ [INGEST] Failed to create Facebook Ads campaign metadata table {raw_table_campaign} due to {e}.")
+                        print(f"❌ [INGEST] Failed to create Facebook Ads campaign insights table {raw_table_campaign} due to {e}.")
+                        logging.error(f"❌ [INGEST] Failed to create Facebook Ads campaign insights table {raw_table_campaign} due to {e}.")
                 
                 else:
                     print(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then existing rows deletion will be proceeding...")
                     logging.info(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then existing rows deletion will be proceeding...")
             
-            # Configuration for overlapping deletion
+            # Define overlapping deletion
                     unique_keys_defined = ["date_start"]                                         
 
-            # Definition for overlapping deletion
-                    unique_keys_effective = [
+            # Config overlapping deletion
+                    unique_keys_config = [
                         unique_key_defined
                         for unique_key_defined in unique_keys_defined
                         if unique_key_defined in ingest_df_deduplicated.columns
-                    ]
+                    ]                
             
-                    ingest_new_dates = set(
-                        ingest_df_deduplicated[unique_keys_effective]
-                        .dropna()
-                        .drop_duplicates()
-                        .itertuples(index=False, name=None)
-                    )
+                    if len(unique_keys_config) == 1:
+                        ingest_new_dates = (
+                            ingest_df_deduplicated[unique_keys_config[0]]
+                            .dropna()
+                            .astype(str)
+                            .unique()
+                            .tolist()
+                        )
 
-            # Execution for overlapping deletion
+                    else:
+                        ingest_new_dates = (
+                            ingest_df_deduplicated[unique_keys_config]
+                            .dropna()
+                            .astype(str)
+                            .drop_duplicates()
+                            .apply(tuple, axis=1)
+                            .tolist()
+                        )
+
+            # Execute overlapping deletion
                     try: 
                         print(f"🔍 [INGEST] Validating overlapping dates in Facebook Ads campaign insights table {raw_table_campaign}...")
                         logging.info(f"🔍 [INGEST] Validating overlapping dates in Facebook Ads campaign insights table {raw_table_campaign}...")
                         query_select_config = f"""
-                            SELECT DISTINCT {", ".join(unique_keys_effective)}
+                            SELECT DISTINCT {", ".join(unique_keys_config)}
                             FROM `{raw_table_campaign}`
                         """                        
                         query_select_execute = google_bigquery_client.query(query_select_config)
                         query_select_result = query_select_execute.result()
-                        ingest_existing_dates = set(
-                            tuple(getattr(row, unique_key_effective) for unique_key_effective in unique_keys_effective)
+                        ingest_existing_dates = [
+                            str(getattr(row, unique_keys_config))
                             for row in query_select_result
-                        )
-                        ingest_dates_overlapped = ingest_new_dates & ingest_existing_dates
+                        ]                    
+                        ingest_dates_overlapped = set(ingest_new_dates) & set(ingest_existing_dates)
                         print(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table.")
                         logging.info(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table.")
                     except Exception as e:
@@ -1668,12 +1676,19 @@ def ingest_campaign_insights(
 
             # Execution for table delete query
                             try:
-                                print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign insights in Google BigQuery table {raw_table_campaign}...")
-                                logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign insights in Google BigQuery table {raw_table_campaign}...")
+                                print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}...")
+                                logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads campaign insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_campaign}...")
                                 query_delete_config = f"""
                                     DELETE FROM `{raw_table_campaign}`
-                                    WHERE {unique_keys_effective[0]} = @date_value
+                                    WHERE {unique_keys_config} = @date_value
                                 """                                                          
+
+                                # DEBUG
+                                print(f"🧪 [DEBUG] DELETE where keys = {unique_keys_config}")
+                                print(f"🧪 [DEBUG] DELETE value = {ingest_date_overlapped} | type = {type(ingest_date_overlapped)}")
+                                logging.info(f"🧪 [DEBUG] DELETE where keys = {unique_keys_config}")
+
+
                                 query_delete_execute = google_bigquery_client.query(
                                     query_delete_config, 
                                     job_config = bigquery.QueryJobConfig(
@@ -1690,6 +1705,11 @@ def ingest_campaign_insights(
                     else:
                         print(f"⚠️ [INGEST] No overlapping date of Facebook Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
                         logging.info(f"⚠️ [INGEST] No overlapping date of Facebook Ads campaign insights found in Google BigQuery {raw_table_campaign} table then deletion is skipped.")
+
+                # DEBUG:
+                print("🧪 [DEBUG] Finished section 2.1.6 successfully")
+                logging.info("🧪 [DEBUG] Finished section 2.1.6 successfully")
+
                 ingest_sections_status[ingest_section_name] = "succeed"
             
             except Exception as e:
@@ -1699,6 +1719,11 @@ def ingest_campaign_insights(
             
             finally:
                 ingest_loops_time[ingest_section_name] += round(time.time() - ingest_section_start, 2)
+
+            #DEBUG:
+            print(f"🧪 [DEBUG] After 2.1.6 - ingest_df_deduplicated shape: {ingest_df_deduplicated.shape}")
+            logging.info(f"🧪 [DEBUG] After 2.1.6 - ingest_df_deduplicated shape: {ingest_df_deduplicated.shape}")
+                 
 
     # 2.1.7. Upload Facebook Ads campaign insights to Google BigQuery
             ingest_section_name = "[INGEST] Upload Facebook Ads campaign insights to Google BigQuery"
