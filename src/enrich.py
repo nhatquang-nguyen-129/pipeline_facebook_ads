@@ -1,30 +1,13 @@
-"""
-==================================================================
-FACEBOOK ENRICHMENT MODULE
-------------------------------------------------------------------
-This module is responsible for transforming raw Facebook Ads insights 
-into a clean, BigQuery-ready dataset optimized for advanced analytics, 
-cross-platform reporting and machine learning applications.
-
-By centralizing enrichment rules, this module ensures transparency, 
-consistency, and maintainability across the marketing data pipeline 
-to build insight-ready tables.
-
-✔️ Maps optimization_goal to its corresponding business action type  
-✔️ Standardizes campaign, ad set and ad-level naming conventions  
-✔️ Extracts and normalizes key performance metrics across campaigns  
-✔️ Cleans and validates data to ensure schema and field consistency  
-✔️ Reduces payload size by removing redundant or raw fields
-
-⚠️ This module focuses only on enrichment and transformation logic.  
-It does not handle data fetching, ingestion or staging.
-==================================================================
-"""
-
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "../../.."
+            )
+        )
+    )
 
 # Add Python datetime utilities for integration
 from datetime import datetime
@@ -83,7 +66,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
     print(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s)...")
     logging.info(f"🚀 [ENRICH] Starting to enrich staging Facebook Ads campaign insights for {len(enrich_df_input)} row(s)...")  
 
-    # 1.1.1. Start timing the staging Facebook Ads campaign insights enrichment
+    # 1.1.1. Start timing
     ICT = ZoneInfo("Asia/Ho_Chi_Minh")    
     enrich_time_start = time.time()   
     enrich_sections_status = {}
@@ -93,24 +76,10 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
 
     try:
 
-    # 1.1.2. Validate input for the staging Facebook Ads campaign insights enrichment
-        enrich_section_name = "[ENRICH] Validate input for the staging Facebook Ads campaign insights enrichment"
-        enrich_section_start = time.time()    
-        try:
-            if enrich_df_input.empty:
-                enrich_sections_status[enrich_section_name] = "failed"
-                print("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment will be suspended.")
-                logging.warning("⚠️ [ENRICH] Empty staging Facebook Ads campaign insights provided then enrichment will be suspended.")
-            else:
-                enrich_sections_status[enrich_section_name] = "succeed"
-                print("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
-                logging.info("✅ [ENRICH] Successfully validated input for staging Facebook Ads campaign insights enrichment.")
-        finally:
-            enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
-
-    # 1.1.3. Enrich goal to action for staging Facebook Ads campaign insights
-        enrich_section_name = "[ENRICH] Enrich goal to action for staging Facebook Ads campaign insights"
+    # 1.1.2. Enrich goal to action
+        enrich_section_name = "[ENRICH] Enrich goal to action"
         enrich_section_start = time.time()
+        
         try:
             print(f"🔄 [ENRICH] Enriching goal to action for staging Facebook Ads campaign insights with {len(enrich_df_input)} row(s)...")
             logging.info(f"🔄 [ENRICH] Enriching goal to action for staging Facebook Ads campaign insights with {len(enrich_df_input)} row(s)...")
@@ -203,12 +172,14 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich goal to action metrics for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich goal to action metrics for staging Facebook Ads campaign insights due to {e}.")
+        
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2) 
 
-    # 1.1.4. Enrich performance result for staging Facebook Ads campaign insights
-        enrich_section_name = "[ENRICH] Enrich performance result for staging Facebook Ads campaign insights"
+    # 1.1.3. Enrich performance result
+        enrich_section_name = "[ENRICH] Enrich performance result"
         enrich_section_start = time.time()
+        
         try:
             print(f"🔄 [ENRICH] Enriching performance result for staging Facebook Ads campaign insights with {len(enrich_df_goal)} row(s)...")
             logging.info(f"🔄 [ENRICH] Enriching performance result for staging Facebook Ads campaign insights with {len(enrich_df_goal)} row(s)...")
@@ -252,12 +223,14 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich performance result for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich performance result for staging Facebook Ads campaign insights due to {e}.")
+        
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    # 1.1.5. Enrich table fields for staging Facebook Ads campaign insights
-        enrich_section_name = "[ENRICH] Enrich table fields for staging Facebook Ads campaign insights"
+    # 1.1.4. Enrich table fields
+        enrich_section_name = "[ENRICH] Enrich table fields"
         enrich_section_start = time.time()            
+        
         try: 
             print(f"🔍 [ENRICH] Enriching table fields for staging Facebook Ads campaign insights with {len(enrich_df_performance)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching table fields for staging Facebook Ads campaign insights with {len(enrich_df_performance)} row(s)...")
@@ -279,12 +252,14 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich table fields for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich table fields for staging Facebook Ads campaign insights due to {e}.")
+        
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
         
-    # 1.1.6. Enrich campaign fields for staging Facebook Ads campaign insights
-        enrich_section_name = "[ENRICH] Enrich campaign fields for staging Facebook Ads campaign insights"
+    # 1.1.5. Enrich campaign fields
+        enrich_section_name = "[ENRICH] Enrich campaign fields"
         enrich_section_start = time.time()            
+        
         try:
             print(f"🔍 [ENRICH] Enriching campaign fields for staging Facebook Ads campaign insights with {len(enrich_df_table)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching campaign fields for staging Facebook Ads campaign insights with {len(enrich_df_table)} row(s)...")
@@ -310,12 +285,14 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich campaign fields for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich campaign fields for staging Facebook Ads campaign insights due to {e}.")
+        
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
 
-    # 1.1.7. Enrich date fields for staging Facebook Ads campaign insights
-        enrich_section_name = "[ENRICH] Enrich date fields for staging Facebook Ads campaign insights"
+    # 1.1.6. Enrich date fields
+        enrich_section_name = "[ENRICH] Enrich date fields"
         enrich_section_start = time.time()            
+        
         try:
             print(f"🔍 [ENRICH] Enriching date fields for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s)...")
             logging.info(f"🔍 [ENRICH] Enriching date fields for staging Facebook Ads campaign insights with {len(enrich_df_campaign)} row(s)...")
@@ -333,10 +310,11 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
             enrich_sections_status[enrich_section_name] = "failed"
             print(f"❌ [ENRICH] Failed to enrich date fields for staging Facebook Ads campaign insights due to {e}.")
             logging.error(f"❌ [ENRICH] Failed to enrich date fields for staging Facebook Ads campaign insights due to {e}.")
+        
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)    
 
-    # 1.1.8. Summarize enrichment results for staging Facebook Ads campaign insights
+    # 1.1.7. Summarize enrichment results
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_date.copy() if not enrich_df_date.empty else pd.DataFrame()

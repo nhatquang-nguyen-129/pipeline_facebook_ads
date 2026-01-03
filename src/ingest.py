@@ -2171,14 +2171,36 @@ def ingest_ad_insights(
                             try:
                                 print(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}...")
                                 logging.info(f"🔍 [INGEST] Deleting existing rows of Facebook Ads ad insights for {ingest_date_overlapped} in Google BigQuery table {raw_table_ad}...")
-                                query_delete_config = f"""
-                                    DELETE FROM `{raw_table_ad}`
-                                    WHERE {unique_keys_config} = @date_value
-                                """                                                          
+                                if len(unique_keys_config) == 1:
+                                    col = unique_keys_config[0]
+                                    query_delete_config = f"""
+                                        DELETE FROM `{raw_table_ad}`
+                                        WHERE {col} = @key_0
+                                    """
+                                    query_parameters = [
+                                        bigquery.ScalarQueryParameter(
+                                            "key_0", "STRING", ingest_date_overlapped
+                                        )
+                                    ]
+                                else:
+                                    where_clause = " AND ".join(
+                                        f"{col} = @key_{i}"
+                                        for i, col in enumerate(unique_keys_config)
+                                    )
+                                    query_delete_config = f"""
+                                        DELETE FROM `{raw_table_ad}`
+                                        WHERE {where_clause}
+                                    """
+                                    query_parameters = [
+                                        bigquery.ScalarQueryParameter(
+                                            f"key_{i}", "STRING", value
+                                        )
+                                        for i, value in enumerate(ingest_date_overlapped)
+                                    ]
                                 query_delete_execute = google_bigquery_client.query(
-                                    query_delete_config, 
-                                    job_config = bigquery.QueryJobConfig(
-                                        query_parameters=[bigquery.ScalarQueryParameter("date_value", "STRING", ingest_date_overlapped)]
+                                    query_delete_config,
+                                    job_config=bigquery.QueryJobConfig(
+                                        query_parameters=query_parameters
                                     )
                                 )
                                 query_delete_result = query_delete_execute.result()
