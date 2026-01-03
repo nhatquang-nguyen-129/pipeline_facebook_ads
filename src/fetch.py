@@ -1,31 +1,13 @@
-"""
-==================================================================
-FACEBOOK FETCHING MODULE
-------------------------------------------------------------------
-This module handles authenticated data retrieval from the Facebook 
-Marketing API, consolidating all campaign, ad, creative, and metadata 
-fetching logic into a unified, maintainable structure for ingestion.
-
-It ensures reliable access to Facebook Ads data with controlled rate 
-limits, standardized field mapping, and structured outputs for 
-downstream enrichment and transformation stages.
-
-✔️ Initializes secure Facebook SDK sessions and retrieves credentials  
-✔️ Fetches campaign, ad, and creative data via authenticated API calls  
-✔️ Handles pagination, rate limiting and error retries automatically  
-✔️ Returns normalized and schema-ready DataFrames for processing  
-✔️ Logs detailed runtime information for monitoring and debugging  
-
-⚠️ This module focuses solely on data retrieval and extraction.  
-It does not perform schema enforcement, data enrichment, or 
-storage operations such as uploading to BigQuery.
-==================================================================
-"""
-
 # Add root directory to sys.path for absolute imports of internal modules
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "../../.."
+        )
+    )
+)
 
 # Add Python datetime utilities for integration
 from datetime import datetime

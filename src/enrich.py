@@ -5,9 +5,9 @@ sys.path.append(
     os.path.abspath(
         os.path.join(
             os.path.dirname(__file__), "../../.."
-            )
         )
     )
+)
 
 # Add Python datetime utilities for integration
 from datetime import datetime
