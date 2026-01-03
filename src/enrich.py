@@ -76,8 +76,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
 
     try:
 
-    # 1.1.2. Enrich goal to action
-        enrich_section_name = "[ENRICH] Enrich goal to action"
+    # 1.1.2. Enrich goal to action for Facebook Ads campaign insights
+        enrich_section_name = "[ENRICH] Enrich goal to action for Facebook Ads campaign insights"
         enrich_section_start = time.time()
         
         try:
@@ -176,8 +176,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2) 
 
-    # 1.1.3. Enrich performance result
-        enrich_section_name = "[ENRICH] Enrich performance result"
+    # 1.1.3. Enrich performance result for Facebook Ads campaign insights
+        enrich_section_name = "[ENRICH] Enrich performance result for Facebook Ads campaign insights"
         enrich_section_start = time.time()
         
         try:
@@ -227,8 +227,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    # 1.1.4. Enrich table fields
-        enrich_section_name = "[ENRICH] Enrich table fields"
+    # 1.1.4. Enrich table fields for Facebook Ads campaign insights
+        enrich_section_name = "[ENRICH] Enrich table fields for Facebook Ads campaign insights"
         enrich_section_start = time.time()            
         
         try: 
@@ -256,8 +256,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
         
-    # 1.1.5. Enrich campaign fields
-        enrich_section_name = "[ENRICH] Enrich campaign fields"
+    # 1.1.5. Enrich campaign fields for Facebook Ads campaign insights
+        enrich_section_name = "[ENRICH] Enrich campaign fields for Facebook Ads campaign insights"
         enrich_section_start = time.time()            
         
         try:
@@ -289,8 +289,8 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)   
 
-    # 1.1.6. Enrich date fields
-        enrich_section_name = "[ENRICH] Enrich date fields"
+    # 1.1.6. Enrich date fields for Facebook Ads campaign insights
+        enrich_section_name = "[ENRICH] Enrich date fields for Facebook Ads campaign insights"
         enrich_section_start = time.time()            
         
         try:
@@ -314,7 +314,7 @@ def enrich_campaign_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) 
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)    
 
-    # 1.1.7. Summarize enrichment results
+    # 1.1.7. Summarize enrichment results for Facebook Ads campaign insights
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_date.copy() if not enrich_df_date.empty else pd.DataFrame()
@@ -376,8 +376,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
 
     try:
 
-    # 1.2.2. Enrich goal to action
-        enrich_section_name = "[ENRICH] Enrich goal to action"
+    # 1.2.2. Enrich goal to action for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich goal to action for Facebook Ads ad insights"
         enrich_section_start = time.time()
         
         try:
@@ -476,8 +476,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2) 
 
-    # 1.2.3. Enrich performance result
-        enrich_section_name = "[ENRICH] Enrich performance result"
+    # 1.2.3. Enrich performance result for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich performance result for Facebook Ads ad insights"
         enrich_section_start = time.time()
         
         try:
@@ -527,8 +527,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
    
-    # 1.2.4. Enrich table fields
-        enrich_section_name = "[ENRICH] Enrich table fields"
+    # 1.2.4. Enrich table fields for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich table fields for Facebook Ads ad insights"
         enrich_section_start = time.time()   
         
         try:
@@ -554,8 +554,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)        
 
-    # 1.2.5. Enrich campaign fields
-        enrich_section_name = "[ENRICH] Enrich campaign fields"
+    # 1.2.5. Enrich campaign fields for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich campaign fields for Facebook Ads ad insights"
         enrich_section_start = time.time()  
         
         try:
@@ -587,8 +587,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)        
 
-    # 1.2.6. Enrich adset fields
-        enrich_section_name = "[ENRICH] Enrich adset fields"
+    # 1.2.6. Enrich adset fields for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich adset fields for Facebook Ads ad insights"
         enrich_section_start = time.time()         
         
         try:
@@ -613,8 +613,8 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    # 1.2.7. Enrich date fields
-        enrich_section_name = "[ENRICH] Enrich date fields"
+    # 1.2.7. Enrich date fields for Facebook Ads ad insights
+        enrich_section_name = "[ENRICH] Enrich date fields for Facebook Ads ad insights"
         enrich_section_start = time.time()            
         
         try:
@@ -638,7 +638,7 @@ def enrich_ad_fields(enrich_df_input: pd.DataFrame, enrich_table_id: str) -> pd.
         finally:
             enrich_sections_time[enrich_section_name] = round(time.time() - enrich_section_start, 2)
 
-    # 1.2.8. Summarize enrichment results
+    # 1.2.8. Summarize enrichment results for Facebook Ads ad insights
     finally:
         enrich_time_elapsed = round(time.time() - enrich_time_start, 2)
         enrich_df_final = enrich_df_date.copy() if not enrich_df_date.empty else pd.DataFrame()
