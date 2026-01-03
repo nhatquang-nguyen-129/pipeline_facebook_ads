@@ -1704,7 +1704,7 @@ def ingest_campaign_insights(
                     logging.info(f"🔄 [INGEST] Found Facebook Ads campaign insights table {raw_table_campaign} then existing rows deletion will be proceeding...")
             
             # Define overlapping deletion
-                    unique_keys_defined = "date_start"
+                    unique_keys_defined = ["date_start"]
 
             # Config overlapping deletion
                     unique_keys_config = [
@@ -1742,10 +1742,17 @@ def ingest_campaign_insights(
                         """                        
                         query_select_execute = google_bigquery_client.query(query_select_config)
                         query_select_result = query_select_execute.result()
-                        ingest_existing_dates = [
-                            str(getattr(row, unique_keys_config))
-                            for row in query_select_result
-                        ]  
+                        if len(unique_keys_config) == 1:
+                            col = unique_keys_config[0]
+                            ingest_existing_dates = [
+                                str(getattr(row, col))
+                                for row in query_select_result
+                            ]
+                        else:
+                            ingest_existing_dates = [
+                                tuple(str(getattr(row, col)) for col in unique_keys_config)
+                                for row in query_select_result
+                            ]
                         ingest_new_dates = unique_keys_value                  
                         ingest_dates_overlapped = set(ingest_new_dates) & set(ingest_existing_dates)
                         print(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads campaign insights {raw_table_campaign} table.")
@@ -2097,7 +2104,7 @@ def ingest_ad_insights(
                     logging.info(f"🔄 [INGEST] Found Facebook Ads ad insights table {raw_table_ad} then existing rows deletion will be proceeding...")
             
             # Define overlapping deletion
-                    unique_keys_defined = "date_start"
+                    unique_keys_defined = ["date_start"]
 
             # Config overlapping deletion
                     unique_keys_config = [
@@ -2135,10 +2142,17 @@ def ingest_ad_insights(
                         """                        
                         query_select_execute = google_bigquery_client.query(query_select_config)
                         query_select_result = query_select_execute.result()
-                        ingest_existing_dates = [
-                            str(getattr(row, unique_keys_config))
-                            for row in query_select_result
-                        ]  
+                        if len(unique_keys_config) == 1:
+                            col = unique_keys_config[0]
+                            ingest_existing_dates = [
+                                str(getattr(row, col))
+                                for row in query_select_result
+                            ]
+                        else:
+                            ingest_existing_dates = [
+                                tuple(str(getattr(row, col)) for col in unique_keys_config)
+                                for row in query_select_result
+                            ]
                         ingest_new_dates = unique_keys_value                  
                         ingest_dates_overlapped = set(ingest_new_dates) & set(ingest_existing_dates)
                         print(f"✅ [INGEST] Successfully validated {len(ingest_dates_overlapped)} overlapping date(s) in Facebook Ads ad insights {raw_table_ad} table.")
