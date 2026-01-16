@@ -1,7 +1,5 @@
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.api import FacebookAdsApi
-
 
 def extract_campaign_metadata(
     campaign_ids: list[str],
@@ -14,9 +12,9 @@ def extract_campaign_metadata(
     try:
         account = AdAccount(f"act_{account_id}")
         account_info = account.api_get(fields=["name"])
-        ad_account_name = account_info.get("name")
+        account_name = account_info.get("name")
     except Exception:
-        ad_account_name = None
+        account_name = None
 
     fields = [
         "id",
@@ -40,8 +38,8 @@ def extract_campaign_metadata(
                 "effective_status": campaign.get("effective_status"),
                 "objective": campaign.get("objective"),
                 "configured_status": campaign.get("configured_status"),
-                "ad_account_id": account_id,
-                "ad_account_name": ad_account_name,
+                "account_id": account_id,
+                "account_name": account_name,
             }
 
             results.append(row)
