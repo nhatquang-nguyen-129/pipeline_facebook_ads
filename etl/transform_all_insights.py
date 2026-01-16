@@ -25,7 +25,7 @@ ENRICH_ACTIONS_MAPPING = {
     "QUALITY_LEAD": "lead",
 }
 
-def transform_campaign_insights(df_input: pd.DataFrame) -> pd.DataFrame:
+def transform_all_insights(df_input: pd.DataFrame) -> pd.DataFrame:
 
     if df_input.empty:
         return df_input.copy()
