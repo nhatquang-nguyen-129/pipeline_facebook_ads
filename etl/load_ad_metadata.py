@@ -29,7 +29,7 @@ def load_ad_metadata(
     ---------
     Parameters:
         1. df: pd.DataFrame 
-            Facebook Ad ad creative flattended DataFrame
+            Facebook Ad ad metadata flattended DataFrame
         2. direction: str
             Must be 'project.dataset.table' for Google BigQuery
     ---------
@@ -39,14 +39,14 @@ def load_ad_metadata(
     """    
 
     if df.empty:
-        msg = ("⚠️ [LOADER] Empty Facebook Ads ad creative Dataframe then loading will be skipped.")
+        msg = ("⚠️ [LOADER] Empty Facebook Ads ad metadata Dataframe then loading will be skipped.")
         print(msg)
         logging.warning(msg)
         return
 
     msg = (
         "🔄 [LOADER] Triggering to load "
-        f"{len(df)} row(s) of Facebook Ads ad creative to Google BigQuery table "
+        f"{len(df)} row(s) of Facebook Ads ad metadata to Google BigQuery table "
         f"{direction}..."
         )
     GoogleBigqueryLoader.load(
