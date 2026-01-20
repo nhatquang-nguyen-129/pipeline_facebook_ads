@@ -8,18 +8,26 @@ def load_ad_insights(
     direction: str,
 ) -> None:
     """
-    Facebook Ads ad insights loader
+    Facebook Ads ad creative loader
     ----------------------
     Workflow:
-        1. Get input DataFrame
-        2. Execute loader
+        1. Validate input DataFrame
+            Empty input DataFrame triggers 'return'
+        2. Log loading metadata
+            Row count, destination table, partition, cluster...
+        3. Trigger GoogleBigqueryLoader
+           UPSERT mode, date-based deduplication
     ---------
     Parameters:
-
+        1. df: pd.DataFrame 
+            Facebook Ad ad creative flattended DataFrame
+        2. direction: str
+            Must be 'project.dataset.table' for Google BigQuery
     ---------
     Returns:
-   
-    """    
+        1. None
+            This function performs data loading as a side effect and does not return any value.
+    """   
 
     if df.empty:
         msg = ("⚠️ [LOADER] Empty Facebook Ads ad insights Dataframe then loading will be skipped.")

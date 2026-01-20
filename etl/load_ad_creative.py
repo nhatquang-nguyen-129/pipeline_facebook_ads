@@ -1,6 +1,15 @@
+import os
+import sys
 import logging
 import pandas as pd
 from plugins.google_bigquery import GoogleBigqueryLoader
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__), "../../"
+        )
+    )
+)
 
 def load_ad_creative(
     *,
