@@ -29,7 +29,7 @@ def load_ad_creative(
     ---------
     Parameters:
         1. df: pd.DataFrame 
-            Facebook Ad ad creative flattended DataFrame
+            Facebook Ads ad creative flattended DataFrame
         2. direction: str
             Must be 'project.dataset.table' for Google BigQuery
     ---------
