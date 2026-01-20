@@ -29,7 +29,7 @@ def load_ad_insights(
     ---------
     Parameters:
         1. df: pd.DataFrame 
-            Facebook Ad ad insights flattended DataFrame
+            Facebook Ads ad insights flattended DataFrame
         2. direction: str
             Must be 'project.dataset.table' for Google BigQuery
     ---------
