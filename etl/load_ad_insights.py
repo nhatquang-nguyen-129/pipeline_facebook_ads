@@ -57,6 +57,6 @@ def load_ad_insights(
         partition=["date"],
         cluster=[
             "account_id",
-            "campaign_id"
+            "ad_id"
             ],
     )
