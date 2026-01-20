@@ -25,7 +25,7 @@ def load_ad_creative(
         2. Log loading metadata
             Row count, destination table, partition, cluster...
         3. Trigger GoogleBigqueryLoader
-           UPSERT mode, date-based deduplication
+           UPSERT mode, ad_id-based deduplication
     ---------
     Parameters:
         1. df: pd.DataFrame 
