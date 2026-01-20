@@ -29,7 +29,7 @@ def load_ad_metadata(
     ---------
     Parameters:
         1. df: pd.DataFrame 
-            Facebook Ad ad metadata flattended DataFrame
+            Facebook Ads ad metadata flattended DataFrame
         2. direction: str
             Must be 'project.dataset.table' for Google BigQuery
     ---------
