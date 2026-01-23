@@ -12,3 +12,12 @@ __pycache__/
 env/
 venv/
 ENV/
+
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/user.yml
+dbt/.user.yml
+.dbt/user.yml
+.dbt/.user.yml
