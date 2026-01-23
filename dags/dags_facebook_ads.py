@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOT_FOLDER_LOCATION))
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 import logging
 import pandas as pd
