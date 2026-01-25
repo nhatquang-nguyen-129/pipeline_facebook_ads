@@ -16,6 +16,7 @@ COPY requirements/ requirements/
 
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir pip-tools \
+    && pip-compile requirements/base.in -o requirements/base.txt \
     && pip install --no-cache-dir -r requirements/base.txt
 
 RUN dbt --version
