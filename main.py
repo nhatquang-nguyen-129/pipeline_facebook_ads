@@ -13,7 +13,7 @@ from google.ads.googleads.client import GoogleAdsClient
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
 
-from dags.dags_facebook_ads import dags_facebook_ads
+from dags._dags_campaign_insights import dags_facebook_ads
 
 COMPANY = os.getenv("COMPANY")
 PROJECT = os.getenv("PROJECT")
