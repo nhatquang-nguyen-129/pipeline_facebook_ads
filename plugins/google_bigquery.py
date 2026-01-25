@@ -1,22 +1,19 @@
-import os
 import sys
+from pathlib import Path
+ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_FOLDER_LOCATION))
+
 import logging
-import uuid
 import pandas as pd
+import uuid
+
 from google.api_core.exceptions import NotFound
 from google.cloud import bigquery
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "../../"
-            )
-        )
-    )
 
-class GoogleBigqueryLoader:
+class internalGoogleBigqueryLoader:
     """
-    Google BigQuery Loader
-    ----------------------
+    Internal Google BigQuery Loader
+    ---------
     Workflow:
         1. Initialize BigQuery client
         2. Check dataset existence
@@ -24,14 +21,16 @@ class GoogleBigqueryLoader:
         4. Check table existence
         5. Create table if not exist
         6. Apply INSERT/UPSERT DML
-        7. Append data into table
+        7. Writer data into table
+    ---------
+    Returns:
+        None
     """
 
 # 1.1. Initialize
     def __init__(self) -> None:
         self.client: bigquery.Client | None = None
         self.project: str | None = None
-
 
 # 1.2. Loader
     def load(
@@ -77,7 +76,7 @@ class GoogleBigqueryLoader:
 
 # 1.3. Workflow
 
-    # 1.3.1. Initialize Google BigQuery client
+    # 1.3.1. Initialize client
     def _init_client(
             self, 
             direction: str
@@ -152,7 +151,8 @@ class GoogleBigqueryLoader:
     def _create_new_dataset(
             self, 
             project: str, 
-            dataset: str
+            dataset: str,
+            location: str = "asia-southeast1",
             ) -> None:
         
         full_dataset_id = f"{project}.{dataset}"
@@ -163,6 +163,7 @@ class GoogleBigqueryLoader:
             logging.info(msg)
 
             dataset_config = bigquery.Dataset(full_dataset_id)
+            dataset_config.location = location
             self.client.create_dataset(dataset_config, exists_ok=True)
 
             msg = f"✅ [PLUGIN] Successfully created Google BigQuery dataset {full_dataset_id}."
@@ -176,7 +177,7 @@ class GoogleBigqueryLoader:
                 f"{str(e)}."
             )
 
-    # 1.3.4. Infer DataFrame schema for Google BigQuery table
+    # 1.3.4. Infer DataFrame schema
     @staticmethod
     def _infer_table_schema(df: pd.DataFrame) -> list[bigquery.SchemaField]:
         schema = []
@@ -243,7 +244,7 @@ class GoogleBigqueryLoader:
 
             table = bigquery.Table(
                 direction,
-                schema=self._infer_schema(df),
+                schema=self._infer_table_schema(df),
             )
 
             if partition:
@@ -378,7 +379,7 @@ class GoogleBigqueryLoader:
                     return
 
                 msg = (
-                    "🔍 [PLUGIN] Deleting existing row(s) in Google BigQuery table..."
+                    "🔍 [PLUGIN] Deleting existing row(s) in Google BigQuery table "
                     f"{direction}..."
                 )
                 print(msg)
@@ -473,26 +474,54 @@ class GoogleBigqueryLoader:
                 f"{direction}..."
             )          
 
-            job_delete_exist = self.client.query(
-                f"""
-                DELETE FROM `{direction}` AS main
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM `{temp_table}` AS temp
-                    WHERE {join_condition}
+            try:
+                job_delete_exist = self.client.query(
+                    f"""
+                    DELETE FROM `{direction}` AS main
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM `{temp_table}` AS temp
+                        WHERE {join_condition}
+                    )
+                    """
                 )
-                """
-            )
-            deleted_rows = job_delete_exist.result().num_dml_affected_rows or 0
-            
-            msg = (
-                "✅ [PLUGIN] Successfully deleted "
-                f"{deleted_rows}/{existing_count} row(s) in Google BigQuery table "
-                f"{direction} using temporary table contains  "
-                f"{keys} keys to delete."
-            )
-            print(msg)
-            logging.info(msg)
+                deleted_rows = job_delete_exist.result().num_dml_affected_rows or 0
+
+                msg = (
+                    "✅ [PLUGIN] Successfully deleted "
+                    f"{deleted_rows}/{existing_count} row(s) in Google BigQuery table "
+                    f"{direction} using temporary table contains "
+                    f"{keys} keys to delete."
+                )
+                print(msg)
+                logging.info(msg)
+
+            finally:
+                
+                try:
+                    msg = (
+                        "🔁 [PLUGIN] Deleting temporary table "
+                        f"{temp_table}..."
+                    )
+                    print(msg)
+                    logging.info(msg)                    
+                    
+                    self.client.query(f"DROP TABLE `{temp_table}`").result()
+                    
+                    msg = (
+                        "✅ [PLUGIN] Successfully deleted temporary table "
+                        f"{temp_table}."
+                    )
+                    print(msg)
+                    logging.info(msg)
+                
+                except Exception as e:
+                    raise RuntimeError (
+                        "❌ [PLUGIN] Failed to delete temporary table "
+                        f"{temp_table} due to "
+                        f"{e}."
+                    )
+
             return
 
         raise ValueError(
