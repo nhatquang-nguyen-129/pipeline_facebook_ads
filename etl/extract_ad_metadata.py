@@ -131,7 +131,7 @@ def extract_ad_metadata(
     except Exception as e:
         # Unknown non-retryable error
         raise RuntimeError(
-            "❌ [EXTRACT] Failed to extract Facebook Ads metadata for ad_id "
+            "❌ [EXTRACT] Failed to extract Facebook Ads ad metadata for ad_id "
             f"{ad_id} due to "
             f"{e}."
         ) from e
