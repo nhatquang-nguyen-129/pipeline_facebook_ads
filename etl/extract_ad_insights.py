@@ -99,15 +99,12 @@ def extract_ad_insights(
         except Exception:
             pass
 
-        # 1️⃣ Token expired → NON-retryable
+        # Expired token error
         if api_error_code == 190:
             retryable = False
-            raise RuntimeError(
-                "❌ [EXTRACT] Failed to extract Facebook Ads ad insights "
-                "due to token expired or invalid. Manual token refresh required."
-            ) from e
+            raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads ad insights due to token expired or invalid then manual token refresh is required.") from e
 
-        # 2️⃣ Retryable Facebook API error
+        # Unexpected retryable error
         if (
             (http_status and http_status >= 500)
             or api_error_code in {1, 2, 4, 17, 80000}
@@ -120,7 +117,7 @@ def extract_ad_insights(
                 f"{end_date} due to API error then this request is eligible to retry."
             ) from e
 
-        # 3️⃣ Unexpected NON-retryable Facebook API error
+        # Unexpected non-retryable error
         retryable = False
         raise RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
@@ -131,7 +128,7 @@ def extract_ad_insights(
         ) from e
 
     except Exception as e:
-        # 4️⃣ Unknown NON-retryable error
+        # Unknown non-retryable error
         retryable = False
         raise RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
