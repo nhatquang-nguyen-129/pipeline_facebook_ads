@@ -15,7 +15,7 @@ def load_campaign_insights(
 ) -> None:
     """
     Load Facebook Ads campaign insights
-    ----------------------
+    ---------
     Workflow:
         1. Validate input DataFrame
         2. Validate output direction for Google BigQuery
