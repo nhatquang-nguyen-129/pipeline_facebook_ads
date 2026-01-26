@@ -14,7 +14,7 @@ def load_campaign_metadata(
     direction: str,
 ) -> None:
     """
-    Load Faceobok Ads campaign metadata
+    Load Facebook Ads campaign metadata
     ----------------------
     Workflow:
         1. Validate input DataFrame

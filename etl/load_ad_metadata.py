@@ -1,15 +1,12 @@
-import os
 import sys
+from pathlib import Path
+ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_FOLDER_LOCATION))
+
 import logging
 import pandas as pd
-from plugins.google_bigquery import GoogleBigqueryLoader
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "../../"
-        )
-    )
-)
+
+from plugins.google_bigquery import internalGoogleBigqueryLoader
 
 def load_ad_metadata(
     *,
@@ -17,29 +14,21 @@ def load_ad_metadata(
     direction: str,
 ) -> None:
     """
-    Facebook Ads ad metadata loader
+    Load Facebook Ads ad metadata
     ----------------------
     Workflow:
         1. Validate input DataFrame
-            Empty input DataFrame triggers 'return'
-        2. Log loading metadata
-            Row count, destination table, partition, cluster...
-        3. Trigger GoogleBigqueryLoader
-           UPSERT mode, ad_id-based deduplication
-    ---------
-    Parameters:
-        1. df: pd.DataFrame 
-            Facebook Ads ad metadata flattended DataFrame
-        2. direction: str
-            Must be 'project.dataset.table' for Google BigQuery
+        2. Validate output direction for Google BigQuery
+        3. Set primary key(s) to account_id and ad_id
+        4. Use UPSERT mode with temporary table for deduplication
+        5. Make internalGoogleBigQueryLoader API call
     ---------
     Returns:
-        1. None
-            This function performs data loading as a side effect and does not return any value.
-    """    
+        None
+    """      
 
     if df.empty:
-        msg = ("⚠️ [LOADER] Empty Facebook Ads ad metadata Dataframe then loading will be skipped.")
+        msg = ("⚠️ [LOADER] Empty Facebook Ads ad metadata Dataframe then loading will be suspended.")
         print(msg)
         logging.warning(msg)
         return
@@ -48,15 +37,20 @@ def load_ad_metadata(
         "🔄 [LOADER] Triggering to load "
         f"{len(df)} row(s) of Facebook Ads ad metadata to Google BigQuery table "
         f"{direction}..."
-        )
-    GoogleBigqueryLoader.load(
+    )
+    
+    loader = internalGoogleBigqueryLoader()
+
+    loader.load(
         df=df,
         direction=direction,
         mode="upsert",
         keys=[
             "account_id", 
             "ad_id"
-            ],
+        ],
         partition=None,
-        cluster=None,
+        cluster=[
+            "ad_id"
+        ],
     )
