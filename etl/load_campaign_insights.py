@@ -1,15 +1,12 @@
-import os
 import sys
+from pathlib import Path
+ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_FOLDER_LOCATION))
+
 import logging
 import pandas as pd
-from plugins.google_bigquery import GoogleBigqueryLoader
-sys.path.append(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), "../../"
-        )
-    )
-)
+
+from plugins.google_bigquery import internalGoogleBigqueryLoader
 
 def load_campaign_insights(
     *,
@@ -17,29 +14,21 @@ def load_campaign_insights(
     direction: str,
 ) -> None:
     """
-    Facebook Ads campaign insights loader
+    Load Facebook Ads campaign insights
     ----------------------
     Workflow:
         1. Validate input DataFrame
-            Empty input DataFrame triggers 'return'
-        2. Log loading metadata
-            Row count, destination table, partition, cluster...
-        3. Trigger GoogleBigqueryLoader
-           UPSERT mode, date-based deduplication, partition on date
-    ---------
-    Parameters:
-        1. df: pd.DataFrame 
-            Facebook Ads campaign insights flattended DataFrame
-        2. direction: str
-            Must be 'project.dataset.table' for Google BigQuery
+        2. Validate output direction for Google BigQuery
+        3. Set primary key(s) to date
+        4. Use UPSERT mode with parameterized query for deduplication
+        5. Make internalGoogleBigQueryLoader API call
     ---------
     Returns:
-        1. None
-            This function performs data loading as a side effect and does not return any value.
-    """   
+        None
+    """    
 
     if df.empty:
-        msg = ("⚠️ [LOADER] Empty Facebook Ads campaign insights Dataframe then loading will be skipped.")
+        msg = ("⚠️ [LOADER] Empty Facebook Ads campaign insights Dataframe then loading will be suspended.")
         print(msg)
         logging.warning(msg)
         return
@@ -49,14 +38,18 @@ def load_campaign_insights(
         f"{len(df)} row(s) of Facebook Ads campaign insights to Google BigQuery table "
         f"{direction}..."
         )
-    GoogleBigqueryLoader.load(
+    
+    loader = internalGoogleBigqueryLoader()
+
+    loader.load(
         df=df,
         direction=direction,
         mode="upsert",
         keys=["date"],
-        partition=["date"],
+        partition={
+            "field": "date"
+        },
         cluster=[
-            "account_id",
             "campaign_id"
-            ],
+        ],
     )
