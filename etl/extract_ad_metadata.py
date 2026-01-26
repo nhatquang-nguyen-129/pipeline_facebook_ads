@@ -124,14 +124,16 @@ def extract_ad_metadata(
         # Unexpected non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads ad metadata for ad_id "
-                f"{ad_id} due to unexpected API error {e}."
+                f"{ad_id} due to unexpected API error "
+                f"{e}."
             ) from e
 
     except Exception as e:
         # Unknown non-retryable error
         raise RuntimeError(
-            f"❌ [EXTRACT] Failed to extract Facebook Ads metadata for ad_id "
-            f"{ad_id} due to {e}."
+            "❌ [EXTRACT] Failed to extract Facebook Ads metadata for ad_id "
+            f"{ad_id} due to "
+            f"{e}."
         ) from e
 
     df = pd.DataFrame(rows)
