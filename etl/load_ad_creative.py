@@ -15,7 +15,7 @@ def load_ad_creative(
 ) -> None:
     """
     Load Facebook Ads ad creative
-    ----------------------
+    ---------
     Workflow:
         1. Validate input DataFrame
         2. Validate output direction for Google BigQuery
