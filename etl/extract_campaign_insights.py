@@ -32,14 +32,16 @@ def extract_campaign_insights(
 
     start_time = time.time()
 
-    fields = [
-        "date_start",
-        "campaign_id",
-        "campaign_name",
-        "impressions",
-        "clicks",
-        "spend",
+    fields = [        
+        "account_id", 
+        "campaign_id", 
+        "optimization_goal",
+        "spend", 
+        "impressions", 
+        "clicks", 
         "actions",
+        "date_start", 
+        "date_stop"
     ]
 
     params = {
@@ -57,7 +59,12 @@ def extract_campaign_insights(
     logging.info(msg)
 
     try:
-        insights = AdAccount(account_id).get_insights(
+        account_id_prefixed = (
+            account_id if account_id.startswith("act_")
+            else f"act_{account_id}"
+        )
+
+        insights = AdAccount(account_id_prefixed).get_insights(
             fields=fields,
             params=params,
         )

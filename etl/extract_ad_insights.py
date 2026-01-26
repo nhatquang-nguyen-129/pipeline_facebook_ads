@@ -7,8 +7,6 @@ def extract_ad_insights(
 ) -> list[dict]:
 
     fields = [
-        "date_start",
-        "date_stop",
         "account_id",
         "campaign_id",
         "adset_id",
@@ -18,6 +16,8 @@ def extract_ad_insights(
         "spend",
         "optimization_goal",
         "actions",
+        "date_start",
+        "date_stop",
     ]
 
     params = {
