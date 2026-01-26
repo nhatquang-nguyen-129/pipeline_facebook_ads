@@ -87,7 +87,7 @@ def extract_adset_metadata(
         if api_error_code == 190:
             raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads adset metadata due to token expired or invalid then manual token refresh is required.") from e
 
-        # Unexpected non-retryable error
+        # Unexpected retryable error
         if (
             (http_status and http_status >= 500)
             or api_error_code in {1, 2, 4, 17, 80000}
