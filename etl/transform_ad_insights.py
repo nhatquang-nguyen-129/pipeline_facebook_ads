@@ -9,11 +9,11 @@ import re
 import numpy as np
 import pandas as pd
 
-def transform_campaign_insights(
+def transform_ad_insights(
     df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Transform Facebook Ads campaign insights
+    Transform Facebook Ads ad insights
     ---------
     Workflow:
         1. Validate input
@@ -25,18 +25,18 @@ def transform_campaign_insights(
     ---------
     Returns:
         1. DataFrame:
-            Enforced Facebook Ads campaign insights
+            Enforced Facebook Ads ad insights
     """
 
     msg = (
         "🔄 [TRANSFORM] Transforming "
-        f"{len(df)} row(s) of Facebook Ads campaign insights..."
+        f"{len(df)} row(s) of Facebook Ads ad insights..."
     )
     print(msg)
     logging.info(msg)
 
     if df.empty:
-        msg = "⚠️ [TRANSFORM] Empty Facebook Ads campaign insights then transformation will be suspended."
+        msg = "⚠️ [TRANSFORM] Empty Facebook Ads ad insights then transformation will be suspended."
         print(msg)
         logging.warning(msg)
         return df
@@ -49,7 +49,7 @@ def transform_campaign_insights(
     missing = required_cols - set(df.columns)
     if missing:
         raise ValueError(
-            "❌ [TRANSFORM] Failed to transform Google Ads campaign insights due to missing columns "
+            "❌ [TRANSFORM] Failed to transform Google Ads ad insights due to missing columns "
             f"{missing} then transformation will be suspended."
         )
 
@@ -193,7 +193,7 @@ def transform_campaign_insights(
 
     msg = (
         "✅ [TRANSFORM] Successfully transformed "
-        f"{len(df)} row(s) of Facebook Ads campaign insights."
+        f"{len(df)} row(s) of Facebook Ads ad insights."
     )
     print(msg)
     logging.info(msg)
