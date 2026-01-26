@@ -1,34 +1,142 @@
+import sys
+from pathlib import Path
+ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
+sys.path.append(str(ROOT_FOLDER_LOCATION))
+
+import time
+import logging
+import pandas as pd
+
 from facebook_business.adobjects.adaccount import AdAccount
+from facebook_business.exceptions import FacebookRequestError
 
 def extract_ad_insights(
     account_id: str,
-    since: str,
-    until: str
-) -> list[dict]:
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """
+    Extract Facebook Ads ad insights
+    ---------
+    Workflow:
+        1. Validate input account_id
+        2. Validate input start_date and end_date
+        3. Make API call for AdAccount(account_id).get_insights endpoint (level=ad)
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
+    ---------
+    Returns:
+        1. DataFrame:
+            Flattened ad insights records
+    """
+
+    start_time = time.time()
 
     fields = [
         "account_id",
-        "campaign_id",
-        "adset_id",
+        "campaign_id",        
         "ad_id",
-        "impressions",
-        "clicks",
-        "spend",
+        "adset_id",       
         "optimization_goal",
         "actions",
+        "spend",
+        "impressions",
+        "clicks",
         "date_start",
         "date_stop",
     ]
 
     params = {
+        "time_range": {"since": start_date, "until": end_date},
         "level": "ad",
-        "time_increment": 1,
-        "time_range": {"since": since, "until": until},
     }
 
-    insights = AdAccount(account_id).get_insights(
-        fields=fields,
-        params=params
+    msg = (
+        "🔍 [EXTRACT] Extracting Facebook Ads ad insights for account_id "
+        f"{account_id} from "
+        f"{start_date} to "
+        f"{end_date}..."
     )
+    print(msg)
+    logging.info(msg)
 
-    return [dict(row) for row in insights]    
+    try:
+        account_id_prefixed = (
+            account_id if account_id.startswith("act_")
+            else f"act_{account_id}"
+        )
+
+        insights = AdAccount(account_id_prefixed).get_insights(
+            fields=fields,
+            params=params,
+        )
+
+        rows = [dict(row) for row in insights]
+        df = pd.DataFrame(rows)
+
+        df.retryable = False
+        df.time_elapsed = round(time.time() - start_time, 2)
+        df.rows_input = None
+        df.rows_output = len(df)
+
+        msg = (
+            "✅ [EXTRACT] Successfully extracted "
+            f"{len(df)} row(s) of Facebook Ads ad insights for account_id "
+            f"{account_id}."
+        )
+        print(msg)
+        logging.info(msg)
+
+        return df
+
+    except FacebookRequestError as e:
+        api_error_code = None
+        http_status = None
+
+        try:
+            api_error_code = e.api_error_code()
+            http_status = e.http_status()
+        except Exception:
+            pass
+
+        # 1️⃣ Token expired → NON-retryable
+        if api_error_code == 190:
+            retryable = False
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads ad insights "
+                "due to token expired or invalid. Manual token refresh required."
+            ) from e
+
+        # 2️⃣ Retryable Facebook API error
+        if (
+            (http_status and http_status >= 500)
+            or api_error_code in {1, 2, 4, 17, 80000}
+        ):
+            retryable = True
+            raise RuntimeError(
+                "⚠️ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
+                f"{account_id} from "
+                f"{start_date} to "
+                f"{end_date} due to API error then this request is eligible to retry."
+            ) from e
+
+        # 3️⃣ Unexpected NON-retryable Facebook API error
+        retryable = False
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date} due to unexpected API error "
+            f"{e} then this request is not eligible to retry."
+        ) from e
+
+    except Exception as e:
+        # 4️⃣ Unknown NON-retryable error
+        retryable = False
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date} due to unknown error "
+            f"{e}."
+        ) from e
