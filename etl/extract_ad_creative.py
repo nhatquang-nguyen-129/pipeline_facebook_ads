@@ -121,15 +121,16 @@ def extract_ad_creative(
             # Unexpected non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads ad creative for ad_id "
-                f"{ad_id} due to unexpected API error {e}."
+                f"{ad_id} due to unexpected API error "
+                f"{e}."
             ) from e
 
-        except Exception as e:
-            
+        except Exception as e:           
             # Unknown non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads creative for ad_id "
-                f"{ad_id} due to {e}."
+                f"{ad_id} due to "
+                f"{e}."
             ) from e
 
     df = pd.DataFrame(rows)
