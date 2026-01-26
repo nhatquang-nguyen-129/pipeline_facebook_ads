@@ -91,12 +91,9 @@ def extract_ad_metadata(
 
         # Expired token error
         if api_error_code == 190:
-            raise RuntimeError(
-                "❌ [EXTRACT] Failed to extract Facebook Ads ad metadata "
-                "due to token expired or invalid. Manual token refresh required."
-            ) from e
+            raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads ad metadata due to token expired or invalid then manual token refresh is required.") from e
 
-        # --- Retryable API error ---
+        # Unexpected non-retryable error
         if (
             (http_status and http_status >= 500)
             or api_error_code in {1, 2, 4, 17, 80000}
@@ -105,8 +102,8 @@ def extract_ad_metadata(
 
             msg = (
                 "⚠️ [EXTRACT] Failed to extract Facebook Ads ad metadata for ad_id "
-                f"{ad_id} due to API request error {e}. "
-                "This ad_id is eligible to retry."
+                f"{ad_id} due to API request error "
+                f"{e} then this ad_id is eligible to retry."
             )
             print(msg)
             logging.warning(msg)
@@ -124,16 +121,16 @@ def extract_ad_metadata(
             )
 
         else:
-            # --- Unexpected NON-retryable API error ---
+        # Unexpected non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads ad metadata for ad_id "
                 f"{ad_id} due to unexpected API error {e}."
             ) from e
 
     except Exception as e:
-        # --- Unknown NON-retryable error ---
+        # Unknown non-retryable error
         raise RuntimeError(
-            "❌ [EXTRACT] Failed to extract Facebook Ads ad metadata for ad_id "
+            f"❌ [EXTRACT] Failed to extract Facebook Ads metadata for ad_id "
             f"{ad_id} due to {e}."
         ) from e
 
