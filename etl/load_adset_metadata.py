@@ -15,7 +15,7 @@ def load_adset_metadata(
 ) -> None:
     """
     Load Facebook Ads adset metadata
-    ----------------------
+    ---------
     Workflow:
         1. Validate input DataFrame
         2. Validate output direction for Google BigQuery
