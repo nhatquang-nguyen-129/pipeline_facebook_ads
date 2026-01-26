@@ -11,10 +11,6 @@ import time
 
 from etl.extract_campaign_insights import extract_campaign_insights
 from etl.extract_campaign_metadata import extract_campaign_metadata
-from etl.extract_ad_insights import extract_ad_insights
-from etl.extract_ad_metadata import extract_ad_metadata
-from etl.extract_adset_metadata import extract_adset_metadata
-from etl.extract_ad_creative import extract_ad_creative
 
 from dbt.run import dbt_facebook_ads
 
