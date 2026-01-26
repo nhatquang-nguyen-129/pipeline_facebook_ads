@@ -11,7 +11,6 @@ from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.exceptions import FacebookRequestError
 
-
 def extract_ad_creative(
     account_id: str,
     ad_ids: list[str],
@@ -92,8 +91,7 @@ def extract_ad_creative(
             
             # Expired token error
             if api_error_code == 190:
-                raise RuntimeError(
-                    "❌ [EXTRACT] Failed to extract Facebook Ads ad creative due to token expired or invalid then manual token refresh is required.") from e
+                raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads ad creative due to token expired or invalid then manual token refresh is required.") from e
 
             # Unexpected retryable error
             if (
@@ -122,7 +120,7 @@ def extract_ad_creative(
             
             # Unexpected non-retryable error
             raise RuntimeError(
-                f"❌ [EXTRACT] Failed to extract Facebook Ads ad creative for ad_id "
+                "❌ [EXTRACT] Failed to extract Facebook Ads ad creative for ad_id "
                 f"{ad_id} due to unexpected API error {e}."
             ) from e
 
@@ -130,7 +128,7 @@ def extract_ad_creative(
             
             # Unknown non-retryable error
             raise RuntimeError(
-                f"❌ [EXTRACT] Failed to extract Facebook Ads creative for ad_id "
+                "❌ [EXTRACT] Failed to extract Facebook Ads creative for ad_id "
                 f"{ad_id} due to {e}."
             ) from e
 
