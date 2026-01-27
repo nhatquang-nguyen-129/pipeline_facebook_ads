@@ -3,6 +3,8 @@
 select
     date(insights.date) as date,
 
+    insights.department,
+    insights.account,
     insights.account_id,
     insights.campaign_id,
 
