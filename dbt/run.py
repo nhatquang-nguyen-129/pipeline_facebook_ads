@@ -7,13 +7,13 @@ import logging
 import os
 import subprocess
 
-def dbt_google_ads(
+def dbt_facebook_ads(
     *,
     google_cloud_project: str,
     select: str = "tag:mart",
 ):
     """
-    Run dbt for Google Ads
+    Run dbt for Facebook Ads
     ---------
     Workflow:
         1. Initialize dbt execution environment
@@ -26,7 +26,7 @@ def dbt_google_ads(
     """
 
     msg = (
-        "🔁 [DBT] Running dbt build with selector "
+        "🔁 [DBT] Running dbt build for Facebook Ads with selector "
         f"{select} to Google Cloud Project "
         f"{google_cloud_project}..."
     )
@@ -53,7 +53,7 @@ def dbt_google_ads(
         logging.info(result.stdout)
 
         msg = (
-            "✅ [DBT] Successfully completed dbt build with selector "
+            "✅ [DBT] Successfully completed dbt build for Facebook Ads with selector "
             f"{select} to Google Cloud Project "
             f"{google_cloud_project}."
         )
@@ -66,7 +66,7 @@ def dbt_google_ads(
         print(e.stderr)
         logging.error(e.stderr)
         raise RuntimeError(
-            "❌ [DBT] Failed to complete dbt build with selector " 
+            "❌ [DBT] Failed to complete dbt build for Facebook Ads with selector " 
             f"{select} to Google Cloud Project "
             f"{google_cloud_project} due to {e}."
         )
