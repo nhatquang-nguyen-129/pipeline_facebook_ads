@@ -1,4 +1,9 @@
-{{ config(materialized='ephemeral') }}
+{{ 
+  config(
+    materialized = 'ephemeral',
+    tags = ['stg', 'facebook', 'ad']
+  ) 
+}}
 
 {% set company = var('company') %}
 {% set raw_schema = company ~ '_dataset_facebook_api_raw' %}

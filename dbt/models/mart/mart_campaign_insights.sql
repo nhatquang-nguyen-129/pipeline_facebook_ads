@@ -11,18 +11,26 @@
 
 select
     date,
+    month,
+    year,
+
+    department,
+    account,
+
     account_id,
     campaign_id,
     campaign_name,
     campaign_status,
+    
     impressions,
     clicks,
     spend,
-    conversions,
+    
     result,
     result_type,
     messaging_conversations_started,
     purchase,
+
     platform,
     objective,
     budget_group,
