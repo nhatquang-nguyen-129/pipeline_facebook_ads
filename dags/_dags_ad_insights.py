@@ -58,18 +58,19 @@ def dags_ad_insights(
     while dags_start_date <= dags_end_date:
         dags_split_date = dags_start_date.strftime("%Y-%m-%d")
 
-        msg = (
-            "🔁 [DAGS] Trigger to extract Facebook Ads ad insights from account_id "
-            f"{account_id} at "
-            f"{dags_split_date}..."
-        )
-        print(msg)
-        logging.info(msg)
-
         for attempt in range(1, DAGS_MAX_ATTEMPTS + 1):
             try:
                 
     # Extract
+                msg = (
+                    "🔁 [DAGS] Trigger to extract Facebook Ads ad insights from account_id "
+                    f"{account_id} at "
+                    f"{dags_split_date} for "
+                    f"{attempt} attempt(s)..."
+                )
+                print(msg)
+                logging.info(msg)                
+                
                 insights = extract_ad_insights(
                     account_id=account_id,
                     start_date=dags_split_date,

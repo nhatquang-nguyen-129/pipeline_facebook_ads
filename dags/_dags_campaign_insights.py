@@ -51,18 +51,19 @@ def dags_campaign_insights(
     while dags_start_date <= dags_end_date:
         dags_split_date = dags_start_date.strftime("%Y-%m-%d")
 
-        msg = (
-            "🔁 [DAGS] Trigger to extract Facebook Ads campaign insights from account_id "
-            f"{account_id} at "
-            f"{dags_split_date}..."
-        )
-        print(msg)
-        logging.info(msg)
-
         for attempt in range(1, DAGS_MAX_ATTEMPTS + 1):
             try:
     
     # Extract
+                msg = (
+                    "🔁 [DAGS] Trigger to extract Facebook Ads campaign insights from account_id "
+                    f"{account_id} at "
+                    f"{dags_split_date} for "
+                    f"{attempt} attempt(s)..."
+                )
+                print(msg)
+                logging.info(msg)
+
                 insights = extract_campaign_insights(
                     account_id=account_id,
                     start_date=dags_split_date,
@@ -80,6 +81,15 @@ def dags_campaign_insights(
                     break
 
     # Transform
+                msg = (
+                    "🔁 [DAGS] Trigger to transform Facebook Ads campaign insights from "
+                    f"{account_id} with "
+                    f"{dags_split_date} for "
+                    f"{len(insights)} row(s)..."
+                )
+                print(msg)
+                logging.info(msg)                
+                
                 insights = transform_campaign_insights(insights)
 
     # Load
@@ -170,14 +180,14 @@ def dags_campaign_insights(
         logging.warning(msg)
         return
 
+    # Extract
     msg = (
-        "🔁 [DAGS] Trigger to extract Facebook Ads campaign metadata for "
+        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
         f"{len(total_campaign_ids)} campaign_id(s)..."
     )
     print(msg)
     logging.info(msg)
 
-    # Extract
     df_campaign_metadatas = extract_campaign_metadata(
         account_id=account_id,
         campaign_id_list=list(total_campaign_ids),
@@ -190,6 +200,13 @@ def dags_campaign_insights(
         return
 
     # Transform
+    msg = (
+        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
+        f"{len(total_campaign_ids)} campaign_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+
     df_campaign_metadatas = transform_campaign_metadata(df_campaign_metadatas)
 
     # Load
@@ -200,7 +217,8 @@ def dags_campaign_insights(
     )
 
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads campaign metadata to "
+        "🔁 [DAGS] Trigger to load Facebook Ads campaign metadata for "
+        f"{len(df_campaign_metadatas)} row(s) to "
         f"{_campaign_metadata_direction}..."
     )
     print(msg)
