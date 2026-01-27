@@ -9,9 +9,9 @@ select
     m.campaign_name,
 
     case
-        when m.campaign_status = 'ENABLED' then '🟢'
-        when m.campaign_status = 'PAUSED'  then '⚪'
-        when m.campaign_status = 'REMOVED' then '🔴'
+        when m.campaign_status = 'ACTIVE'   then '🟢'
+        when m.campaign_status = 'PAUSED'   then '⚪'
+        when m.campaign_status in ('ARCHIVED', 'DELETED') then '🔴'
         else '❓'
     end as campaign_status,
 
@@ -26,9 +26,13 @@ select
 
     i.impressions,
     i.clicks,
-    i.cost,
-    i.conversions,
-    i.conversion_value
+    i.spend,
+
+    i.result,
+    i.result_type,
+
+    i.messaging_conversations_started,
+    i.purchase
 
 from {{ ref('stg_campaign_insights') }} i
 left join `{{ target.project }}.{{ var('company') }}_dataset_google_api_raw.{{ var('company') }}_table_google_{{ var('department') }}_{{ var('account') }}_campaign_metadata` m
