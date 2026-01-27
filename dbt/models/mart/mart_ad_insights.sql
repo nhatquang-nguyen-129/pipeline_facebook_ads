@@ -10,37 +10,22 @@
 }}
 
 select
-    -- ======================
-    -- Date
-    -- ======================
     date,
     month,
     year,
 
-    -- ======================
-    -- Scope
-    -- ======================
     department,
     account,
 
-    -- ======================
-    -- Grain IDs
-    -- ======================
     account_id,
     campaign_id,
     adset_id,
     ad_id,
 
-    -- ======================
-    -- Ad
-    -- ======================
     ad_name,
     ad_status,
     thumbnail_url,
 
-    -- ======================
-    -- Metrics
-    -- ======================
     impressions,
     clicks,
     spend,
@@ -50,9 +35,6 @@ select
     messaging_conversations_started,
     purchase,
 
-    -- ======================
-    -- Campaign dimensions
-    -- ======================
     campaign_name,
     platform,
     objective,
@@ -63,9 +45,6 @@ select
     pillar_group,
     content_group,
 
-    -- ======================
-    -- Adset dimensions
-    -- ======================
     location,
     gender,
     age,
