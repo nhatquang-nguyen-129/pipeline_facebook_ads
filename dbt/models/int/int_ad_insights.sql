@@ -1,4 +1,9 @@
-{{ config(materialized='ephemeral') }}
+{{ 
+  config(
+    materialized = 'ephemeral',
+    tags = ['int', 'facebook', 'ad']
+  ) 
+}}
 
 select
     date(insights.date) as date,
