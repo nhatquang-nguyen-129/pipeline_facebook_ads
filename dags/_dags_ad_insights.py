@@ -109,6 +109,15 @@ def dags_ad_insights(
                     f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_m{month:02d}{year}"
                 )
 
+                msg = (
+                    "🔁 [DAGS] Trigger to load Facebook Ads ad insights from account_id "
+                    f"{account_id} for "
+                    f"{dags_split_date} to direction "
+                    f"{_ad_insights_direction}..."
+                )
+                print(msg)
+                logging.info(msg)
+
                 daily_ad_ids = set(insights["ad_id"].dropna().unique())
                 total_ad_ids.update(daily_ad_ids)
 
@@ -207,9 +216,9 @@ def dags_ad_insights(
     )
     
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads ad metadata to "
-        f"{_ad_metadata_direction} for "
-        f"{len(df_ad_metadatas)} row(s)..."
+        "🔁 [DAGS] Trigger to load Facebook Ads ad metadata for "       
+        f"{len(df_ad_metadatas)} row(s) for "
+        f"{_ad_metadata_direction}..."
     )
     print(msg)
     logging.info(msg)
@@ -219,58 +228,119 @@ def dags_ad_insights(
         direction=_ad_metadata_direction,
     )
 
-# ETL for Facebook Ads ad metadata
-    total_adset_ids = set(df_ad_metadatas["adset_id"].dropna().unique())
-
-    if total_adset_ids:
-
-    # Extract        
+# ETL for Facebook Ads ad creative
+    if not total_ad_ids:
         msg = (
-            "🔁 [DAGS] Trigger to extract Facebook Ads adset metadata for "
-            f"{len(total_adset_ids)} adset_id(s)..."
+            "⚠️ [DAGS] No Facebook Ads ad_id appended for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date} then DAG execution will be suspended."
         )
         print(msg)
-        logging.info(msg)
+        logging.warning(msg)
+        return
 
-        df_adset_metadatas = extract_adset_metadata(
-            account_id=account_id,
-            adset_id_list=list(total_adset_ids),
-        )
+    # Extract
+    msg = (
+        "🔁 [DAGS] Trigger to extract Facebook Ads ad creative for "
+        f"{len(total_ad_ids)} ad_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+
+    df_ad_creatives = extract_ad_creative(
+        account_id=account_id,
+        ad_id_list=list(total_ad_ids),
+    )
+
+    if df_ad_creatives.empty:
+        msg = "⚠️ [DAGS] Empty Facebook Ads ad creative extracted then DAG execution will be suspended."
+        print(msg)
+        logging.warning(msg)
+        return
 
     # Transform
+
+    # Load    
+    _ad_creative_direction = (
+        f"{PROJECT}."
+        f"{COMPANY}_dataset_facebook_api_raw."
+        f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+    )
+    
+    msg = (
+        "🔁 [DAGS] Trigger to load Facebook Ads ad creative for "       
+        f"{len(df_ad_creatives)} row(s) for "
+        f"{_ad_creative_direction}..."
+    )
+    print(msg)
+    logging.info(msg)
+
+    load_ad_creative(
+        df=df_ad_creatives,
+        direction=_ad_creative_direction,
+    )
+
+# ETL for Facebook Ads adset metadata
+    total_adset_ids = set(df_ad_metadatas["adset_id"].dropna().unique())
+
+    if not total_adset_ids:
         msg = (
-            "🔁 [DAGS] Trigger to transform Facebook Ads adset metadata for "
-            f"{len(df_adset_metadatas)} row(s)..."
+            "⚠️ [DAGS] No Facebook Ads adset_id appended for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date} then DAG execution will be suspended."
         )
         print(msg)
-        logging.info(msg)
+        logging.warning(msg)
+        return
+    
+    # Extract
+    msg = (
+        "🔁 [DAGS] Trigger to extract Facebook Ads adset metadata for "
+        f"{len(total_adset_ids)} adset_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
 
-        df_adset_metadatas = transform_adset_metadata(df_adset_metadatas)
+    df_adset_metadatas = extract_adset_metadata(
+        account_id=account_id,
+        adset_id_list=list(total_adset_ids),
+    )
+
+    # Transform
+    msg = (
+        "🔁 [DAGS] Trigger to transform Facebook Ads adset metadata for "
+        f"{len(df_adset_metadatas)} row(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+
+    df_adset_metadatas = transform_adset_metadata(df_adset_metadatas)
 
     # Load
-        _adset_metadata_direction = (
-            f"{PROJECT}."
-            f"{COMPANY}_dataset_facebook_api_raw."
-            f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
-        )        
+    _adset_metadata_direction = (
+        f"{PROJECT}."
+        f"{COMPANY}_dataset_facebook_api_raw."
+        f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_adset_metadata"
+    )        
+    
+    msg = (
+        "🔁 [DAGS] Trigger to load Facebook Ads adset metadata for "
+        f"{len(df_adset_metadatas)} row(s) to"
+        f"{_adset_metadata_direction}..."
         
-        msg = (
-            "🔁 [DAGS] Trigger to load Facebook Ads adset metadata to "
-            f"{_adset_metadata_direction} for "
-            f"{len(df_adset_metadatas)} row(s)..."
-        )
+    )
 
-        load_adset_metadata(
-            df=df_adset_metadatas,
-            direction=_adset_metadata_direction,
-        )
+    load_adset_metadata(
+        df=df_adset_metadatas,
+        direction=_adset_metadata_direction,
+    )
 
-    # =========================
-    # 4. Campaign Metadata
-    # =========================
-    campaign_ids = set(df_ads["campaign_id"].dropna().unique())
+# ETL for Facebook Ads campaign metadata
+    total_campaign_ids = set(df_ad_metadatas["campaign_id"].dropna().unique())
 
-    if campaign_ids:
+    if total_campaign_ids:
         msg = f"🔁 [DAGS] Trigger to extract Facebook Ads campaign metadata for {len(campaign_ids)} campaign_id(s)..."
         print(msg)
         logging.info(msg)
