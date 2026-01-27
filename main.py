@@ -9,11 +9,10 @@ import json
 import logging
 from zoneinfo import ZoneInfo
 
-from google.ads.googleads.client import GoogleAdsClient
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
 
-from dags._dags_campaign_insights import dags_facebook_ads
+from dags.dags_facebook_ads import dags_facebook_ads
 
 COMPANY = os.getenv("COMPANY")
 PROJECT = os.getenv("PROJECT")
@@ -28,25 +27,24 @@ if not all([
     ACCOUNT,
     MODE
 ]):
-    raise EnvironmentError("❌ [MAIN] Failed to execute Google Ads main entrypoint due to missing required environment variables.")
+    raise EnvironmentError("❌ [MAIN] Failed to execute Facebook Ads main entrypoint due to missing required environment variables.")
 
 def main():
     """
-    Google Ads entrypoint
+    Main Facebook Ads entrypoint
     ---------
-    Main is responsible for preparing the entire execution environment:
-        - Resolve execution time window from MODE
-        - Read & validate OS environment variables
-        - Load secrets from GCP Secret Manager
-        - Initialize Google Ads client exactly once
-        - Dispatch execution to DAG orchestrator
-
-    DAGs must NOT initialize clients or read secrets.
-    DAGs only coordinate execution order and retries.
+    Workflow:
+        1. Resolve execution time window from MODE
+        2. Read & validate OS environment variables
+        3. Load secrets from GCP Secret Manager
+        4. Initialize Facebook Ads SDK wrapper exactly once
+        5. Dispatch execution to DAG orchestrator
+    Return:
+        None
     """
     
     msg = (
-        "🔄 [MAIN] Triggering to update Google Ads for "
+        "🔄 [MAIN] Triggering to update Facebook Ads for "
         f"{ACCOUNT} account of "
         f"{DEPARTMENT} department in "
         f"{COMPANY} company with "
@@ -114,7 +112,7 @@ def main():
             f"{e}."
         )
         
-# Resolve customer_id from Google Secret Manager
+# Resolve account_id from Google Secret Manager
     try:
         secret_customer_id = (
             f"{COMPANY}_secret_{DEPARTMENT}_google_account_id_{ACCOUNT}"
