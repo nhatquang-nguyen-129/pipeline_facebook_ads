@@ -1,25 +1,28 @@
 {{ 
   config(
-    alias = var('company') ~ '_table_google_all_all_campaign_performance',
+    alias = var('company') ~ '_table_facebook_all_all_campaign_performance',
     partition_by = {
       "field": "date",
       "data_type": "date"
     },
-    cluster_by = ["customer_id", "campaign_id"]
+    cluster_by = ["account_id", "campaign_id"]
   ) 
 }}
 
 select
     date,
-    customer_id,
+    account_id,
     campaign_id,
     campaign_name,
     campaign_status,
     impressions,
     clicks,
-    cost,
+    spend,
     conversions,
-    conversion_value,
+    result,
+    result_type,
+    messaging_conversations_started,
+    purchase,
     platform,
     objective,
     budget_group,
