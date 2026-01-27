@@ -10,13 +10,14 @@ import subprocess
 def dbt_google_ads(
     *,
     google_cloud_project: str,
+    select: str = "tag:mart",
 ):
     """
     Run dbt for Google Ads
     ---------
     Workflow:
         1. Initialize dbt execution environment
-        2. Trigger dbt build command for Google Ads models
+        2. Trigger dbt build command for dbt models
         3. Capture dbt execution logs with stdout and stderr
     ---------
     Returns:
@@ -25,7 +26,8 @@ def dbt_google_ads(
     """
 
     msg = (
-        "🔁 [DBT] Running dbt build for Google Ads materialization to Google Cloud Project "
+        "🔁 [DBT] Running dbt build with selector "
+        f"{select} to Google Cloud Project "
         f"{google_cloud_project}..."
     )
     print(msg)
@@ -36,7 +38,7 @@ def dbt_google_ads(
         "build",
         "--project-dir", "dbt",
         "--profiles-dir", "dbt",
-        "--select", "tag:mart",
+        "--select", select,
     ]
 
     try:
@@ -49,9 +51,10 @@ def dbt_google_ads(
 
         print(result.stdout)
         logging.info(result.stdout)
-        
+
         msg = (
-            "✅ [DBT] Successfully completed dbt build for Google Ads to Google Cloud Project "
+            "✅ [DBT] Successfully completed dbt build with selector "
+            f"{select} to Google Cloud Project "
             f"{google_cloud_project}."
         )
         print(msg)
@@ -61,9 +64,9 @@ def dbt_google_ads(
         print(e.stdout)
         logging.error(e.stdout)
         print(e.stderr)
-        logging.error(e.stderr)       
+        logging.error(e.stderr)
         raise RuntimeError(
-            "❌ [DBT] Failed to complete dbt build for Google Ads to Google Cloud Project "
-            f"{google_cloud_project} due to "
-            f"{e}."
+            "❌ [DBT] Failed to complete dbt build with selector " 
+            f"{select} to Google Cloud Project "
+            f"{google_cloud_project} due to {e}."
         )
