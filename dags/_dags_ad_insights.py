@@ -340,30 +340,60 @@ def dags_ad_insights(
 # ETL for Facebook Ads campaign metadata
     total_campaign_ids = set(df_ad_metadatas["campaign_id"].dropna().unique())
 
-    if total_campaign_ids:
-        msg = f"🔁 [DAGS] Trigger to extract Facebook Ads campaign metadata for {len(campaign_ids)} campaign_id(s)..."
+    if not total_campaign_ids:
+        msg = (
+            "⚠️ [DAGS] No Facebook Ads campaign_id appended for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date} then DAG execution will be suspended."
+        )
         print(msg)
-        logging.info(msg)
+        logging.warning(msg)
+        return
 
-        df_campaigns = extract_campaign_metadata(
-            account_id=account_id,
-            campaign_id_list=list(campaign_ids),
-        )
+    # Extract
+    msg = (
+        "🔁 [DAGS] Trigger to extract Facebook Ads campaign metadata for "
+        f"{len(total_campaign_ids)} campaign_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
 
-        df_campaigns = transform_campaign_metadata(df_campaigns)
+    df_campaign_metadatas = extract_campaign_metadata(
+        account_id=account_id,
+        campaign_id_list=list(total_campaign_ids),
+    )
 
-        load_campaign_metadata(
-            df=df_campaigns,
-            direction=(
-                f"{PROJECT}."
-                f"{COMPANY}_dataset_facebook_api_raw."
-                f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
-            ),
-        )
+    # Transform
+    msg = (
+        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
+        f"{len(df_campaign_metadatas)} row(s)..."
+    )
+    print(msg)
+    logging.info(msg)
 
-    # =========================
-    # 5. dbt Materialization
-    # =========================
+    df_campaign_metadatas = transform_campaign_metadata(df_campaign_metadatas)
+
+    # Load
+    _campaign_metadata_direction = (
+        f"{PROJECT}."
+        f"{COMPANY}_dataset_facebook_api_raw."
+        f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_campaign_metadata"
+    )  
+
+    msg = (
+        "🔁 [DAGS] Trigger to load Facebook Ads campaign metadata for "
+        f"{len(df_campaign_metadatas)} row(s) to"
+        f"{_campaign_metadata_direction}..."
+        
+    )
+
+    load_campaign_metadata(
+        df=df_campaign_metadatas,
+        direction=_campaign_metadata_direction,
+    )
+
+# Materialization with dbt
     msg = "🔁 [DAGS] Trigger to materialize Facebook Ads ad insights with dbt..."
     print(msg)
     logging.info(msg)
