@@ -2,9 +2,9 @@
   <img src="kidsplaza.png" alt="KidsPlaza Logo" width="300"/>
 </p>
 
-This pipeline integrates **Facebook Ads Insights data**, supporting both **daily synchronization** and **historical backfills**, and serves as the foundation for performance analysis, budget reconciliation, and marketing reporting.
+This pipeline integrates **Facebook Ads Insights data**, supporting both **daily synchronization** and **historical backfills**.
 
-The system is designed with a **modular, stage-based architecture** to ensure maintainability, scalability, and controlled evolution over time.
+The system is designed with a **modular architecture** to ensure maintainability, scalability, and controlled evolution over time.
 
 ---
 
