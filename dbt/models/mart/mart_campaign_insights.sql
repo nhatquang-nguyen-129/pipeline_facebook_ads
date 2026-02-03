@@ -6,7 +6,7 @@
       "data_type": "date"
     },
     cluster_by = ["account_id", "campaign_id"],
-    tags = ['mart', 'facebook', 'ad']    
+    tags = ['mart', 'facebook', 'campaign']    
   ) 
 }}
 

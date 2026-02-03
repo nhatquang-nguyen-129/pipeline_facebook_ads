@@ -7,10 +7,11 @@ import logging
 import os
 import subprocess
 
+
 def dbt_facebook_ads(
     *,
     google_cloud_project: str,
-    select: str = "tag:mart",
+    select: str
 ):
     """
     Run dbt for Facebook Ads
@@ -21,8 +22,7 @@ def dbt_facebook_ads(
         3. Capture dbt execution logs with stdout and stderr
     ---------
     Returns:
-        1. subprocess.CompletedProcess:
-            Contains dbt execution result including stdout, stderr, and return code
+        None
     """
 
     msg = (
@@ -42,15 +42,25 @@ def dbt_facebook_ads(
     ]
 
     try:
-        result = subprocess.run(
+        process = subprocess.Popen(
             cmd,
-            check=True,
-            env={**os.environ},
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             text=True,
+            env={**os.environ},
         )
 
-        print(result.stdout)
-        logging.info(result.stdout)
+        # Stream dbt logs realtime (tránh treo)
+        for line in process.stdout:
+            print(line, end="")
+            logging.info(line.rstrip())
+
+        return_code = process.wait()
+
+        if return_code != 0:
+            raise RuntimeError(
+                f"❌ [DBT] dbt build failed with return code {return_code}"
+            )
 
         msg = (
             "✅ [DBT] Successfully completed dbt build for Facebook Ads with selector "
@@ -60,13 +70,9 @@ def dbt_facebook_ads(
         print(msg)
         logging.info(msg)
 
-    except subprocess.CalledProcessError as e:
-        print(e.stdout)
-        logging.error(e.stdout)
-        print(e.stderr)
-        logging.error(e.stderr)
+    except Exception as e:
         raise RuntimeError(
-            "❌ [DBT] Failed to complete dbt build for Facebook Ads with selector " 
+            "❌ [DBT] Failed to complete dbt build for Facebook Ads with selector "
             f"{select} to Google Cloud Project "
             f"{google_cloud_project} due to {e}."
-        )
+        ) from e

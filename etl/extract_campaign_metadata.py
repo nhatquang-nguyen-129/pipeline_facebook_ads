@@ -35,14 +35,6 @@ def extract_campaign_metadata(
     failed_campaign_ids: list[str] = []
     retryable = False
 
-    msg = (
-        "🔍 [EXTRACT] Extracting Facebook Ads campaign metadata for account_id "
-        f"{account_id} with "
-        f"{len(campaign_ids)} campaign_id(s)..."
-    )
-    print(msg)
-    logging.info(msg)
-
     # Validate input
     if not campaign_ids:
         msg = (
@@ -130,6 +122,14 @@ def extract_campaign_metadata(
         ) from e
 
     # Make Facebook Ads API call for campaign metadata
+    msg = (
+        "🔍 [EXTRACT] Extracting Facebook Ads campaign metadata for account_id "
+        f"{account_id} with "
+        f"{len(campaign_ids)} campaign_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+        
     for campaign_id in campaign_ids:
         try:
             campaign = Campaign(campaign_id).api_get(
