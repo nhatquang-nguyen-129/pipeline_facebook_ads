@@ -18,14 +18,13 @@ def transform_campaign_insights(
     Workflow:
         1. Validate input
         2. Parse actions
-        3. Resolve main result + result_type
-        4. Extract common metrics
-        5. Normalize date dimension
-        6. Enforce numeric schema
+        3. Resolve results
+        4. Normalize date dimension
+        5. Enforce numeric schema
     ---------
     Returns:
         1. DataFrame:
-            Enforced Facebook Ads campaign insights
+            Enforced campaign insights records
     """
 
     msg = (
@@ -189,7 +188,7 @@ def transform_campaign_insights(
         df["year"] = dt.dt.year
         df["month"] = dt.dt.strftime("%Y-%m")
 
-    # Drop unnecessary columns
+    # Drop raw columns
     df = df.drop(
         columns=[
             "actions", 
