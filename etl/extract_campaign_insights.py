@@ -49,16 +49,16 @@ def extract_campaign_insights(
         "level": "campaign",
     }
 
-    msg = (
-        "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
-        f"{account_id} from "
-        f"{start_date} to "
-        f"{end_date}..."
-    )
-    print(msg)
-    logging.info(msg)
-
     try:
+        msg = (
+            "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date}..."
+        )
+        print(msg)
+        logging.info(msg)
+
         account_id_prefixed = (
             account_id if account_id.startswith("act_")
             else f"act_{account_id}"
@@ -71,6 +71,16 @@ def extract_campaign_insights(
 
         rows = [dict(row) for row in insights]
         df = pd.DataFrame(rows)
+
+        msg = (
+            "✅ [EXTRACT] Successfully extracted "
+            f"{len(df)} row(s) of Facebook Ads campaign insights for account_id "           
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date}."
+        )
+        print(msg)
+        logging.info(msg)        
 
         df.retryable = False
         df.time_elapsed = round(time.time() - start_time, 2)
@@ -91,39 +101,50 @@ def extract_campaign_insights(
 
         # Expired token error
         if api_error_code == 190:
-            retryable = False
-            raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads campaign insights due to token expired or invalid then manual token refresh is required.") from e
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
+                f"{account_id} from "
+                f"{start_date} to "
+                f"{end_date} due to expired or invalid access token then manual token refresh is required."
+            ) from e
 
-        # Unexpected retryable error
+        # Unexpected retryable API error
         if (
             (http_status and http_status >= 500)
-            or api_error_code in {1, 2, 4, 17, 80000}
+            or api_error_code in {
+                1, 
+                2, 
+                4, 
+                17, 
+                80000
+            }
         ):
             retryable = True
             raise RuntimeError(
                 "⚠️ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
                 f"{account_id} from "
                 f"{start_date} to "
-                f"{end_date} due to API error then this request is eligible to retry."
+                f"{end_date} due to API error "
+                f"{e} then this request is eligible to retry."
             ) from e
 
-        # Unexpected non-retryable error
+        # Unexpected non-retryable API error
         retryable = False
         raise RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
             f"{account_id} from "
             f"{start_date} to "
-            f"{end_date} due to unexpected API error "
+            f"{end_date} due to API error "
             f"{e} then this request is not eligible to retry."
         ) from e
        
+        # Unknown non-retryable error      
     except Exception as e:
-        # Unknown non-retryable error
         retryable = False
         raise RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
             f"{account_id} from "
             f"{start_date} to "
-            f"{end_date} due to unknown error "
+            f"{end_date} due to "
             f"{e}."
         ) from e
