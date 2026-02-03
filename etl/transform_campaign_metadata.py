@@ -10,7 +10,7 @@ def transform_campaign_metadata(
     df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Transform Facebook Ads ad insights
+    Transform Facebook Ads campaign metadata
     ---------
     Workflow:
         1. Validate input
@@ -19,7 +19,7 @@ def transform_campaign_metadata(
     ---------
     Returns:
         1. DataFrame:
-            Enforced adset metadata records
+            Enforced campaigns metadata records
     """
 
     msg = (
