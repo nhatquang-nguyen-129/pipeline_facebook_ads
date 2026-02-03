@@ -13,28 +13,30 @@ from facebook_business.exceptions import FacebookRequestError
 
 def extract_campaign_metadata(
     account_id: str,
-    campaign_id: str,
+    campaign_ids: list[str],
 ) -> pd.DataFrame:
     """
     Extract Facebook Ads campaign metadata
     ---------
     Workflow:
-        1. Validate input campaign_ids list[dict]
-        2. Make API call for Campaign(campaign_id) endpoint
-        3. Append extracted JSON data to list[dict]
-        4. Enforce List[dict] to DataFrame
+        1. Validate input campaign_ids
+        2. Make API call for AdAccount endpoint
+        3. Make API call for Campaign(campaign_id) endpoint
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        1. DataFrame:
+        DataFrame:
             Flattened campaign metadata records
     """
 
     start_time = time.time()
     rows: list[dict] = []
     failed_campaign_ids: list[str] = []
-    retryable = True
+    retryable = False
 
-    if not campaign_id:
+    # Validate input
+    if not campaign_ids:
         df = pd.DataFrame(
             columns=[
                 "campaign_id",
@@ -51,27 +53,25 @@ def extract_campaign_metadata(
         df.rows_output = 0
         return df
 
+    # Make Facebook Ads API call for ad account information
     try:
-        campaign = Campaign(campaign_id).api_get(
-            fields=[
-                "id",
-                "name",
-                "status",
-                "account_id",
-            ]
+        msg = (
+            "🔍 [EXTRACT] Extracting Facebook Ads account_name for account_id "
+            f"{account_id}..."
         )
+        print(msg)
+        logging.info(msg)
 
         account = AdAccount(account_id).api_get(fields=["name"])
+        account_name = account.get("name")
 
-        rows.append(
-            {
-                "campaign_id": campaign.get("id"),
-                "campaign_name": campaign.get("name"),
-                "status": campaign.get("status"),
-                "account_id": account_id,
-                "account_name": account.get("name"),
-            }
+        msg = (
+            "✅ [EXTRACT] Successfully extracted Facebook Ads account_name "
+            f"{account_name} for account_id "
+            f"{account_id}."
         )
+        print(msg)
+        logging.info(msg)
 
     except FacebookRequestError as e:
         api_error_code = None
@@ -85,54 +85,127 @@ def extract_campaign_metadata(
 
         # Expired token error
         if api_error_code == 190:
-            raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads campaign metadata due to token expired or invalid then manual token refresh is required.") from e
-
-        # Unexpected retryable error
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+                f"{account_id} due to expired or invalid access token then manual token refresh is required."
+            ) from e
+        
+        # Unexpected retryable API error
         if (
             (http_status and http_status >= 500)
-            or api_error_code in {1, 2, 4, 17, 80000}
+            or api_error_code in {
+                1, 
+                2, 
+                4, 
+                17, 
+                80000
+            }
         ):
-            failed_campaign_ids.append(campaign_id)
+            raise RuntimeError(
+                "⚠️ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+                f"{account_id} due to API error "
+                f"{e} then this request is eligible to retry."
+            ) from e
 
-            msg = (
-                "⚠️ [EXTRACT] Failed to extract Facebook Ads campaign metadata for campaign_id "
-                f"{campaign_id} due to API request error "
-                f"{e} then this campaign_id is eligible to retry."
+        # Unexpected non-retryable API error
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+            f"{account_id} due to API error "
+            f"{e} then this request is not eligible to retry."
+        ) from e
+
+    # Make Facebook Ads API call for campaign metadata
+    for campaign_id in campaign_ids:
+        try:
+            campaign = Campaign(campaign_id).api_get(
+                fields=[
+                    "id",
+                    "name",
+                    "status",
+                    "account_id",
+                ]
             )
-            print(msg)
-            logging.warning(msg)
 
             rows.append(
                 {
-                    "campaign_id": campaign_id,
-                    "campaign_name": None,
-                    "status": None,
+                    "campaign_id": campaign.get("id"),
+                    "campaign_name": campaign.get("name"),
+                    "status": campaign.get("status"),
                     "account_id": account_id,
-                    "account_name": None,
+                    "account_name": account_name,
                 }
             )
 
-        else:
-        # Unexpected non-retryable error
+        except FacebookRequestError as e:
+            api_error_code = None
+            http_status = None
+
+            try:
+                api_error_code = e.api_error_code()
+                http_status = e.http_status()
+            except Exception:
+                pass
+
+        # Expired token error
+            if api_error_code == 190:
+                raise RuntimeError(
+                    "❌ [EXTRACT] Failed to extract Facebook Ads campaign metadata for account_id "
+                    f"{account_id} due to expired or invalid access token then manual token refresh is required."
+                ) from e
+
+        # Unexpected retryable API error
+            if (
+                (http_status and http_status >= 500)
+                or api_error_code in {
+                    1, 
+                    2, 
+                    4, 
+                    17, 
+                    80000
+                }
+            ):
+                failed_campaign_ids.append(campaign_id)
+                retryable = True
+
+                msg = (
+                    "⚠️ [EXTRACT] Failed to extract Facebook Ads campaign metadata for campaign_id "
+                    f"{campaign_id} due to API error "
+                    f"{e} then this request is eligible to retry."
+                )
+                print(msg)
+                logging.warning(msg)
+
+                rows.append(
+                    {
+                        "campaign_id": campaign_id,
+                        "campaign_name": None,
+                        "status": None,
+                        "account_id": account_id,
+                        "account_name": account_name,
+                    }
+                )
+                continue
+
+        # Unexpected non-retryable API error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads campaign metadata for campaign_id "
-                f"{campaign_id} due to unexpected API error "
+                f"{campaign_id} due to API error "
+                f"{e} then this request is not eligible to retry."
+            ) from e
+
+        # Unknown non-retryable error        
+        except Exception as e:
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads campaign metadata for campaign_id "
+                f"{campaign_id} due to "
                 f"{e}."
             ) from e
 
-    except Exception as e:
-        # Unknown non-retryable error
-        raise RuntimeError(
-            "❌ [EXTRACT] Failed to extract Facebook Ads campaign metadata for campaign_id "
-            f"{campaign_id} due to "
-            f"{e}."
-        ) from e
-
     df = pd.DataFrame(rows)
     df.failed_campaign_ids = failed_campaign_ids
-    df.retryable = bool(failed_campaign_ids) and retryable
+    df.retryable = retryable
     df.time_elapsed = round(time.time() - start_time, 2)
-    df.rows_input = 1
+    df.rows_input = len(campaign_ids)
     df.rows_output = len(df)
 
     return df
