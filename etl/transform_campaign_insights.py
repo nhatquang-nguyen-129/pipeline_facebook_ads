@@ -174,7 +174,11 @@ def transform_campaign_insights(
     df["purchase"] = purchase_values
 
     # Normalize numeric metrics
-    for col in ["impressions", "clicks", "spend"]:
+    for col in [
+        "impressions", 
+        "clicks", 
+        "spend"
+    ]:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
@@ -185,9 +189,14 @@ def transform_campaign_insights(
         df["year"] = dt.dt.year
         df["month"] = dt.dt.strftime("%Y-%m")
 
-    # Drop raw columns
+    # Drop unnecessary columns
     df = df.drop(
-        columns=["actions", "optimization_goal", "date_start", "date_stop"],
+        columns=[
+            "actions", 
+            "optimization_goal", 
+            "date_start", 
+            "date_stop"
+        ],
         errors="ignore"
     )
 

@@ -32,8 +32,9 @@ def extract_ad_creative(
     start_time = time.time()
     rows: list[dict] = []
     failed_ad_ids: list[str] = []
-    retryable = True
+    retryable = False
 
+    # Validate input    
     if not ad_ids:
         df = pd.DataFrame(
             columns=[
@@ -50,6 +51,7 @@ def extract_ad_creative(
         df.rows_output = 0
         return df
 
+    # Make Facebook Ads API call for ad creative
     for ad_id in ad_ids:
         try:
             ad = Ad(ad_id).api_get(fields=["creative"])
@@ -89,21 +91,25 @@ def extract_ad_creative(
             except Exception:
                 pass
             
-            # Expired token error
+        # Expired token error
             if api_error_code == 190:
-                raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads ad creative due to token expired or invalid then manual token refresh is required.") from e
+                raise RuntimeError(
+                    "❌ [EXTRACT] Failed to extract Facebook Ads ad creative for account_id "
+                    f"{account_id} due to expired or invalid access token then manual token refresh is required."
+                )
 
-            # Unexpected retryable error
+        # Unexpected retryable API error
             if (
                 (http_status and http_status >= 500)
                 or api_error_code in {1, 2, 4, 17, 80000}
             ):
                 failed_ad_ids.append(ad_id)
+                retryable = True
 
                 msg = (
                     "⚠️ [EXTRACT] Failed to extract Facebook Ads ad creative for ad_id "
-                    f"{ad_id} due to API request error "
-                    f"{e} then this ad_id is eligible to retry."
+                    f"{ad_id} due to API error "
+                    f"{e} then this request is eligible to retry."
                 )
                 print(msg)
                 logging.warning(msg)
@@ -118,15 +124,15 @@ def extract_ad_creative(
                 )
                 continue
             
-            # Unexpected non-retryable error
+        # Unexpected non-retryable API error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads ad creative for ad_id "
-                f"{ad_id} due to unexpected API error "
-                f"{e}."
+                f"{ad_id} due to API error "
+                f"{e} then this request is no eligible to retry."
             ) from e
 
+        # Unknown non-retryable error
         except Exception as e:           
-            # Unknown non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads creative for ad_id "
                 f"{ad_id} due to "
@@ -135,7 +141,7 @@ def extract_ad_creative(
 
     df = pd.DataFrame(rows)
     df.failed_ad_ids = failed_ad_ids
-    df.retryable = bool(failed_ad_ids) and retryable
+    df.retryable = retryable
     df.time_elapsed = round(time.time() - start_time, 2)
     df.rows_input = len(ad_ids)
     df.rows_output = len(df)
