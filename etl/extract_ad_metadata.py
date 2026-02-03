@@ -25,8 +25,8 @@ def extract_ad_metadata(
         4. Append extracted JSON data to list[dict]
         5. Enforce List[dict] to DataFrame
     ---------
-    Returns:
-        DataFrame with retry metadata
+        1. DataFrame:
+            Flattened adset metadata records
     """
 
     start_time = time.time()
