@@ -26,7 +26,7 @@ def extract_campaign_metadata(
         5. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        DataFrame:
+        1. DataFrame:
             Flattened campaign metadata records
     """
 
