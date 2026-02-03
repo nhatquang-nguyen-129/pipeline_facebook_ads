@@ -13,7 +13,7 @@ from google.api_core.client_options import ClientOptions
 
 from facebook_business.api import FacebookAdsApi
 
-from dags.dags_facebook_ads import dags_facebook_ads
+from dags.dags_facebook_ads import dags_campaign_insights
 
 COMPANY = os.getenv("COMPANY")
 PROJECT = os.getenv("PROJECT")
@@ -26,7 +26,7 @@ if not all([
     DEPARTMENT,
     ACCOUNT,
 ]):
-    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads manual entrypoint due to missing required environment variables.")
+    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to missing required environment variables.")
 
 def backfill():
     """
@@ -60,13 +60,13 @@ def backfill():
         start_date = datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
         end_date = datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
     except ValueError:
-        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads main entrypoint due to start_date and end_date must be in YYYY-MM-DD format.")
+        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to start_date and end_date must be in YYYY-MM-DD format.")
 
     if start_date > end_date:
-        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads main entrypoint due to start_date must be less than or equal to end_date.")
+        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to start_date must be less than or equal to end_date.")
 
     msg = (
-        "🔄 [BACKFILL] Triggering to execute Facebook Ads main entrypoint for "
+        "🔄 [BACKFILL] Triggering to execute Facebook Ads campaign insights manual entrypoint for "
         f"{ACCOUNT} account of "
         f"{DEPARTMENT} department in "
         f"{COMPANY} company from "
@@ -122,7 +122,7 @@ def backfill():
         facebook_account_id = secret_account_response.payload.data.decode("utf-8")
         
         msg = (
-            "✅ [BACKFILL] Successfully retrieved Facebook Ads customer_id "
+            "✅ [BACKFILL] Successfully retrieved Facebook Ads account_id "
             f"{facebook_account_id} from Google Secret Manager."
         )
         print(msg)
@@ -130,7 +130,7 @@ def backfill():
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to retrieve Facebook Ads customer_id from Google Secret Manager due to "
+            "❌ [BACKFILL] Failed to retrieve Facebook Ads account_id from Google Secret Manager due to "
             f"{e}."
         )
 
@@ -143,7 +143,7 @@ def backfill():
         )
         
         msg = (
-            "🔍 [BACKFILL] Retrieving Facebook Ads secret_credentials_json "
+            "🔍 [BACKFILL] Retrieving Facebook Ads secret_token_name "
             f"{secret_token_name} from Google Secret Manager..."
         )
         print(msg)
@@ -154,17 +154,17 @@ def backfill():
         )
         facebook_token_user = secret_token_response.payload.data.decode("utf-8")
         
-        msg = ("✅ [BACKFILL] Successfully retrieved Google Ads credentials from Google Secret Manager.")
+        msg = ("✅ [BACKFILL] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
         print(msg)
         logging.info(msg)
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to retrieve Google Ads credentials from Google Secret Manager due to "
+            "❌ [BACKFILL] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
         )        
 
-# Initialize global Google Ads client
+# Initialize global Facebook Ads client
     try:
         msg = (
             "🔍 [BACKFILL] Initializing global Facebook Ads client for account_id "
@@ -179,7 +179,7 @@ def backfill():
         )
 
         msg = (
-            "✅ [BACKFILL] Successfully initialized global Facebook Ads client for customer_id "
+            "✅ [BACKFILL] Successfully initialized global Facebook Ads client for account_id "
             f"{facebook_account_id}."
         )
         print(msg)
@@ -192,7 +192,7 @@ def backfill():
         )
    
 # Execute DAGS
-    dags_facebook_ads(
+    dags_campaign_insights(
         account_id=facebook_account_id,
         start_date=start_date,
         end_date=end_date
