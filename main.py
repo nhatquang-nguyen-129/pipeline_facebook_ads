@@ -5,7 +5,6 @@ ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[0]
 sys.path.append(str(ROOT_FOLDER_LOCATION))
 
 from datetime import datetime, timedelta
-import json
 import logging
 from zoneinfo import ZoneInfo
 
