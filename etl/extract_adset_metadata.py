@@ -16,17 +16,17 @@ def extract_adset_metadata(
     adset_id: str,
 ) -> pd.DataFrame:
     """
-    Extract Facebook Ads adset metadata
+    Extract Facebook Ads ad metadata
     ---------
     Workflow:
-        1. Validate input adset_ids list[dict]
-        2. Make API call for Adset(adset_id) endpoint
-        3. Append extracted JSON data to list[dict]
-        4. Enforce List[dict] to DataFrame
+        1. Validate input ad_ids
+        2. Make API call for AdAccount endpoint
+        3. Make API call for Ad(ad_id) endpoint
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        1. DataFrame:
-            Flattened adset metadata records
+        DataFrame with retry metadata
     """
 
     start_time = time.time()
