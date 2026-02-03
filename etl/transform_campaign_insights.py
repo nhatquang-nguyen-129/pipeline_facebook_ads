@@ -74,7 +74,7 @@ def transform_campaign_insights(
         "QUALITY_LEAD": "lead",
     }
 
-    # Parse actions column
+    # Parse actions column (GIỐNG LEGACY)
     parsed_actions = []
 
     for x in df.get("actions", []):
@@ -91,7 +91,7 @@ def transform_campaign_insights(
                     normalized = re.sub(
                         r"(?<!\")'([^']*?)':",
                         r'"\1":',
-                        x.replace("'", '"')
+                        str(x).replace("'", '"').strip()
                     )
                     parsed = json.loads(normalized)
                     parsed_actions.append(parsed if isinstance(parsed, list) else [])
@@ -102,13 +102,16 @@ def transform_campaign_insights(
 
     df["actions"] = parsed_actions
 
-    # Resolve results
+    # Resolve result
     results_value = []
     results_type = []
 
     for _, row in df.iterrows():
         optimization_goal = row.get("optimization_goal")
         actions = row.get("actions", [])
+
+        if not isinstance(actions, list):
+            actions = []
 
         value = None
         rtype = None
@@ -118,9 +121,11 @@ def transform_campaign_insights(
 
             if mapped_action in {"reach", "impressions"}:
                 value = pd.to_numeric(row.get("impressions", 0), errors="coerce")
-                rtype = mapped_action
+                rtype = "impressions"
             else:
                 for act in actions:
+                    if not isinstance(act, dict):
+                        continue
                     if act.get("action_type") == mapped_action:
                         value = pd.to_numeric(act.get("value", 0), errors="coerce")
                         rtype = (
@@ -132,6 +137,8 @@ def transform_campaign_insights(
 
         if value is None:
             for act in actions:
+                if not isinstance(act, dict):
+                    continue
                 if act.get("action_type") == "onsite_conversion.lead_grouped":
                     value = pd.to_numeric(act.get("value", 0), errors="coerce")
                     rtype = "onsite_conversion.lead_grouped"
@@ -139,18 +146,27 @@ def transform_campaign_insights(
 
         if value is None:
             for act in actions:
+                if not isinstance(act, dict):
+                    continue
                 if act.get("action_type") == "lead":
                     value = pd.to_numeric(act.get("value", 0), errors="coerce")
                     rtype = "lead"
                     break
 
-        results_value.append(value if value is not None else 0)
-        results_type.append(rtype if rtype else "unknown")
+        results_value.append(value)
+        results_type.append(rtype)
 
-    df["result"] = (pd.to_numeric(pd.Series(results_value), errors="coerce").fillna(0))
-    df["result_type"] = pd.Series(results_type, dtype="string").fillna("unknown")
+    df["result"] = (
+        pd.to_numeric(pd.Series(results_value), errors="coerce")
+        .fillna(0)
+    )
 
-    # Extract performance metrics
+    df["result_type"] = (
+        pd.Series(results_type, dtype="string")
+        .fillna("unknown")
+    )
+
+    # Parse performance metrics
     messaging_values = []
     purchase_values = []
 

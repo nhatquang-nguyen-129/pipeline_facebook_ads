@@ -78,8 +78,8 @@ def extract_ad_metadata(
         print(msg)
         logging.info(msg)
 
-        account = AdAccount(account_id).api_get(fields=["name"])
-        account_name = account.get("name")
+        account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
+        account_name = account_info.get("name")
 
         msg = (
             "✅ [EXTRACT] Successfully extracted Facebook Ads account_name "

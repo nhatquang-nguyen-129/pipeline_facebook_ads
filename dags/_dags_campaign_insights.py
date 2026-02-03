@@ -190,7 +190,7 @@ def dags_campaign_insights(
 
     df_campaign_metadatas = extract_campaign_metadata(
         account_id=account_id,
-        campaign_id_list=list(total_campaign_ids),
+        campaign_ids=list(total_campaign_ids),
     )
 
     if df_campaign_metadatas.empty:
