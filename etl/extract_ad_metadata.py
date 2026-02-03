@@ -20,11 +20,10 @@ def extract_ad_metadata(
     ---------
     Workflow:
         1. Validate input ad_ids
-        2. Fetch shared account metadata (fail fast)
-        3. Loop each ad_id
-        4. Make API call for Ad(ad_id) endpoint
-        5. Append extracted JSON data to list[dict]
-        6. Enforce List[dict] to DataFrame
+        2. Make API call for AdAccount endpoint
+        3. Make API call for Ad(ad_id) endpoint
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
     ---------
     Returns:
         DataFrame with retry metadata
