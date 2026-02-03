@@ -147,7 +147,7 @@ def transform_campaign_insights(
         results_value.append(value if value is not None else 0)
         results_type.append(rtype if rtype else "unknown")
 
-    df["result"] = pd.to_numeric(results_value, errors="coerce").fillna(0)
+    df["result"] = (pd.to_numeric(pd.Series(results_value), errors="coerce").fillna(0))
     df["result_type"] = pd.Series(results_type, dtype="string").fillna("unknown")
 
     # Extract performance metrics

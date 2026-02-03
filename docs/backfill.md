@@ -6,9 +6,10 @@
 - CLI usage example: 
 
 ```bash
-export COMPANY=my_company
-export PROJECT=my_gcp_project
-export DEPARTMENT=marketing
-export ACCOUNT=search
-
-python backfill.py --start-date 2025-12-30 --end-date 2026-01-01`
+$env:PROJECT ="seer-digital-ads"; 
+$env:COMPANY="kids"; 
+$env:PLATFORM="facebook"; 
+$env:DEPARTMENT="marketing"; 
+$env:ACCOUNT="main"; 
+python -m backfill.backfill_campaign_insights --start_date=2026-02-01 --end_date=2026-02-01
+```
