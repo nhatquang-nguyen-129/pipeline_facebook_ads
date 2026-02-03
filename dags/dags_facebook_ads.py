@@ -10,7 +10,6 @@ import time
 from dags._dags_campaign_insights import dags_campaign_insights
 from dags._dags_ad_insights import dags_ad_insights
 
-
 def dags_facebook_ads(
     *,
     account_id: str,
