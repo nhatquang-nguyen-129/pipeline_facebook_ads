@@ -18,14 +18,13 @@ def transform_ad_insights(
     Workflow:
         1. Validate input
         2. Parse actions
-        3. Resolve main result + result_type
-        4. Extract common metrics
-        5. Normalize date dimension
-        6. Enforce numeric schema
+        3. Resolve results
+        4. Normalize date dimension
+        5. Enforce numeric schema
     ---------
     Returns:
         1. DataFrame:
-            Enforced Facebook Ads ad insights
+            Enforced ad insights records
     """
 
     msg = (
