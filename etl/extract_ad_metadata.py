@@ -34,8 +34,23 @@ def extract_ad_metadata(
     failed_ad_ids: list[str] = []
     retryable = False
 
+    msg = (
+        "🔍 [EXTRACT] Extracting Facebook Ads ad metadata for account_id "
+        f"{account_id} with "
+        f"{len(ad_ids)} ad_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+
     # Validate input
     if not ad_ids:
+        msg = (
+            "⚠️ [EXTRACT] No input ad_ids for Facebook Ads account_id "
+            f"{account_id} then empty DataFrame returned."
+        )
+        print(msg)
+        logging.warning(msg)
+        
         df = pd.DataFrame(
             columns=[
                 "ad_id",
@@ -209,6 +224,14 @@ def extract_ad_metadata(
             ) from e
 
     df = pd.DataFrame(rows)
+
+    msg = (
+        "✅ [EXTRACT] Successfully extracted "
+        f"{len(df)}/{len(ad_ids)} row(s) of Facebook Ads ad metadata."
+    )
+    print(msg)
+    logging.info(msg)  
+
     df.failed_ad_ids = failed_ad_ids
     df.retryable = retryable
     df.time_elapsed = round(time.time() - start_time, 2)
