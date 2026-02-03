@@ -19,15 +19,14 @@ def extract_ad_creative(
     Extract Facebook Ads ad creative
     ---------
     Workflow:
-        1. Validate input ad_ids list[dict]
+        1. Validate input ad_ids
         2. Loop each ad_id
         3. Make API call for Ad(ad_id) endpoint
         4. Append extracted JSON data to list[dict]
         5. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        1. DataFrame:
-            Flattened ad creative records
+        DataFrame with retry metadata
     """
 
     start_time = time.time()
@@ -102,7 +101,13 @@ def extract_ad_creative(
         # Unexpected retryable API error
             if (
                 (http_status and http_status >= 500)
-                or api_error_code in {1, 2, 4, 17, 80000}
+                or api_error_code in {
+                    1, 
+                    2, 
+                    4, 
+                    17, 
+                    80000
+                }
             ):
                 failed_ad_ids.append(ad_id)
                 retryable = True
