@@ -10,7 +10,7 @@ def transform_adset_metadata(
     df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Transform Facebook Ads ad insights
+    Transform Facebook Ads adset metadata
     ---------
     Workflow:
         1. Validate input

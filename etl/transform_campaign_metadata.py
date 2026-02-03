@@ -10,16 +10,16 @@ def transform_campaign_metadata(
     df: pd.DataFrame
 ) -> pd.DataFrame:
     """
-    Transform Facebook Ads campaign metadata
+    Transform Facebook Ads ad insights
     ---------
     Workflow:
-        1. Validate required columns
-        2. Parse campaign naming convention
-        3. Enrich platform dimension
+        1. Validate input
+        2. Validate missing columns
+        3. Assign enriched columns
     ---------
     Returns:
         1. DataFrame:
-            Enforced campaign metadata  
+            Enforced adset metadata records
     """
 
     msg = (
