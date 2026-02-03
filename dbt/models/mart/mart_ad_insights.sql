@@ -1,6 +1,6 @@
 {{ 
   config(
-    alias = var('company') ~ '_table_facebook_all_all_ad_performance',
+    alias = var('company') ~ '_table_facebook_all_all_creative_performance',
     partition_by = {
       "field": "date",
       "data_type": "date"
