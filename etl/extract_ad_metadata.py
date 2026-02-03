@@ -26,7 +26,7 @@ def extract_ad_metadata(
         5. Enforce List[dict] to DataFrame
     ---------
         1. DataFrame:
-            Flattened adset metadata records
+            Flattened ad metadata records
     """
 
     start_time = time.time()
