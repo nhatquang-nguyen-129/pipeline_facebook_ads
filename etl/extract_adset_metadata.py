@@ -13,28 +13,32 @@ from facebook_business.exceptions import FacebookRequestError
 
 def extract_adset_metadata(
     account_id: str,
-    adset_id: str,
+    adset_ids: list[str],
 ) -> pd.DataFrame:
     """
     Extract Facebook Ads adset metadata
     ---------
     Workflow:
-        1. Validate input adset_ids list[dict]
-        2. Make API call for Adset(adset_id) endpoint
-        3. Append extracted JSON data to list[dict]
-        4. Enforce List[dict] to DataFrame
+        1. Validate input adset_ids
+        2. Make API call for AdAccount endpoint
+        4. Make API call for AdSet(adset_id) endpoint
+        5. Append extracted JSON data to list[dict]
+        6. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        1. DataFrame:
+        DataFrame:
             Flattened adset metadata records
     """
 
     start_time = time.time()
     rows: list[dict] = []
     failed_adset_ids: list[str] = []
-    retryable = True
+    retryable = False
 
-    if not adset_id:
+    # --------------------------------------------------
+    # Validate input
+    # --------------------------------------------------
+    if not adset_ids:
         df = pd.DataFrame(
             columns=[
                 "adset_id",
@@ -51,27 +55,26 @@ def extract_adset_metadata(
         df.rows_output = 0
         return df
 
+    # --------------------------------------------------
+    # Fetch account_name (shared dependency → fail fast)
+    # --------------------------------------------------
     try:
-        adset = AdSet(adset_id).api_get(
-            fields=[
-                "id",
-                "name",
-                "campaign_id",
-                "account_id",
-            ]
+        msg = (
+            "🔍 [EXTRACT] Extracting Facebook Ads account_name for account_id "
+            f"{account_id}..."
         )
+        print(msg)
+        logging.info(msg)
 
         account = AdAccount(account_id).api_get(fields=["name"])
+        account_name = account.get("name")
 
-        rows.append(
-            {
-                "adset_id": adset.get("id"),
-                "adset_name": adset.get("name"),
-                "campaign_id": adset.get("campaign_id"),
-                "account_id": account_id,
-                "account_name": account.get("name"),
-            }
+        msg = (
+            "✅ [EXTRACT] Successfully extracted Facebook Ads account_name "
+            f"{account_name} for account_id {account_id}."
         )
+        print(msg)
+        logging.info(msg)
 
     except FacebookRequestError as e:
         api_error_code = None
@@ -83,56 +86,117 @@ def extract_adset_metadata(
         except Exception:
             pass
 
-        # Expired token error
+        # Expired token → hard fail
         if api_error_code == 190:
-            raise RuntimeError("❌ [EXTRACT] Failed to extract Facebook Ads adset metadata due to token expired or invalid then manual token refresh is required.") from e
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+                f"{account_id} due to expired or invalid access token. Manual token refresh is required."
+            ) from e
 
-        # Unexpected retryable error
+        # Retryable API error → retry whole task
         if (
             (http_status and http_status >= 500)
             or api_error_code in {1, 2, 4, 17, 80000}
         ):
-            failed_adset_ids.append(adset_id)
+            raise RuntimeError(
+                "⚠️ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+                f"{account_id} due to API error {e}. This request is eligible to retry."
+            ) from e
 
-            msg = (
-                "⚠️ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-                f"{adset_id} due to API request error "
-                f"{e} then this ad_id is eligible to retry."
+        # Non-retryable API error
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
+            f"{account_id} due to API error {e}. This request is not eligible to retry."
+        ) from e
+
+    # --------------------------------------------------
+    # Loop each adset_id
+    # --------------------------------------------------
+    for adset_id in adset_ids:
+        try:
+            adset = AdSet(adset_id).api_get(
+                fields=[
+                    "id",
+                    "name",
+                    "campaign_id",
+                    "account_id",
+                ]
             )
-            print(msg)
-            logging.warning(msg)
 
             rows.append(
                 {
-                    "adset_id": adset_id,
-                    "adset_name": None,
-                    "campaign_id": None,
+                    "adset_id": adset.get("id"),
+                    "adset_name": adset.get("name"),
+                    "campaign_id": adset.get("campaign_id"),
                     "account_id": account_id,
-                    "account_name": None,
+                    "account_name": account_name,
                 }
             )
 
-        else:
-        # Unexpected non-retryable error
+        except FacebookRequestError as e:
+            api_error_code = None
+            http_status = None
+
+            try:
+                api_error_code = e.api_error_code()
+                http_status = e.http_status()
+            except Exception:
+                pass
+
+            # Expired token → hard fail
+            if api_error_code == 190:
+                raise RuntimeError(
+                    "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for account_id "
+                    f"{account_id} due to expired or invalid access token. Manual token refresh is required."
+                ) from e
+
+            # Retryable API error → partial success
+            if (
+                (http_status and http_status >= 500)
+                or api_error_code in {1, 2, 4, 17, 80000}
+            ):
+                failed_adset_ids.append(adset_id)
+                retryable = True
+
+                msg = (
+                    "⚠️ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
+                    f"{adset_id} due to API error {e}. This adset_id is eligible to retry."
+                )
+                print(msg)
+                logging.warning(msg)
+
+                rows.append(
+                    {
+                        "adset_id": adset_id,
+                        "adset_name": None,
+                        "campaign_id": None,
+                        "account_id": account_id,
+                        "account_name": account_name,
+                    }
+                )
+                continue
+
+            # Non-retryable API error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-                f"{adset_id} due to unexpected API error "
-                f"{e}."
+                f"{adset_id} due to API error {e}. This request is not eligible to retry."
             ) from e
 
-    except Exception as e:
-        # Unknown non-retryable error
-        raise RuntimeError(
-            f"❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-            f"{adset_id} due to "
-            f"{e}."
-        ) from e
+        except Exception as e:
+            # Unknown non-retryable error
+            raise RuntimeError(
+                "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
+                f"{adset_id} due to {e}."
+            ) from e
 
+    # --------------------------------------------------
+    # Finalize
+    # --------------------------------------------------
     df = pd.DataFrame(rows)
     df.failed_adset_ids = failed_adset_ids
-    df.retryable = bool(failed_adset_ids) and retryable
+    df.retryable = retryable
     df.time_elapsed = round(time.time() - start_time, 2)
-    df.rows_input = 1
+    df.rows_input = len(adset_ids)
     df.rows_output = len(df)
 
     return df

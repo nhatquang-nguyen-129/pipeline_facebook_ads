@@ -26,7 +26,7 @@ def extract_ad_creative(
         5. Enforce List[dict] to DataFrame
     ---------
         1. DataFrame:
-            Flattened adset metadata records
+            Flattened ad creative records
     """
 
     start_time = time.time()
