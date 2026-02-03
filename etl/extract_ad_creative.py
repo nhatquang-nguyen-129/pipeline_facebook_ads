@@ -20,9 +20,10 @@ def extract_ad_creative(
     ---------
     Workflow:
         1. Validate input ad_ids list[dict]
-        2. Make API call for Ad(ad_id) endpoint
-        3. Append extracted JSON data to list[dict]
-        4. Enforce List[dict] to DataFrame
+        2. Loop each ad_id
+        3. Make API call for Ad(ad_id) endpoint
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
     ---------
     Returns:
         1. DataFrame:
