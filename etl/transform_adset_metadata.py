@@ -9,6 +9,18 @@ import pandas as pd
 def transform_adset_metadata(
     df: pd.DataFrame
 ) -> pd.DataFrame:
+    """
+    Transform Facebook Ads ad insights
+    ---------
+    Workflow:
+        1. Validate input
+        2. Validate missing columns
+        3. Assign enriched columns
+    ---------
+    Returns:
+        1. DataFrame:
+            Enforced adset metadata records
+    """
 
     msg = (
         "🔄 [TRANSFORM] Transforming "
