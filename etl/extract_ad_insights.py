@@ -51,16 +51,16 @@ def extract_ad_insights(
         "level": "ad",
     }
 
-    msg = (
-        "🔍 [EXTRACT] Extracting Facebook Ads ad insights for account_id "
-        f"{account_id} from "
-        f"{start_date} to "
-        f"{end_date}..."
-    )
-    print(msg)
-    logging.info(msg)
-
     try:
+        msg = (
+            "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date}..."
+        )
+        print(msg)
+        logging.info(msg)
+
         account_id_prefixed = (
             account_id if account_id.startswith("act_")
             else f"act_{account_id}"
@@ -74,18 +74,20 @@ def extract_ad_insights(
         rows = [dict(row) for row in insights]
         df = pd.DataFrame(rows)
 
+        msg = (
+            "✅ [EXTRACT] Successfully extracted "
+            f"{len(df)} row(s) of Facebook Ads ad insights for account_id "           
+            f"{account_id} from "
+            f"{start_date} to "
+            f"{end_date}."
+        )
+        print(msg)
+        logging.info(msg)
+
         df.retryable = False
         df.time_elapsed = round(time.time() - start_time, 2)
         df.rows_input = None
         df.rows_output = len(df)
-
-        msg = (
-            "✅ [EXTRACT] Successfully extracted "
-            f"{len(df)} row(s) of Facebook Ads ad insights for account_id "
-            f"{account_id}."
-        )
-        print(msg)
-        logging.info(msg)
 
         return df
 
