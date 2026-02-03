@@ -21,12 +21,12 @@ def extract_adset_metadata(
     Workflow:
         1. Validate input adset_ids
         2. Make API call for AdAccount endpoint
-        4. Make API call for AdSet(adset_id) endpoint
-        5. Append extracted JSON data to list[dict]
-        6. Enforce List[dict] to DataFrame
+        3. Make API call for AdSet(adset_id) endpoint
+        4. Append extracted JSON data to list[dict]
+        5. Enforce List[dict] to DataFrame
     ---------
     Returns:
-        DataFrame:
+        1. DataFrame:
             Flattened adset metadata records
     """
 
@@ -35,9 +35,7 @@ def extract_adset_metadata(
     failed_adset_ids: list[str] = []
     retryable = False
 
-    # --------------------------------------------------
     # Validate input
-    # --------------------------------------------------
     if not adset_ids:
         df = pd.DataFrame(
             columns=[
@@ -55,9 +53,7 @@ def extract_adset_metadata(
         df.rows_output = 0
         return df
 
-    # --------------------------------------------------
-    # Fetch account_name (shared dependency → fail fast)
-    # --------------------------------------------------
+    # Make Facebook Ads API call for ad account information
     try:
         msg = (
             "🔍 [EXTRACT] Extracting Facebook Ads account_name for account_id "
@@ -71,7 +67,8 @@ def extract_adset_metadata(
 
         msg = (
             "✅ [EXTRACT] Successfully extracted Facebook Ads account_name "
-            f"{account_name} for account_id {account_id}."
+            f"{account_name} for account_id "
+            f"{account_id}."
         )
         print(msg)
         logging.info(msg)
@@ -86,32 +83,38 @@ def extract_adset_metadata(
         except Exception:
             pass
 
-        # Expired token → hard fail
+        # Expired token error
         if api_error_code == 190:
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
-                f"{account_id} due to expired or invalid access token. Manual token refresh is required."
+                f"{account_id} due to expired or invalid access token then manual token refresh is required."
             ) from e
-
-        # Retryable API error → retry whole task
+        
+        # Unexpected retryable API error
         if (
             (http_status and http_status >= 500)
-            or api_error_code in {1, 2, 4, 17, 80000}
+            or api_error_code in {
+                1, 
+                2, 
+                4, 
+                17, 
+                80000
+            }
         ):
             raise RuntimeError(
                 "⚠️ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
-                f"{account_id} due to API error {e}. This request is eligible to retry."
+                f"{account_id} due to API error "
+                f"{e} then this request is eligible to retry."
             ) from e
 
-        # Non-retryable API error
+        # Unexpected non-retryable API error
         raise RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
-            f"{account_id} due to API error {e}. This request is not eligible to retry."
+            f"{account_id} due to API error "
+            f"{e} then this request is not eligible to retry."
         ) from e
 
-    # --------------------------------------------------
-    # Loop each adset_id
-    # --------------------------------------------------
+    # Make Facebook Ads API call for adset metadata
     for adset_id in adset_ids:
         try:
             adset = AdSet(adset_id).api_get(
@@ -143,24 +146,31 @@ def extract_adset_metadata(
             except Exception:
                 pass
 
-            # Expired token → hard fail
+        # Expired token error
             if api_error_code == 190:
                 raise RuntimeError(
                     "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for account_id "
-                    f"{account_id} due to expired or invalid access token. Manual token refresh is required."
+                    f"{account_id} due to expired or invalid access token then manual token refresh is required."
                 ) from e
 
-            # Retryable API error → partial success
+        # Unexpected retryable API error
             if (
                 (http_status and http_status >= 500)
-                or api_error_code in {1, 2, 4, 17, 80000}
+                or api_error_code in {
+                    1, 
+                    2, 
+                    4, 
+                    17, 
+                    80000
+                }
             ):
                 failed_adset_ids.append(adset_id)
                 retryable = True
 
                 msg = (
                     "⚠️ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-                    f"{adset_id} due to API error {e}. This adset_id is eligible to retry."
+                    f"{adset_id} due to API error "
+                    f"{e} then this request is eligible to retry."
                 )
                 print(msg)
                 logging.warning(msg)
@@ -176,22 +186,21 @@ def extract_adset_metadata(
                 )
                 continue
 
-            # Non-retryable API error
+        # Unexpected non-retryable API error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-                f"{adset_id} due to API error {e}. This request is not eligible to retry."
+                f"{adset_id} due to API error "
+                f"{e} then this request is not eligible to retry."
             ) from e
 
+        # Unknown non-retryable error        
         except Exception as e:
-            # Unknown non-retryable error
             raise RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
-                f"{adset_id} due to {e}."
+                f"{adset_id} due to "
+                f"{e}."
             ) from e
 
-    # --------------------------------------------------
-    # Finalize
-    # --------------------------------------------------
     df = pd.DataFrame(rows)
     df.failed_adset_ids = failed_adset_ids
     df.retryable = retryable
