@@ -32,7 +32,6 @@ select
 
     cast(null as string)  as account_id,
     cast(null as string)  as campaign_id,
-    cast(null as date)    as date,
 
     cast(null as int64)   as impressions,
     cast(null as int64)   as clicks,
@@ -44,6 +43,7 @@ select
     cast(null as int64)   as messaging_conversations_started,
     cast(null as int64)   as purchase,
 
+    cast(null as date)    as date,    
     cast(null as int64)   as year,
     cast(null as string)  as month
 
