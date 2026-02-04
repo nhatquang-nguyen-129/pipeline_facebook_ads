@@ -6,7 +6,9 @@
 }}
 
 select
-    insights.date,
+    date,
+    month,
+    year,
 
     insights.department,
     insights.account,

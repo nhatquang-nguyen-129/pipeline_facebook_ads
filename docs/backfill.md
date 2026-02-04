@@ -11,5 +11,5 @@ $env:COMPANY="kids";
 $env:PLATFORM="facebook"; 
 $env:DEPARTMENT="marketing"; 
 $env:ACCOUNT="main"; 
-python -m backfill.backfill_campaign_insights --start_date=2026-02-02 --end_date=2026-02-02
+python -m backfill.backfill_campaign_insights --start_date=2026-02-01 --end_date=2026-02-02
 ```
