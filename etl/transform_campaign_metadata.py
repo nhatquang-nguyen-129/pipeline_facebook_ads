@@ -52,14 +52,14 @@ def transform_campaign_metadata(
     df["platform"] = "Facebook"
     df = df.assign(
         objective=df["campaign_name"].fillna("").str.split("_").str[0].fillna("unknown"),
-        budget_group=df["campaign_name"].fillna("").str.split("_").str[1].fillna("unknown"),
-        region=df["campaign_name"].fillna("").str.split("_").str[2].fillna("unknown"),
-        category_level_1=df["campaign_name"].fillna("").str.split("_").str[3].fillna("unknown"),
-        year=df["campaign_name"].fillna("").str.split("_").str[4].fillna("unknown"),
-        month=df["campaign_name"].fillna("").str.split("_").str[5].fillna("unknown"),
-        track_group=df["campaign_name"].fillna("").str.split("_").str[6].fillna("unknown"),
-        pillar_group=df["campaign_name"].fillna("").str.split("_").str[7].fillna("unknown"),
-        content_group=df["campaign_name"].fillna("").str.split("_").str[8].fillna("unknown"),
+        region=df["campaign_name"].fillna("").str.split("_").str[1].fillna("unknown"),
+        budget_group_1=df["campaign_name"].fillna("").str.split("_").str[2].fillna("unknown"),
+        budget_group_2=df["campaign_name"].fillna("").str.split("_").str[3].fillna("unknown"),      
+        category_level_1=df["campaign_name"].fillna("").str.split("_").str[4].fillna("unknown"),
+        personnel=df["campaign_name"].fillna("").str.split("_").str[5].fillna("unknown"),
+        track_group=df["campaign_name"].fillna("").str.split("_").str[7].fillna("unknown"),
+        pillar_group=df["campaign_name"].fillna("").str.split("_").str[8].fillna("unknown"),
+        content_group=df["campaign_name"].fillna("").str.split("_").str[9].fillna("unknown"),
     )
 
     msg = (

@@ -58,8 +58,8 @@ select
     split('{{ table_name }}', '_')[offset(4)] as account,
 
     date,
-    year,
     month,
+    year,
 
     account_id,
     campaign_id,

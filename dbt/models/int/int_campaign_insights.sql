@@ -6,9 +6,7 @@
 }}
 
 select
-    date(insights.date) as date,
-    month(insights.month) as month,
-    year(insights.year) as year,
+    insights.date,
 
     insights.department,
     insights.account,
