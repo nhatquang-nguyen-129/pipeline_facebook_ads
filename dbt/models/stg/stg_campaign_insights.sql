@@ -57,7 +57,7 @@ select
     split('{{ table_name }}', '_')[offset(3)] as department,
     split('{{ table_name }}', '_')[offset(4)] as account,
 
-    date,
+    DATE(date) as date,
     month,
     year,
 
