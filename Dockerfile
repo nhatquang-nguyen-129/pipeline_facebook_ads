@@ -25,4 +25,4 @@ RUN dbt --version
 
 COPY . .
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "main.py"] 
