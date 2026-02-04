@@ -43,6 +43,7 @@ def dbt_facebook_ads(
     try:
         result = subprocess.run(
             cmd,
+            cwd="dbt",
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
