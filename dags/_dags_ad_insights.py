@@ -197,7 +197,7 @@ def dags_ad_insights(
 
     df_ad_metadatas = extract_ad_metadata(
         account_id=account_id,
-        ad_id_list=list(total_ad_ids),
+        ad_ids=list(total_ad_ids),
     )
 
     if df_ad_metadatas.empty:
@@ -207,6 +207,8 @@ def dags_ad_insights(
         return
 
     # Transform
+
+        # Nothing to transform with ad metadata
 
     # Load    
     _ad_metadata_direction = (
@@ -250,7 +252,7 @@ def dags_ad_insights(
 
     df_ad_creatives = extract_ad_creative(
         account_id=account_id,
-        ad_id_list=list(total_ad_ids),
+        ad_ids=list(total_ad_ids),
     )
 
     if df_ad_creatives.empty:
@@ -260,6 +262,8 @@ def dags_ad_insights(
         return
 
     # Transform
+
+        # Nothing to transform with ad metadata
 
     # Load    
     _ad_creative_direction = (
@@ -305,7 +309,7 @@ def dags_ad_insights(
 
     df_adset_metadatas = extract_adset_metadata(
         account_id=account_id,
-        adset_id_list=list(total_adset_ids),
+        adset_ids=list(total_adset_ids),
     )
 
     # Transform
@@ -361,7 +365,7 @@ def dags_ad_insights(
 
     df_campaign_metadatas = extract_campaign_metadata(
         account_id=account_id,
-        campaign_id_list=list(total_campaign_ids),
+        campaign_ids=list(total_campaign_ids),
     )
 
     # Transform
@@ -400,5 +404,5 @@ def dags_ad_insights(
 
     dbt_facebook_ads(
         google_cloud_project=PROJECT,
-        level="ad",
+        select="tag:mart,tag:ad"
     )
