@@ -7,7 +7,6 @@ import logging
 import os
 import subprocess
 
-
 def dbt_facebook_ads(
     *,
     google_cloud_project: str,
@@ -25,14 +24,6 @@ def dbt_facebook_ads(
         None
     """
 
-    msg = (
-        "🔁 [DBT] Running dbt build for Facebook Ads with selector "
-        f"{select} to Google Cloud Project "
-        f"{google_cloud_project}..."
-    )
-    print(msg)
-    logging.info(msg)
-
     cmd = [
         "dbt",
         "build",
@@ -41,30 +32,43 @@ def dbt_facebook_ads(
         "--select", select,
     ]
 
+    msg = (
+        "🔄 [DBT] Executing dbt build for Facebook Ads "
+        f"{select} insights to Google Cloud Project "
+        f"{google_cloud_project}..."
+    )
+    print(msg)
+    logging.info(msg)
+
     try:
-        process = subprocess.Popen(
+        result = subprocess.run(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            env={**os.environ},
+            env=os.environ,
         )
 
-        # Stream dbt logs realtime (tránh treo)
-        for line in process.stdout:
-            print(line, end="")
-            logging.info(line.rstrip())
-
-        return_code = process.wait()
-
-        if return_code != 0:
+        if result.returncode != 0:
             raise RuntimeError(
-                f"❌ [DBT] dbt build failed with return code {return_code}"
-            )
+                "❌ [DBT] Failed to execute dbt build for Facebook Ads "
+                f"{select} insights to Google Cloud Project "
+                f"{google_cloud_project} due to dbt execution error."
+                + (
+                    "\n\nDBT error:\n"
+                    + "\n".join(
+                        line
+                        for line in (result.stdout or "").splitlines()
+                        if "Error" in line
+                    )
+                    if (result.stdout or "")
+                    else ""
+                )
+        )   
 
         msg = (
-            "✅ [DBT] Successfully completed dbt build for Facebook Ads with selector "
-            f"{select} to Google Cloud Project "
+            "✅ [DBT] Successfully executed dbt build for Facebook Ads "
+            f"{select} insights to Google Cloud Project "
             f"{google_cloud_project}."
         )
         print(msg)
@@ -72,7 +76,8 @@ def dbt_facebook_ads(
 
     except Exception as e:
         raise RuntimeError(
-            "❌ [DBT] Failed to complete dbt build for Facebook Ads with selector "
-            f"{select} to Google Cloud Project "
-            f"{google_cloud_project} due to {e}."
+            "❌ [DBT] Failed to execute dbt build for Facebook Ads "
+            f"{select} insights to Google Cloud Project "
+            f"{google_cloud_project} due to "
+            f"{e}."
         ) from e

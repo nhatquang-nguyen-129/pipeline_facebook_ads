@@ -96,21 +96,25 @@ dbt build
 
 - Run only campaign insights
 ```bash
-$env:PROJECT="seer-digital-ads";
-$env:COMPANY="kids";
-$env:DEPARTMENT="marketing";
-$env:ACCOUNT="main";
+$env:PROJECT="your-gcp-project";
+$env:COMPANY="your-company-in-short";
+$env:DEPARTMENT="your-department";
+$env:ACCOUNT="your-account";
 dbt build --project-dir dbt --profiles-dir dbt --select tag:campaign
 ```
 
 - Run only ad insights
 ```bash
+$env:PROJECT="your-gcp-project";
+$env:COMPANY="your-company-in-short";
+$env:DEPARTMENT="your-department";
+$env:ACCOUNT="your-account";
 dbt build --project-dir dbt --profiles-dir dbt --select tag:ad
 ```
 
 ### Deployment with DAGs
 
-- Using Python `subprocess` to call dbt
+- Using Python `subprocess` to call dbt for each stream
 ```bash
 dbt_facebook_ads(
     google_cloud_project=PROJECT,
