@@ -21,7 +21,7 @@ def extract_ad_insights(
     Workflow:
         1. Validate input account_id
         2. Validate input start_date and end_date
-        3. Make API call for AdAccount(account_id).get_insights endpoint (level=ad) 
+        3. Make API call for AdAccount(account_id).get_insights endpoint (level=ad)
         4. Append extracted JSON data to list[dict]
         5. Enforce List[dict] to DataFrame
     ---------
