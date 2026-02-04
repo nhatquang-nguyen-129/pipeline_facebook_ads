@@ -81,7 +81,7 @@ def main():
 
     else:
         raise ValueError(
-            "⚠️ [MAIN] Failed to update Facebook Ads due to unsupported mode "
+            "⚠️ [MAIN] Failed to trigger Facebook Ads main entrypoint due to unsupported mode "
             f"{MODE}."
         )
     
@@ -139,7 +139,7 @@ def main():
         facebook_account_id = secret_account_response.payload.data.decode("utf-8")
         
         msg = (
-            "✅ [MAIN] Successfully retrieved Facebook Ads customer_id "
+            "✅ [MAIN] Successfully retrieved Facebook Ads account_id "
             f"{facebook_account_id} from Google Secret Manager."
         )
         print(msg)
@@ -147,7 +147,7 @@ def main():
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [MAIN] Failed to retrieve Facebook Ads customer_id from Google Secret Manager due to "
+            "❌ [MAIN] Failed to retrieve Facebook Ads account_id from Google Secret Manager due to "
             f"{e}."
         )
 
@@ -160,28 +160,28 @@ def main():
         )
         
         msg = (
-            "🔍 [MAIN] Retrieving Facebook Ads secret_credentials_json "
+            "🔍 [MAIN] Retrieving Facebook Ads access token with secret_token_name "
             f"{secret_token_name} from Google Secret Manager..."
         )
         print(msg)
         logging.info(msg)
 
         secret_token_response = google_secret_client.access_secret_version(
-            name=secret_token_response
+            name=secret_account_name
         )
         facebook_token_user = secret_token_response.payload.data.decode("utf-8")
         
-        msg = ("✅ [MAIN] Successfully retrieved Google Ads credentials from Google Secret Manager.")
+        msg = ("✅ [MAIN] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
         print(msg)
         logging.info(msg)
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [MAIN] Failed to retrieve Google Ads credentials from Google Secret Manager due to "
+            "❌ [MAIN] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
         )        
 
-# Initialize global Google Ads client
+# Initialize global Facebook Ads client
     try:
         msg = (
             "🔍 [MAIN] Initializing global Facebook Ads client for account_id "
@@ -196,7 +196,7 @@ def main():
         )
 
         msg = (
-            "✅ [MAIN] Successfully initialized global Facebook Ads client for customer_id "
+            "✅ [MAIN] Successfully initialized global Facebook Ads client for account_id "
             f"{facebook_account_id}."
         )
         print(msg)
