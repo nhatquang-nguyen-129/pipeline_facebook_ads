@@ -96,12 +96,16 @@ dbt build
 
 - Run only campaign insights
 ```bash
-dbt build --select tag:campaign
+$env:PROJECT="seer-digital-ads";
+$env:COMPANY="kids";
+$env:DEPARTMENT="marketing";
+$env:ACCOUNT="main";
+dbt build --project-dir dbt --profiles-dir dbt --select tag:campaign
 ```
 
 - Run only ad insights
 ```bash
-dbt build --select tag:ad
+dbt build --project-dir dbt --profiles-dir dbt --select tag:ad
 ```
 
 ### Deployment with DAGs

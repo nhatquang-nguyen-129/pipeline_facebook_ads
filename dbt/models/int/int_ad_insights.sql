@@ -56,18 +56,22 @@ select
 
 from {{ ref('stg_ad_insights') }} insights
 
-left join {{ ref('stg_ad_metadata') }} ad
+left join `{{ target.project }}.{{ var('company') }}_dataset_facebook_api_raw
+           .{{ var('company') }}_table_facebook_{{ var('department') }}_{{ var('account') }}_ad_metadata` ad
     on insights.account_id = ad.account_id
    and insights.ad_id      = ad.ad_id
 
-left join {{ ref('stg_campaign_metadata') }} campaign
+left join `{{ target.project }}.{{ var('company') }}_dataset_facebook_api_raw
+           .{{ var('company') }}_table_facebook_{{ var('department') }}_{{ var('account') }}_campaign_metadata` campaign
     on insights.account_id  = campaign.account_id
    and insights.campaign_id = campaign.campaign_id
 
-left join {{ ref('stg_adset_metadata') }} adset
+left join `{{ target.project }}.{{ var('company') }}_dataset_facebook_api_raw
+           .{{ var('company') }}_table_facebook_{{ var('department') }}_{{ var('account') }}_adset_metadata` adset
     on insights.account_id = adset.account_id
    and insights.adset_id   = adset.adset_id
 
-left join {{ ref('stg_ad_creative') }} creative
+left join `{{ target.project }}.{{ var('company') }}_dataset_facebook_api_raw
+           .{{ var('company') }}_table_facebook_{{ var('department') }}_{{ var('account') }}_ad_creative` creative
     on insights.account_id = creative.account_id
    and insights.ad_id      = creative.ad_id
