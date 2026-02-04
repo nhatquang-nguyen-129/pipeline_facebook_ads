@@ -15,6 +15,16 @@ select
     insights.account_id,
     insights.campaign_id,
 
+    insights.impressions,
+    insights.clicks,
+    insights.spend,
+
+    insights.result,
+    insights.result_type,
+
+    insights.messaging_conversations_started,
+    insights.purchase    
+
     campaign.campaign_name,
     campaign.account_name,
 
@@ -34,17 +44,7 @@ select
     campaign.personnel,
     campaign.track_group,
     campaign.pillar_group,
-    campaign.content_group,
-
-    insights.impressions,
-    insights.clicks,
-    insights.spend,
-
-    insights.result,
-    insights.result_type,
-
-    insights.messaging_conversations_started,
-    insights.purchase
+    campaign.content_group
 
 from {{ ref('stg_campaign_insights') }} insights
 left join `{{ target.project }}.{{ var('company') }}_dataset_facebook_api_raw.{{ var('company') }}_table_facebook_{{ var('department') }}_{{ var('account') }}_campaign_metadata` campaign
