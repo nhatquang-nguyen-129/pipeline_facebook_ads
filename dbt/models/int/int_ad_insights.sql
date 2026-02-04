@@ -6,12 +6,26 @@
 }}
 
 select
-    date(insights.date) as date,
+    date,
+    month,
+    year,
 
+    insights.department,
+    insights.account,
     insights.account_id,
     insights.campaign_id,
     insights.adset_id,
     insights.ad_id,
+
+    insights.impressions,
+    insights.clicks,
+    insights.spend,
+
+    insights.result,
+    insights.result_type,
+
+    insights.messaging_conversations_started,
+    insights.purchase
 
     ad.ad_name,
 
@@ -22,12 +36,13 @@ select
         else '❓'
     end as ad_status,
 
-    campaign.campaign_name,
     campaign.platform,
     campaign.objective,
-    campaign.budget_group,
     campaign.region,
+    campaign.budget_group_1,
+    campaign.budget_group_2,
     campaign.category_level_1,
+    campaign.personnel,
     campaign.track_group,
     campaign.pillar_group,
     campaign.content_group,
@@ -43,16 +58,6 @@ select
     adset.content,
 
     creative.thumbnail_url,
-
-    insights.impressions,
-    insights.clicks,
-    insights.spend,
-
-    insights.result,
-    insights.result_type,
-
-    insights.messaging_conversations_started,
-    insights.purchase
 
 from {{ ref('stg_ad_insights') }} insights
 
