@@ -38,7 +38,7 @@ def dags_ad_insights(
     end_date: str,
 ):
     msg = (
-        "🔁 [DAGS] Trigger to update Facebook Ads ad insights with account_id "
+        "🔄 [DAGS] Trigger to update Facebook Ads ad insights with account_id "
         f"{account_id} from "
         f"{start_date} to "
         f"{end_date}..."
@@ -47,8 +47,8 @@ def dags_ad_insights(
     logging.info(msg)
 
 # ETL for Facebook Ads ad insights
-    DAGS_MAX_ATTEMPTS = 3
-    DAGS_MIN_COOLDOWN = 60
+    DAGS_INSIGHTS_ATTEMPTS = 3
+    DAGS_INSIGHTS_COOLDOWN = 60
 
     dags_start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
     dags_end_date   = datetime.strptime(end_date, "%Y-%m-%d").date()
@@ -58,12 +58,12 @@ def dags_ad_insights(
     while dags_start_date <= dags_end_date:
         dags_split_date = dags_start_date.strftime("%Y-%m-%d")
 
-        for attempt in range(1, DAGS_MAX_ATTEMPTS + 1):
+        for attempt in range(1, DAGS_INSIGHTS_ATTEMPTS + 1):
             try:
                 
     # Extract
                 msg = (
-                    "🔁 [DAGS] Trigger to extract Facebook Ads ad insights from account_id "
+                    "🔄 [DAGS] Trigger to extract Facebook Ads ad insights from account_id "
                     f"{account_id} at "
                     f"{dags_split_date} for "
                     f"{attempt} attempt(s)..."
@@ -89,7 +89,7 @@ def dags_ad_insights(
 
     # Transform
                 msg = (
-                    "🔁 [DAGS] Trigger to transform Facebook Ads ad insights from "
+                    "🔄 [DAGS] Trigger to transform Facebook Ads ad insights from "
                     f"{account_id} with "
                     f"{dags_split_date} for "
                     f"{len(insights)} row(s)..."
@@ -110,7 +110,7 @@ def dags_ad_insights(
                 )
 
                 msg = (
-                    "🔁 [DAGS] Trigger to load Facebook Ads ad insights from account_id "
+                    "🔄 [DAGS] Trigger to load Facebook Ads ad insights from account_id "
                     f"{account_id} for "
                     f"{dags_split_date} to direction "
                     f"{_ad_insights_direction}..."
@@ -132,7 +132,7 @@ def dags_ad_insights(
                 retryable = getattr(e, "retryable", False)
                 msg = (
                     f"⚠️ [DAGS] Failed to extract Facebook Ads ad insights for {dags_split_date} in "
-                    f"{attempt}/{DAGS_MAX_ATTEMPTS} attempt(s) due to "
+                    f"{attempt}/{DAGS_INSIGHTS_ATTEMPTS} attempt(s) due to "
                     f"{e}."
                 )
                 print(msg)
@@ -144,19 +144,19 @@ def dags_ad_insights(
                         f"{dags_split_date} due to unexpected error then DAG execution will be aborting."
                     ) from e
 
-                if attempt == DAGS_MAX_ATTEMPTS:
+                if attempt == DAGS_INSIGHTS_ATTEMPTS:
                     raise RuntimeError(
                         "❌ [DAGS] Failed to extract Facebook Ads ad insights for "
                         f"{dags_split_date} in "
-                        f"{attempt}/{DAGS_MAX_ATTEMPTS} attempt(s) due to exceeded attempt limit then DAG execution will be aborting."
+                        f"{attempt}/{DAGS_INSIGHTS_ATTEMPTS} attempt(s) due to exceeded attempt limit then DAG execution will be aborting."
                     ) from e
 
                 wait_to_retry = 2 ** attempt
                 
                 msg = (
-                    "🔁 [DAGS] Waiting "
+                    "🔄 [DAGS] Waiting "
                     f"{wait_to_retry} second(s) before retrying Facebook Ads API "
-                    f"{attempt}/{DAGS_MAX_ATTEMPTS} attempt(s)..."
+                    f"{attempt}/{DAGS_INSIGHTS_ATTEMPTS} attempt(s)..."
                 )
                 print(msg)
                 logging.warning(msg)
@@ -167,13 +167,13 @@ def dags_ad_insights(
         
         if dags_start_date <= dags_end_date:
             msg = (
-                "🔁 [DAGS] Waiting "
-                f"{DAGS_MIN_COOLDOWN} second(s) cooldown before processing next date of Facebook Ads ad insights..."
+                "🔄 [DAGS] Waiting "
+                f"{DAGS_INSIGHTS_COOLDOWN} second(s) cooldown before processing next date of Facebook Ads ad insights..."
             )
             print(msg)
             logging.info(msg)
 
-            time.sleep(DAGS_MIN_COOLDOWN)
+            time.sleep(DAGS_INSIGHTS_COOLDOWN)
 
 # ETL for Facebook Ads ad metadata
     if not total_ad_ids:
@@ -189,7 +189,7 @@ def dags_ad_insights(
 
     # Extract
     msg = (
-        "🔁 [DAGS] Trigger to extract Facebook Ads ad metadata for "
+        "🔄 [DAGS] Trigger to extract Facebook Ads ad metadata for "
         f"{len(total_ad_ids)} ad_id(s)..."
     )
     print(msg)
@@ -218,7 +218,7 @@ def dags_ad_insights(
     )
     
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads ad metadata for "       
+        "🔄 [DAGS] Trigger to load Facebook Ads ad metadata for "       
         f"{len(df_ad_metadatas)} row(s) for "
         f"{_ad_metadata_direction}..."
     )
@@ -231,6 +231,9 @@ def dags_ad_insights(
     )
 
 # ETL for Facebook Ads ad creative
+    DAGS_CREATIVE_ATTEMPTS = 3
+    DAGS_INSIGHTS_COOLDOWN = 60    
+    
     if not total_ad_ids:
         msg = (
             "⚠️ [DAGS] No Facebook Ads ad_id appended for account_id "
@@ -241,49 +244,98 @@ def dags_ad_insights(
         print(msg)
         logging.warning(msg)
         return
+        
+    # Extract Facebook Ads ad creative
+    remaining_ad_ids = list(total_ad_ids)
+    dfs_ad_creative = []
+    
+    for attempt in range(1, DAGS_CREATIVE_ATTEMPTS + 1):
+        msg = (
+            "🔄 [DAGS] Trigger to extract Facebook Ads ad creative for "
+            f"{len(remaining_ad_ids)} ad_id(s) in "
+            f"{attempt}/{DAGS_CREATIVE_ATTEMPTS} attempt(s)..."
+        )
+        print(msg)
+        logging.info(msg)
 
-    # Extract
-    msg = (
-        "🔁 [DAGS] Trigger to extract Facebook Ads ad creative for "
-        f"{len(total_ad_ids)} ad_id(s)..."
-    )
-    print(msg)
-    logging.info(msg)
+        df_ad_creative = extract_ad_creative(
+            account_id=account_id,
+            ad_ids=remaining_ad_ids,
+        )
 
-    df_ad_creatives = extract_ad_creative(
-        account_id=account_id,
-        ad_ids=list(total_ad_ids),
-    )
+        if not df_ad_creative.empty:
+            dfs_ad_creative.append(df_ad_creative)
 
-    if df_ad_creatives.empty:
-        msg = "⚠️ [DAGS] Empty Facebook Ads ad creative extracted then DAG execution will be suspended."
+        failed_ad_ids = getattr(df_ad_creative, "failed_ad_ids", [])
+        retryable = getattr(df_ad_creative, "retryable", False)
+
+        if not failed_ad_ids:
+            msg = (
+                "✅ [DAGS] Successfully triggered to extract Facebook ad creative with "
+                f"{len(set(pd.concat(dfs_ad_creative)["ad_id"].dropna()))}/{len(remaining_ad_ids)} row(s)."
+            )
+            print(msg)
+            logging.info(msg)
+            break
+
+        if not retryable:
+            msg = (
+                "❌ [DAGS] Failed to extract Facebook Ads ad creative for "
+                f"{len(remaining_ad_ids)} ad_id(s) due to unexpected non-retryable error then DAG execution will be suspended."
+            )
+            print(msg)
+            logging.warning(msg)
+            break
+
+        if attempt == DAGS_CREATIVE_ATTEMPTS:
+            msg = (
+                "❌ [DAGS] Failed to extract Facebook Ads ad creative for "
+                f"{len(remaining_ad_ids)} ad_id(s) due to exceeded attempt limit then DAG execution will be suspended."
+            )
+            print(msg)
+            logging.warning(msg)
+            break
+
+        remaining_ad_ids = failed_ad_ids
+
+        wait_to_retry = 2 ** attempt
+        
+        msg = (
+            "🔄 [DAGS] Waiting "
+            f"{wait_to_retry} second(s) before retrying Facebook Ads API "
+                f"{attempt}/{DAGS_CREATIVE_ATTEMPTS} attempt(s)..."
+            )
+        print(msg)
+        logging.info(msg)
+        
+        time.sleep(wait_to_retry)
+
+    if not dfs_ad_creative:
+        msg = "⚠️ [DAGS] No Facebook Ads ad creative extracted then skip loading step."
         print(msg)
         logging.warning(msg)
-        return
+    else:
+        df_ad_creatives = pd.concat(dfs_ad_creative, ignore_index=True)
 
-    # Transform
+    # Load
+        _ad_creative_direction = (
+            f"{PROJECT}."
+            f"{COMPANY}_dataset_facebook_api_raw."
+            f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+        )
 
-        # Nothing to transform with ad metadata
+        msg = (
+            "🔄 [DAGS] Trigger to load Facebook Ads ad creative for "
+            f"{len(df_ad_creatives)} row(s) to "
+            f"{_ad_creative_direction}..."
+        )
+        print(msg)
+        logging.info(msg)
 
-    # Load    
-    _ad_creative_direction = (
-        f"{PROJECT}."
-        f"{COMPANY}_dataset_facebook_api_raw."
-        f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-    )
-    
-    msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads ad creative for "       
-        f"{len(df_ad_creatives)} row(s) for "
-        f"{_ad_creative_direction}..."
-    )
-    print(msg)
-    logging.info(msg)
-
-    load_ad_creative(
-        df=df_ad_creatives,
-        direction=_ad_creative_direction,
-    )
+        load_ad_creative(
+            df=df_ad_creatives,
+            direction=_ad_creative_direction,
+        )
 
 # ETL for Facebook Ads adset metadata
     total_adset_ids = set(df_ad_metadatas["adset_id"].dropna().unique())
