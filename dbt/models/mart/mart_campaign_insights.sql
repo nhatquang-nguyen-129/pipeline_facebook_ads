@@ -19,6 +19,7 @@ select
     account,
 
     account_id,
+    account_name,
     campaign_id,
     campaign_name,
     campaign_status,
