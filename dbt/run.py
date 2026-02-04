@@ -27,8 +27,7 @@ def dbt_facebook_ads(
     cmd = [
         "dbt",
         "build",
-        "--project-dir", "dbt",
-        "--profiles-dir", "dbt",
+        "--profiles-dir", ".",
         "--select", select,
     ]
 
