@@ -26,11 +26,11 @@ if not all([
     DEPARTMENT,
     ACCOUNT,
 ]):
-    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to missing required environment variables.")
+    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights update due to missing required environment variables.")
 
 def backfill():
     """
-    Backfill Facebook Ads campaign insights entrypoint
+    Backfill Facebook Ads campaign insights
     ---------
     Workflow:
         1. Get execution time window through argparse
@@ -60,13 +60,13 @@ def backfill():
         start_date = datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
         end_date = datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
     except ValueError:
-        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to start_date and end_date must be in YYYY-MM-DD format.")
+        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights update due to start_date and end_date must be in YYYY-MM-DD format.")
 
     if start_date > end_date:
-        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights manual entrypoint due to start_date must be less than or equal to end_date.")
+        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads campaign insights update due to start_date must be less than or equal to end_date.")
 
     msg = (
-        "🔄 [BACKFILL] Triggering to execute Facebook Ads campaign insights manual entrypoint for "
+        "🔄 [BACKFILL] Triggering to execute Facebook Ads campaign insights update for "
         f"{ACCOUNT} account of "
         f"{DEPARTMENT} department in "
         f"{COMPANY} company from "
@@ -143,14 +143,14 @@ def backfill():
         )
         
         msg = (
-            "🔍 [BACKFILL] Retrieving Facebook Ads secret_token_name "
+            "🔍 [BACKFILL] Retrieving Facebook Ads access token with secret_token_name "
             f"{secret_token_name} from Google Secret Manager..."
         )
         print(msg)
         logging.info(msg)
 
         secret_token_response = google_secret_client.access_secret_version(
-            name=secret_token_name
+            name=secret_token_response
         )
         facebook_token_user = secret_token_response.payload.data.decode("utf-8")
         
@@ -187,7 +187,7 @@ def backfill():
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to initialize global Facebook Ads client due to."
+            "❌ [BACKFILL] Failed to initialize global Facebook Ads client due to "
             f"{e}."
         )
    
@@ -199,7 +199,7 @@ def backfill():
     )
 
 # Entrypoint
-if __name__ == "__main__":
+if __name__ == "__backfill__":
     try:
         backfill()
     except Exception:
