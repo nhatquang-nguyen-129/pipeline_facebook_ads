@@ -150,7 +150,7 @@ def backfill():
         logging.info(msg)
 
         secret_token_response = google_secret_client.access_secret_version(
-            name=secret_token_response
+            name=secret_token_name
         )
         facebook_token_user = secret_token_response.payload.data.decode("utf-8")
         
