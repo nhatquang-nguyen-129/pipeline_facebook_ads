@@ -27,9 +27,11 @@ select
 
     campaign.platform,
     campaign.objective,
-    campaign.budget_group,
     campaign.region,
+    campaign.budget_group_1,
+    campaign.budget_group_2,
     campaign.category_level_1,
+    campaign.personnel,
     campaign.track_group,
     campaign.pillar_group,
     campaign.content_group,
