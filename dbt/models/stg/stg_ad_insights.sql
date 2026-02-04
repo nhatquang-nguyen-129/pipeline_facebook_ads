@@ -59,14 +59,14 @@ select
     split('{{ table_name }}', '_')[offset(3)] as department,
     split('{{ table_name }}', '_')[offset(4)] as account,
 
+    DATE(date) as date,
+    year,
+    month,
+
     account_id,
     campaign_id,
     adset_id,
     ad_id,
-
-    date,
-    year,
-    month,
 
     impressions,
     clicks,
