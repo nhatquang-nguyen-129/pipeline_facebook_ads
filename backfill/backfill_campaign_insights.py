@@ -199,7 +199,7 @@ def backfill():
     )
 
 # Entrypoint
-if __name__ == "__backfill__":
+if __name__ == "__main__":
     try:
         backfill()
     except Exception:
