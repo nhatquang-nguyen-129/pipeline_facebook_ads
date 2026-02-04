@@ -53,7 +53,7 @@ def extract_ad_insights(
 
     try:
         msg = (
-            "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
+            "🔍 [EXTRACT] Extracting Facebook Ads ad insights for account_id "
             f"{account_id} from "
             f"{start_date} to "
             f"{end_date}..."
