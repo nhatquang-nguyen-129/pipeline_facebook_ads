@@ -57,7 +57,7 @@ select
     adset.pillar,
     adset.content,
 
-    creative.thumbnail_url,
+    creative.thumbnail_url
 
 from {{ ref('stg_ad_insights') }} insights
 
