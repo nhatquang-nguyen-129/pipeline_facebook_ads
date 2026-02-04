@@ -45,7 +45,7 @@ select
     cast(null as int64)   as messaging_conversations_started,
     cast(null as int64)   as purchase,
 
-    cast(null as date)    as date,
+    cast(null as date)    as date,    
     cast(null as int64)   as year,
     cast(null as string)  as month
 
@@ -60,8 +60,8 @@ select
     split('{{ table_name }}', '_')[offset(4)] as account,
 
     DATE(date) as date,
-    year,
     month,
+    year,
 
     account_id,
     campaign_id,

@@ -105,10 +105,10 @@ dbt build --project-dir dbt --profiles-dir dbt --select tag:campaign
 
 - Run only ad insights
 ```bash
-$env:PROJECT="your-gcp-project";
-$env:COMPANY="your-company-in-short";
-$env:DEPARTMENT="your-department";
-$env:ACCOUNT="your-account";
+$env:PROJECT="seer-digital-ads";
+$env:COMPANY="kids";
+$env:DEPARTMENT="marketing";
+$env:ACCOUNT="main";
 dbt build --project-dir dbt --profiles-dir dbt --select tag:ad
 ```
 
