@@ -42,7 +42,7 @@ def backfill():
         None
     """
 
-# CLI arguments parser for manual date range
+# CLI arguments parser for manual date
     parser = argparse.ArgumentParser(description="Manual Facebook Ads ETL executor")
     parser.add_argument(
         "--start_date",
