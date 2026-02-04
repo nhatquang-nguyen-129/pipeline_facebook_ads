@@ -230,7 +230,7 @@ def dags_campaign_insights(
     )
 
 # Materialization with dbt
-    msg = ("🔁 [DAGS] Trigger to materialize Facebook Ads campaign insights with dbt...")
+    msg = ("🔁 [DAGS] Trigger to materialize  Facebook Ads campaign insights with dbt...")
     print(msg)
     logging.info(msg)
 
