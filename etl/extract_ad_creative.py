@@ -34,14 +34,6 @@ def extract_ad_creative(
     failed_ad_ids: list[str] = []
     retryable = False
 
-    msg = (
-        "🔍 [EXTRACT] Extracting Facebook Ads ad creative for account_id "
-        f"{account_id} with "
-        f"{len(ad_ids)} ad_id(s)..."
-    )
-    print(msg)
-    logging.info(msg)
-
     # Validate input    
     if not ad_ids:
         msg = (
@@ -67,6 +59,14 @@ def extract_ad_creative(
         return df
 
     # Make Facebook Ads API call for ad creative
+    msg = (
+        "🔍 [EXTRACT] Extracting Facebook Ads ad creative for account_id "
+        f"{account_id} with "
+        f"{len(ad_ids)} ad_id(s)..."
+    )
+    print(msg)
+    logging.info(msg)
+        
     for ad_id in ad_ids:
         try:
             ad = Ad(ad_id).api_get(fields=["creative"])
