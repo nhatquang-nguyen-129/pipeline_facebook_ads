@@ -26,7 +26,7 @@ if not all([
     DEPARTMENT,
     ACCOUNT,
 ]):
-    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads manual entrypoint due to missing required environment variables.")
+    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads main entrypoint due to missing required environment variables.")
 
 def backfill():
     """
@@ -122,7 +122,7 @@ def backfill():
         facebook_account_id = secret_account_response.payload.data.decode("utf-8")
         
         msg = (
-            "✅ [BACKFILL] Successfully retrieved Facebook Ads customer_id "
+            "✅ [BACKFILL] Successfully retrieved Facebook Ads account_id "
             f"{facebook_account_id} from Google Secret Manager."
         )
         print(msg)
@@ -130,7 +130,7 @@ def backfill():
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to retrieve Facebook Ads customer_id from Google Secret Manager due to "
+            "❌ [BACKFILL] Failed to retrieve Facebook Ads account_id from Google Secret Manager due to "
             f"{e}."
         )
 
@@ -143,7 +143,7 @@ def backfill():
         )
         
         msg = (
-            "🔍 [BACKFILL] Retrieving Facebook Ads secret_credentials_json "
+            "🔍 [BACKFILL] Retrieving Facebook Ads access token with secret_token_name "
             f"{secret_token_name} from Google Secret Manager..."
         )
         print(msg)
@@ -154,17 +154,17 @@ def backfill():
         )
         facebook_token_user = secret_token_response.payload.data.decode("utf-8")
         
-        msg = ("✅ [BACKFILL] Successfully retrieved Google Ads credentials from Google Secret Manager.")
+        msg = ("✅ [BACKFILL] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
         print(msg)
         logging.info(msg)
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to retrieve Google Ads credentials from Google Secret Manager due to "
+            "❌ [BACKFILL] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
         )        
 
-# Initialize global Google Ads client
+# Initialize global Facebook Ads client
     try:
         msg = (
             "🔍 [BACKFILL] Initializing global Facebook Ads client for account_id "
@@ -179,7 +179,7 @@ def backfill():
         )
 
         msg = (
-            "✅ [BACKFILL] Successfully initialized global Facebook Ads client for customer_id "
+            "✅ [BACKFILL] Successfully initialized global Facebook Ads client for account_id "
             f"{facebook_account_id}."
         )
         print(msg)
@@ -187,7 +187,7 @@ def backfill():
     
     except Exception as e:
         raise RuntimeError(
-            "❌ [BACKFILL] Failed to initialize global Facebook Ads client due to."
+            "❌ [BACKFILL] Failed to initialize global Facebook Ads client due to "
             f"{e}."
         )
    
