@@ -41,7 +41,7 @@ select
     insights.messaging_conversations_started,
     insights.purchase
 
-from {{ ref('stg_campaign_insights') }} i
-left join `{{ target.project }}.{{ var('company') }}_dataset_google_api_raw.{{ var('company') }}_table_google_{{ var('department') }}_{{ var('account') }}_campaign_metadata` m
+from {{ ref('stg_campaign_insights') }} insights
+left join `{{ target.project }}.{{ var('company') }}_dataset_google_api_raw.{{ var('company') }}_table_google_{{ var('department') }}_{{ var('account') }}_campaign_metadata` campaign
     on insights.account_id = campaign.account_id
    and insights.campaign_id = campaign.campaign_id
