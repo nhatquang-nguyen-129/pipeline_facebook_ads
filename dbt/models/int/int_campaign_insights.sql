@@ -14,11 +14,12 @@ select
     insights.campaign_id,
 
     campaign.campaign_name,
+    campaign.account_name,
 
     case
-        when campaign.campaign_status = 'ACTIVE'                    then '🟢'
-        when campaign.campaign_status = 'PAUSED'                    then '⚪'
-        when campaign.campaign_status in ('ARCHIVED', 'DELETED')    then '🔴'
+        when campaign.status = 'ACTIVE'                    then '🟢'
+        when campaign.status = 'PAUSED'                    then '⚪'
+        when campaign.status in ('ARCHIVED', 'DELETED')    then '🔴'
         else '❓'
     end as campaign_status,
 
