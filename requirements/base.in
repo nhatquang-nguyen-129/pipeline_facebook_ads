@@ -19,5 +19,5 @@ google-cloud-bigquery-storage; python_version >= "3.9"
 google-cloud-secret-manager; python_version >= "3.9"
 pandas-gbq; python_version >= "3.9"
 
-# dbt
+# dbt adapter
 dbt-bigquery; python_version >= "3.9"
