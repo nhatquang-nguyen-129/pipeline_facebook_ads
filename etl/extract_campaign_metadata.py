@@ -21,7 +21,7 @@ def extract_campaign_metadata(
     Workflow:
         1. Validate input campaign_ids
         2. Make API call for AdAccount endpoint
-        3. Make API call for Campaign(campaign_id) endpoint 
+        3. Make API call for Campaign(campaign_id) endpoint
         4. Append extracted JSON data to list[dict]
         5. Enforce List[dict] to DataFrame
     ---------
