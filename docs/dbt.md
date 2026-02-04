@@ -96,24 +96,23 @@ dbt build
 
 - Run only campaign insights
 ```bash
-$env:PROJECT="seer-digital-ads"
-$env:COMPANY="kids"
-$env:DEPARTMENT="marketing"
-$env:ACCOUNT="main"
-
-cd dbt
+$env:PROJECT="your-gcp-project"
+$env:COMPANY="your-company-in-short"
+$env:DEPARTMENT="your-department"
+$env:ACCOUNT="your-account"
 
 dbt build `
-  --profiles-dir . `
-  --select tag:campaign
+  --project-dir dbt `
+  --profiles-dir dbt `
+  --select tag:ad
 ```
 
 - Run only ad insights
 ```bash
-$env:PROJECT="seer-digital-ads"
-$env:COMPANY="kids"
-$env:DEPARTMENT="marketing"
-$env:ACCOUNT="main"
+$env:PROJECT="your-gcp-project"
+$env:COMPANY="your-company-in-short"
+$env:DEPARTMENT="your-department"
+$env:ACCOUNT="your-account"
 
 dbt build `
   --project-dir dbt `
