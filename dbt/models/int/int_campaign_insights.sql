@@ -23,7 +23,7 @@ select
     insights.result_type,
 
     insights.messaging_conversations_started,
-    insights.purchase    
+    insights.purchase,    
 
     campaign.campaign_name,
     campaign.account_name,

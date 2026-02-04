@@ -56,5 +56,4 @@ select
     type,
     pillar,
     content
-
 from {{ ref('int_ad_insights') }}
