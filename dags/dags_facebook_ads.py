@@ -12,6 +12,7 @@ from dags._dags_ad_insights import dags_ad_insights
 
 def dags_facebook_ads(
     *,
+    access_token: str,
     account_id: str,
     start_date: str,
     end_date: str,
@@ -49,6 +50,7 @@ def dags_facebook_ads(
 
             future = executor.submit(
                 task,
+                access_token=access_token,
                 account_id=account_id,
                 start_date=start_date,
                 end_date=end_date,
