@@ -491,7 +491,7 @@ def dags_ad_insights(
     )        
     
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads adset metadata for "
+        "🔄 [DAGS] Trigger to load Facebook Ads adset metadata for "
         f"{len(df_adset_metadatas)} row(s) to"
         f"{_adset_metadata_direction}..."
         
@@ -588,7 +588,7 @@ def dags_ad_insights(
 
     # Transform
     msg = (
-        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
         f"{len(df_campaign_metadatas)} row(s)..."
     )
     print(msg)
@@ -604,7 +604,7 @@ def dags_ad_insights(
     )  
 
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to load Facebook Ads campaign metadata for "
         f"{len(df_campaign_metadatas)} row(s) to"
         f"{_campaign_metadata_direction}..."
         
@@ -616,7 +616,7 @@ def dags_ad_insights(
     )
 
 # Materialization with dbt
-    msg = "🔁 [DAGS] Trigger to materialize Facebook Ads ad insights with dbt..."
+    msg = "🔄 [DAGS] Trigger to materialize Facebook Ads ad insights with dbt..."
     print(msg)
     logging.info(msg)
 
