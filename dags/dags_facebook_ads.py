@@ -20,7 +20,7 @@ def dags_facebook_ads(
 ):
 
     msg = (
-        "🔁 [DAGS] Triggering to update Facebook Ads for account_id "
+        "🔄 [DAGS] Triggering to update Facebook Ads for account_id "
         f"{account_id} from "
         f"{start_date} to "
         f"{end_date} using ThreadPoolExecutor with "
