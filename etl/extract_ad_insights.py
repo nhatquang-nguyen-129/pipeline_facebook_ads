@@ -81,6 +81,7 @@ def extract_ad_insights(
             f"{e}."
         ) from e
 
+    # Make Facebook Ads API call for ad insights
     try:
         msg = (
             "🔍 [EXTRACT] Extracting Facebook Ads ad insights for account_id "
