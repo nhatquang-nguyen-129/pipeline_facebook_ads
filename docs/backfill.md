@@ -11,7 +11,7 @@ $env:COMPANY="kids";
 $env:PLATFORM="facebook"; 
 $env:DEPARTMENT="marketing"; 
 $env:ACCOUNT="main"; 
-python -m backfill.backfill_campaign_insights --start_date=2026-01-31 --end_date=2026-02-01
+python -m backfill.backfill_campaign_insights --start_date=2026-01-05 --end_date=2026-01-05
 ```
 
 - CLI usage example for ad insights backfill: 
@@ -22,5 +22,5 @@ $env:COMPANY="kids";
 $env:PLATFORM="facebook"; 
 $env:DEPARTMENT="marketing"; 
 $env:ACCOUNT="main"; 
-python -m backfill.backfill_ad_insights --start_date=2026-01-31 --end_date=2026-02-01
+python -m backfill.backfill_ad_insights --start_date=2026-01-05 --end_date=2026-01-05
 ```

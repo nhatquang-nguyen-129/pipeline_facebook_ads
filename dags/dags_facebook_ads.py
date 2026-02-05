@@ -65,13 +65,6 @@ def dags_facebook_ads(
         for future in as_completed(future_map):
             task_name = future_map[future]
             
-            msg = (
-                "🔍 [DAGS] Getting result from Facebook Ads ThreadPoolExecutor task "
-                f"{task_name}..."
-            )
-            print(msg)
-            logging.info(msg)
-
             try:
                 future.result()
                 msg = (
