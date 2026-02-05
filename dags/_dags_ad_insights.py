@@ -310,32 +310,31 @@ def dags_ad_insights(
         
         time.sleep(wait_to_retry)
 
-    if not dfs_ad_creative:
-        msg = "⚠️ [DAGS] No Facebook Ads ad creative extracted then skip loading step."
-        print(msg)
-        logging.warning(msg)
-    else:
-        df_ad_creatives = pd.concat(dfs_ad_creative, ignore_index=True)
+    df_ad_creatives = pd.concat(dfs_ad_creative, ignore_index=True)
+
+    # Transform
+
+        # Nothing to transform with ad creative
 
     # Load
-        _ad_creative_direction = (
-            f"{PROJECT}."
-            f"{COMPANY}_dataset_facebook_api_raw."
-            f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_creative"
-        )
+    _ad_creative_direction = (
+        f"{PROJECT}."
+        f"{COMPANY}_dataset_facebook_api_raw."
+        f"{COMPANY}_table_facebook_{DEPARTMENT}_{ACCOUNT}_ad_creative"
+    )
 
-        msg = (
-            "🔄 [DAGS] Trigger to load Facebook Ads ad creative for "
-            f"{len(df_ad_creatives)} row(s) to "
-            f"{_ad_creative_direction}..."
-        )
-        print(msg)
-        logging.info(msg)
+    msg = (
+        "🔄 [DAGS] Trigger to load Facebook Ads ad creative for "
+        f"{len(df_ad_creatives)} row(s) to "
+        f"{_ad_creative_direction}..."
+    )
+    print(msg)
+    logging.info(msg)
 
-        load_ad_creative(
-            df=df_ad_creatives,
-            direction=_ad_creative_direction,
-        )
+    load_ad_creative(
+        df=df_ad_creatives,
+        direction=_ad_creative_direction,
+    )
 
 # ETL for Facebook Ads adset metadata
     total_adset_ids = set(df_ad_metadatas["adset_id"].dropna().unique())
