@@ -176,6 +176,9 @@ def dags_ad_insights(
             time.sleep(DAGS_INSIGHTS_COOLDOWN)
 
 # ETL for Facebook Ads ad metadata
+    DAGS_AD_ATTEMPTS = 3
+    DAGS_AD_COOLDOWN = 60    
+    
     if not total_ad_ids:
         msg = (
             "⚠️ [DAGS] No Facebook Ads ad_id appended for account_id "
@@ -187,24 +190,72 @@ def dags_ad_insights(
         logging.warning(msg)
         return
 
-    # Extract
-    msg = (
-        "🔄 [DAGS] Trigger to extract Facebook Ads ad metadata for "
-        f"{len(total_ad_ids)} ad_id(s)..."
-    )
-    print(msg)
-    logging.info(msg)
+    # Extract Facebook Ads ad creative
+    remaining_ad_ids = list(total_ad_ids)
+    dfs_ad_metadata = []
 
-    df_ad_metadatas = extract_ad_metadata(
-        account_id=account_id,
-        ad_ids=list(total_ad_ids),
-    )
-
-    if df_ad_metadatas.empty:
-        msg = "⚠️ [DAGS] Empty Facebook Ads ad metadata extracted then DAG execution will be suspended."
+    for attempt in range(1, DAGS_AD_ATTEMPTS + 1):
+        msg = (
+            "🔄 [DAGS] Trigger to extract Facebook Ads ad metadata for "
+            f"{len(remaining_ad_ids)} ad_id(s) in "
+            f"{attempt}/{DAGS_AD_ATTEMPTS} attempt(s)..."
+        )
         print(msg)
-        logging.warning(msg)
-        return
+        logging.info(msg)
+    
+        df_ad_metadata = extract_ad_metadata(
+            account_id=account_id,
+            ad_ids=remaining_ad_ids,
+        )
+
+        if not df_ad_metadata.empty:
+            dfs_ad_metadata.append(df_ad_metadata)
+
+        failed_ad_ids = getattr(df_ad_metadata, "failed_ad_ids", [])
+        retryable = getattr(df_ad_metadata, "retryable", False)
+
+        if not failed_ad_ids:
+            msg = (
+                "✅ [DAGS] Successfully triggered to extract Facebook ad metadata with "
+                f"{len(set(pd.concat(dfs_ad_metadata)["ad_id"].dropna()))}/{len(remaining_ad_ids)} row(s)."
+            )
+            print(msg)
+            logging.info(msg)
+            break
+
+        if not retryable:
+            msg = (
+                "❌ [DAGS] Failed to extract Facebook Ads ad metadata for "
+                f"{len(remaining_ad_ids)} ad_id(s) due to unexpected non-retryable error then DAG execution will be suspended."
+            )
+            print(msg)
+            logging.warning(msg)
+            break
+
+        if attempt == DAGS_AD_ATTEMPTS:
+            msg = (
+                "❌ [DAGS] Failed to extract Facebook Ads ad metadata for "
+                f"{len(remaining_ad_ids)} ad_id(s) due to exceeded attempt limit then DAG execution will be suspended."
+            )
+            print(msg)
+            logging.warning(msg)
+            break
+
+        remaining_ad_ids = failed_ad_ids
+
+        wait_to_retry = 2 ** attempt
+        
+        msg = (
+            "🔄 [DAGS] Waiting "
+            f"{wait_to_retry} second(s) before retrying Facebook Ads API "
+                f"{attempt}/{DAGS_AD_ATTEMPTS} attempt(s)..."
+            )
+        print(msg)
+        logging.info(msg)
+        
+        time.sleep(wait_to_retry)
+
+    df_ad_metadatas = pd.concat(dfs_ad_metadata, ignore_index=True)
 
     # Transform
 
