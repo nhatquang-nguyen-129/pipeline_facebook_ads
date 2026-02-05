@@ -151,7 +151,7 @@ def dags_ad_insights(
                         f"{attempt}/{DAGS_INSIGHTS_ATTEMPTS} attempt(s) due to exceeded attempt limit then DAG execution will be aborting."
                     ) from e
 
-                wait_to_retry = 2 ** attempt
+                wait_to_retry = 60 + (attempt - 1) * 30
                 
                 msg = (
                     "🔄 [DAGS] Waiting "
@@ -242,7 +242,7 @@ def dags_ad_insights(
 
         remaining_ad_ids = failed_ad_ids
 
-        wait_to_retry = 2 ** attempt
+        wait_to_retry = 60 + (attempt - 1) * 30
         
         msg = (
             "🔄 [DAGS] Waiting "
@@ -282,7 +282,6 @@ def dags_ad_insights(
 
 # ETL for Facebook Ads ad creative
     DAGS_CREATIVE_ATTEMPTS = 3
-    DAGS_INSIGHTS_COOLDOWN = 60    
     
     if not total_ad_ids:
         msg = (
@@ -348,7 +347,7 @@ def dags_ad_insights(
 
         remaining_ad_ids = failed_ad_ids
 
-        wait_to_retry = 2 ** attempt
+        wait_to_retry = 60 + (attempt - 1) * 30
         
         msg = (
             "🔄 [DAGS] Waiting "
