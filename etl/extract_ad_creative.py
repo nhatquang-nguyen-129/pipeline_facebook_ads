@@ -76,7 +76,7 @@ def extract_ad_creative(
 
         msg = (
             "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
-            f"{account_id} for ad insights extraction."
+            f"{account_id} for ad creative extraction."
         )
         print(msg)
         logging.info(msg)
@@ -84,7 +84,7 @@ def extract_ad_creative(
     except Exception as e:
         raise RuntimeError(
             "❌ [EXTRACT] Failed to initialize Facebook Ads SDK client for account_id "
-            f"{account_id} for ad insights extraction due to "
+            f"{account_id} for ad creative extraction due to "
             f"{e}."
         ) from e
 
