@@ -9,6 +9,8 @@ import logging
 import pandas as pd
 import time
 
+from facebook_business.api import FacebookAdsApi
+
 from etl.extract_ad_insights import extract_ad_insights
 from etl.extract_ad_metadata import extract_ad_metadata
 from etl.extract_ad_creative import extract_ad_creative
@@ -33,6 +35,7 @@ MODE = os.getenv("MODE")
 
 def dags_ad_insights(
     *,
+    access_token: str,
     account_id: str,
     start_date: str,
     end_date: str,
@@ -45,6 +48,33 @@ def dags_ad_insights(
     )
     print(msg)
     logging.info(msg)
+
+    # Initialize Facebook Ads SDK client
+    try:
+        msg = (
+            "🔍 [DAGS] Initializing Facebook Ads SDK client for account_id "
+            f"{account_id}..."
+        )
+        print(msg)
+        logging.info(msg)
+
+        FacebookAdsApi.init(
+            access_token=access_token,
+            timeout=180,
+        )
+
+        msg = (
+            "✅ [DAGS] Successfully initialized Facebook Ads SDK client for account_id "
+            f"{account_id}."
+        )
+        print(msg)
+        logging.info(msg)
+
+    except Exception as e:
+        raise RuntimeError(
+            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for ad_insights DAG due to "
+            f"{e}."
+        ) from e
 
 # ETL for Facebook Ads ad insights
     DAGS_INSIGHTS_ATTEMPTS = 3

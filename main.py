@@ -11,8 +11,6 @@ from zoneinfo import ZoneInfo
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
 
-from facebook_business.api import FacebookAdsApi
-
 from dags.dags_facebook_ads import dags_facebook_ads
 
 COMPANY = os.getenv("COMPANY")
@@ -169,7 +167,7 @@ def main():
         secret_token_response = google_secret_client.access_secret_version(
             name=secret_account_name
         )
-        facebook_token_user = secret_token_response.payload.data.decode("utf-8")
+        access_token = secret_token_response.payload.data.decode("utf-8")
         
         msg = ("✅ [MAIN] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
         print(msg)
@@ -181,33 +179,6 @@ def main():
             f"{e}."
         )        
 
-# Initialize global Facebook Ads client
-    try:
-        msg = (
-            "🔍 [MAIN] Initializing global Facebook Ads client for account_id "
-            f"{facebook_account_id}..."
-        )
-        print(msg)
-        logging.info(msg)
-
-        FacebookAdsApi.init(
-            access_token=facebook_token_user, 
-            timeout=180
-        )
-
-        msg = (
-            "✅ [MAIN] Successfully initialized global Facebook Ads client for account_id "
-            f"{facebook_account_id}."
-        )
-        print(msg)
-        logging.info(msg)
-    
-    except Exception as e:
-        raise RuntimeError(
-            "❌ [MAIN] Failed to initialize global Facebook Ads client due to."
-            f"{e}."
-        )
-   
 # Execute DAGS
     dags_facebook_ads(
         account_id=facebook_account_id,
