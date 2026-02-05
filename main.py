@@ -166,7 +166,7 @@ def main():
         logging.info(msg)
 
         secret_token_response = google_secret_client.access_secret_version(
-            name=secret_account_name
+            name=secret_token_name
         )
         access_token = secret_token_response.payload.data.decode("utf-8")
         

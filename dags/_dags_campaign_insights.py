@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[2]
 sys.path.append(str(ROOT_FOLDER_LOCATION))
+sys.stdout.reconfigure(encoding="utf-8")
 
 from datetime import datetime, timedelta
 import logging
