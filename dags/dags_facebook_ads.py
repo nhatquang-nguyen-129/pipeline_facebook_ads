@@ -23,12 +23,15 @@ def dags_facebook_ads(
 
     msg = (
         "🔄 [DAGS] Triggering to update Facebook Ads for account_id "
-        f"{account_id} from {start_date} to {end_date} "
-        f"using ThreadPoolExecutor with {max_workers} max_workers..."
+        f"{account_id} from "
+        f"{start_date} to "
+        f"{end_date} using ThreadPoolExecutor with "
+        f"{max_workers} max_workers..."
     )
     print(msg)
     logging.info(msg)
 
+    # List of DAG tasks to run in parallel
     tasks = {
         "campaign_insights": dags_campaign_insights,
         "ad_insights": dags_ad_insights,
@@ -40,7 +43,7 @@ def dags_facebook_ads(
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_map = {}
 
-        # ---------- submit tasks ----------
+        # Submit tasks to ThreadPoolExecutor
         for task_name, task_fn in tasks.items():
             future = executor.submit(
                 lambda name=task_name, fn=task_fn: (
@@ -50,48 +53,71 @@ def dags_facebook_ads(
             )
             future_map[future] = task_name
 
-        print(
-            f"🔍 [DAGS] Waiting for {len(future_map)} ThreadPoolExecutor task(s) to complete..."
+        msg = (
+            "🔄 [DAGS] Waiting for "
+            f"{len(future_map)} ThreadPoolExecutor task(s) to complete..."
         )
+        print(msg)
+        logging(msg)
 
-        # ---------- execute tasks ----------
+        # Braille spinner printing in the terminal while executing tasks
+        spinner_frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        spinner_idx = 0
+
+        # Process tasks as soon as they finish and whichever task finishes first will have its logs printed first
         for future in as_completed(future_map):
             task_name = future_map[future]
 
             print("\n" + "=" * 120)
-            print(f"📦 [DAGS:{task_name}] LOG OUTPUT (flush after completion)")
+            print(f"[DAGS] TASK EXECUTION SUMMARY FOR {task_name}")
             print("=" * 120)
 
+        # Redirect all stdout/stderr from terminal into in-memory buffer to prevent interleaving between threds
             buffer = io.StringIO()
             task_start = time.time()
 
             try:
-                _, task_fn = future.result()
+                _, task_fn = future_map[future], None  # placeholder, future already submitted
+
+        # Keep overwriting spinner loop the same terminal line
+                while not future.done():
+                    frame = spinner_frames[spinner_idx % len(spinner_frames)]
+                    spinner_idx += 1
+
+                    print(
+                        f"\r{frame} [DAGS:{task_name}] Running...",
+                        end="",
+                        flush=True,
+                    )
+                    time.sleep(0.1)
+
+                print("\r" + " " * 80 + "\r", end="", flush=True)
 
                 with redirect_stdout(buffer), redirect_stderr(buffer):
-                    task_fn(
-                        access_token=access_token,
-                        account_id=account_id,
-                        start_date=start_date,
-                        end_date=end_date,
-                    )
+                    future.result()
 
                 elapsed = round(time.time() - task_start, 2)
 
+        # Print entire buffered log as a single continuous block at once after task complettion
                 if buffer.getvalue().strip():
                     print(buffer.getvalue(), end="")
 
                 print(
-                    f"\n✅ [DAGS:{task_name}] Completed successfully "
-                    f"in {elapsed}s"
+                    "✅ [DAGS] Successfully completed "
+                    f"{task_name} task using ThreadPoolExecutor in "
+                    f"{elapsed}s."
                 )
 
             except Exception as e:
-                print(f"❌ [DAGS:{task_name}] FAILED due to {e}")
+                print(
+                    f"❌ [DAGS] Failed to complete {task_name} "
+                    f"using ThreadPoolExecutor: {e}"
+                )
                 logging.exception(e)
                 failures.append(task_name)
 
             print("=" * 120 + "\n")
+
 
     total_elapsed = round(time.time() - start_time, 2)
 
