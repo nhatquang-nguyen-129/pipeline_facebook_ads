@@ -72,7 +72,8 @@ def dags_ad_insights(
 
     except Exception as e:
         raise RuntimeError(
-            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for ad_insights DAG due to "
+            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for account_id "
+            f"{account_id} due to "
             f"{e}."
         ) from e
 

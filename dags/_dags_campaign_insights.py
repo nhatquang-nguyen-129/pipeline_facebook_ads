@@ -39,6 +39,33 @@ def dags_campaign_insights(
     print(msg)
     logging.info(msg)
 
+    # Initialize Facebook Ads SDK client
+    try:
+        msg = (
+            "🔍 [DAGS] Initializing Facebook Ads SDK client for account_id "
+            f"{account_id}..."
+        )
+        print(msg)
+        logging.info(msg)
+
+        FacebookAdsApi.init(
+            access_token=access_token,
+            timeout=180,
+        )
+
+        msg = (
+            "✅ [DAGS] Successfully initialized Facebook Ads SDK client for account_id "
+            f"{account_id}."
+        )
+        print(msg)
+        logging.info(msg)
+
+    except Exception as e:
+        raise RuntimeError(
+            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for ad_insights DAG due to "
+            f"{e}."
+        ) from e
+
 # ETL for Facebook Ads campaign insights
     DAGS_MAX_ATTEMPTS = 3
     DAGS_MIN_COOLDOWN = 60
