@@ -11,8 +11,6 @@ import os
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
 
-from facebook_business.api import FacebookAdsApi
-
 from dags.dags_facebook_ads import dags_ad_insights
 
 COMPANY = os.getenv("COMPANY")
@@ -119,11 +117,11 @@ def backfill():
             name=secret_account_name,
             timeout=10.0,
         )
-        facebook_account_id = secret_account_response.payload.data.decode("utf-8")
+        account_id = secret_account_response.payload.data.decode("utf-8")
         
         msg = (
             "✅ [BACKFILL] Successfully retrieved Facebook Ads account_id "
-            f"{facebook_account_id} from Google Secret Manager."
+            f"{account_id} from Google Secret Manager."
         )
         print(msg)
         logging.info(msg)
@@ -134,6 +132,7 @@ def backfill():
             f"{e}."
         )
 
+# Resolve access_token from Google Secret Manager
     try:
         secret_token_id = (
             f"{COMPANY}_secret_all_facebook_token_access_user"
@@ -152,7 +151,7 @@ def backfill():
         secret_token_response = google_secret_client.access_secret_version(
             name=secret_token_name
         )
-        facebook_token_user = secret_token_response.payload.data.decode("utf-8")
+        access_token = secret_token_response.payload.data.decode("utf-8")
         
         msg = ("✅ [BACKFILL] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
         print(msg)
@@ -163,37 +162,11 @@ def backfill():
             "❌ [BACKFILL] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
         )        
-
-# Initialize global Facebook Ads client
-    try:
-        msg = (
-            "🔍 [BACKFILL] Initializing global Facebook Ads client for account_id "
-            f"{facebook_account_id}..."
-        )
-        print(msg)
-        logging.info(msg)
-
-        FacebookAdsApi.init(
-            access_token=facebook_token_user, 
-            timeout=180
-        )
-
-        msg = (
-            "✅ [BACKFILL] Successfully initialized global Facebook Ads client for account_id "
-            f"{facebook_account_id}."
-        )
-        print(msg)
-        logging.info(msg)
-    
-    except Exception as e:
-        raise RuntimeError(
-            "❌ [BACKFILL] Failed to initialize global Facebook Ads client due to "
-            f"{e}."
-        )
    
 # Execute DAGS
     dags_ad_insights(
-        account_id=facebook_account_id,
+        access_token=access_token,
+        account_id=account_id,
         start_date=start_date,
         end_date=end_date
     )
