@@ -9,6 +9,8 @@ import logging
 import pandas as pd
 import time
 
+from facebook_business.api import FacebookAdsApi
+
 from etl.extract_campaign_insights import extract_campaign_insights
 from etl.extract_campaign_metadata import extract_campaign_metadata
 from etl.transform_campaign_insights import transform_campaign_insights
@@ -26,6 +28,7 @@ MODE = os.getenv("MODE")
 
 def dags_campaign_insights(
     *,
+    access_token: str,
     account_id: str,
     start_date: str,
     end_date: str,
@@ -62,7 +65,8 @@ def dags_campaign_insights(
 
     except Exception as e:
         raise RuntimeError(
-            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for ad_insights DAG due to "
+            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for account_id "
+            f"{account_id} due to "
             f"{e}."
         ) from e
 
