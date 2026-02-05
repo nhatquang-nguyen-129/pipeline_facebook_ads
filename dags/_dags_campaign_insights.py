@@ -9,8 +9,6 @@ import logging
 import pandas as pd
 import time
 
-from facebook_business.api import FacebookAdsApi
-
 from etl.extract_campaign_insights import extract_campaign_insights
 from etl.extract_campaign_metadata import extract_campaign_metadata
 from etl.transform_campaign_insights import transform_campaign_insights
@@ -42,34 +40,6 @@ def dags_campaign_insights(
     print(msg)
     logging.info(msg)
 
-    # Initialize Facebook Ads SDK client
-    try:
-        msg = (
-            "🔍 [DAGS] Initializing Facebook Ads SDK client with account_id "
-            f"{account_id} for campaign insights update..."
-        )
-        print(msg)
-        logging.info(msg)
-
-        FacebookAdsApi.init(
-            access_token=access_token,
-            timeout=180,
-        )
-
-        msg = (
-            "✅ [DAGS] Successfully initialized Facebook Ads SDK client for account_id "
-            f"{account_id} for campaign insights update"
-        )
-        print(msg)
-        logging.info(msg)
-
-    except Exception as e:
-        raise RuntimeError(
-            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for account_id "
-            f"{account_id} for campaign insights update due to "
-            f"{e}."
-        ) from e
-
 # ETL for Facebook Ads campaign insights
     DAGS_MAX_ATTEMPTS = 3
     DAGS_MIN_COOLDOWN = 60
@@ -96,6 +66,7 @@ def dags_campaign_insights(
                 logging.info(msg)
 
                 insights = extract_campaign_insights(
+                    access_token=access_token,
                     account_id=account_id,
                     start_date=dags_split_date,
                     end_date=dags_split_date,
@@ -227,6 +198,7 @@ def dags_campaign_insights(
         logging.info(msg)
     
         df_campaign_metadata = extract_campaign_metadata(
+            access_token=access_token,
             account_id=account_id,
             campaign_ids=remaining_campaign_ids,
         )
@@ -284,35 +256,6 @@ def dags_campaign_insights(
     msg = (
         "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
         f"{len(df_campaign_metadatas)} row(s)..."
-    )
-    print(msg)
-    logging.info(msg)
-
-    df_campaign_metadatas = transform_campaign_metadata(df_campaign_metadatas)
-
-    # Extract
-    msg = (
-        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
-        f"{len(total_campaign_ids)} campaign_id(s)..."
-    )
-    print(msg)
-    logging.info(msg)
-
-    df_campaign_metadatas = extract_campaign_metadata(
-        account_id=account_id,
-        campaign_ids=list(total_campaign_ids),
-    )
-
-    if df_campaign_metadatas.empty:
-        msg = "⚠️ [DAGS] Empty Facebook Ads campaign metadata extracted then DAG execution will be suspended."
-        print(msg)
-        logging.warning(msg)
-        return
-
-    # Transform
-    msg = (
-        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
-        f"{len(total_campaign_ids)} campaign_id(s)..."
     )
     print(msg)
     logging.info(msg)
