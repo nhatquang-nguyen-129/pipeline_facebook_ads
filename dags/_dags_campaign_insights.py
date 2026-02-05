@@ -45,8 +45,8 @@ def dags_campaign_insights(
     # Initialize Facebook Ads SDK client
     try:
         msg = (
-            "🔍 [DAGS] Initializing Facebook Ads SDK client for account_id "
-            f"{account_id}..."
+            "🔍 [DAGS] Initializing Facebook Ads SDK client with account_id "
+            f"{account_id} for campaign insights update..."
         )
         print(msg)
         logging.info(msg)
@@ -58,7 +58,7 @@ def dags_campaign_insights(
 
         msg = (
             "✅ [DAGS] Successfully initialized Facebook Ads SDK client for account_id "
-            f"{account_id}."
+            f"{account_id} for campaign insights update"
         )
         print(msg)
         logging.info(msg)
@@ -66,7 +66,7 @@ def dags_campaign_insights(
     except Exception as e:
         raise RuntimeError(
             "❌ [DAGS] Failed to initialize Facebook Ads SDK client for account_id "
-            f"{account_id} due to "
+            f"{account_id} for campaign insights update due to "
             f"{e}."
         ) from e
 
