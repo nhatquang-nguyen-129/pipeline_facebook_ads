@@ -72,13 +72,12 @@ def extract_adset_metadata(
         print(msg)
         logging.info(msg)
 
-        session = FacebookSession(
+        adset_metadata_session = FacebookSession(
             access_token=access_token,
             timeout=180,
         )
 
-        api = FacebookAdsApi(session)
-        FacebookAdsApi.set_default_api(api)
+        adset_metadata_api = FacebookAdsApi(adset_metadata_session)
 
         msg = (
             "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
@@ -103,7 +102,11 @@ def extract_adset_metadata(
         print(msg)
         logging.info(msg)
 
-        account_info = AdAccount(f"act_{account_id}").api_get(fields=["name"])
+        account_info = AdAccount(
+            f"act_{account_id}",
+            api=adset_metadata_api,
+        ).api_get(fields=["name"])
+
         account_name = account_info.get("name")
 
         msg = (
@@ -166,7 +169,10 @@ def extract_adset_metadata(
 
     for adset_id in adset_ids:
         try:
-            adset = AdSet(adset_id).api_get(
+            adset = AdSet(
+                adset_id,
+                api=adset_metadata_api,
+            ).api_get(
                 fields=[
                     "id",
                     "name",

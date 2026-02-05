@@ -70,13 +70,12 @@ def extract_ad_creative(
         print(msg)
         logging.info(msg)
 
-        session = FacebookSession(
+        ad_creative_session = FacebookSession(
             access_token=access_token,
             timeout=180,
         )
 
-        api = FacebookAdsApi(session)
-        FacebookAdsApi.set_default_api(api)
+        ad_creative_api = FacebookAdsApi(ad_creative_session)
 
         msg = (
             "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
@@ -103,7 +102,7 @@ def extract_ad_creative(
         
     for ad_id in ad_ids:
         try:
-            ad = Ad(ad_id).api_get(fields=["creative"])
+            ad = Ad(ad_id, api=ad_creative_api).api_get(fields=["creative"])
             creative_id = ad.get("creative", {}).get("id")
 
             if not creative_id:
@@ -117,9 +116,10 @@ def extract_ad_creative(
                 )
                 continue
 
-            creative = AdCreative(creative_id).api_get(
-                fields=["thumbnail_url"]
-            )
+            creative = AdCreative(
+                creative_id,
+                api=ad_creative_api,
+            ).api_get(fields=["thumbnail_url"])
 
             rows.append(
                 {
