@@ -7,11 +7,13 @@ import time
 import logging
 import pandas as pd
 
+from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.campaign import Campaign
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 
 def extract_campaign_metadata(
+    access_token: str,
     account_id: str,
     campaign_ids: list[str],
 ) -> pd.DataFrame:
@@ -59,6 +61,34 @@ def extract_campaign_metadata(
         df.rows_input = 0
         df.rows_output = 0
         return df
+
+    # Initialize Facebook Ads SDK client
+    try:
+        msg = (
+            "🔍 [EXTRACT] Initializing Facebook Ads SDK client with account_id "
+            f"{account_id} for campaign metadata extraction..."
+        )
+        print(msg)
+        logging.info(msg)
+
+        FacebookAdsApi.init(
+            access_token=access_token,
+            timeout=180,
+        )
+
+        msg = (
+            "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
+            f"{account_id} for campaign metadata extraction."
+        )
+        print(msg)
+        logging.info(msg)
+
+    except Exception as e:
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to initialize Facebook Ads SDK client for account_id "
+            f"{account_id} for campaign metadata extraction due to "
+            f"{e}."
+        ) from e
 
     # Make Facebook Ads API call for ad account information
     try:
