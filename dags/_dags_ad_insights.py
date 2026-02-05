@@ -9,8 +9,6 @@ import logging
 import pandas as pd
 import time
 
-from facebook_business.api import FacebookAdsApi
-
 from etl.extract_ad_insights import extract_ad_insights
 from etl.extract_ad_metadata import extract_ad_metadata
 from etl.extract_ad_creative import extract_ad_creative
@@ -49,34 +47,6 @@ def dags_ad_insights(
     print(msg)
     logging.info(msg)
 
-    # Initialize Facebook Ads SDK client
-    try:
-        msg = (
-            "🔍 [DAGS] Initializing Facebook Ads SDK client with account_id "
-            f"{account_id} for ad insights update..."
-        )
-        print(msg)
-        logging.info(msg)
-
-        FacebookAdsApi.init(
-            access_token=access_token,
-            timeout=180,
-        )
-
-        msg = (
-            "✅ [DAGS] Successfully initialized Facebook Ads SDK client for account_id "
-            f"{account_id} for ad insights update"
-        )
-        print(msg)
-        logging.info(msg)
-
-    except Exception as e:
-        raise RuntimeError(
-            "❌ [DAGS] Failed to initialize Facebook Ads SDK client for account_id "
-            f"{account_id} for ad insights update due to "
-            f"{e}."
-        ) from e
-
 # ETL for Facebook Ads ad insights
     DAGS_INSIGHTS_ATTEMPTS = 3
     DAGS_INSIGHTS_COOLDOWN = 60
@@ -103,6 +73,7 @@ def dags_ad_insights(
                 logging.info(msg)                
                 
                 insights = extract_ad_insights(
+                    access_token=access_token,
                     account_id=account_id,
                     start_date=dags_split_date,
                     end_date=dags_split_date,
@@ -234,6 +205,7 @@ def dags_ad_insights(
         logging.info(msg)
     
         df_ad_metadata = extract_ad_metadata(
+            access_token=access_token,
             account_id=account_id,
             ad_ids=remaining_ad_ids,
         )
@@ -339,6 +311,7 @@ def dags_ad_insights(
         logging.info(msg)
 
         df_ad_creative = extract_ad_creative(
+            access_token=access_token,
             account_id=account_id,
             ad_ids=remaining_ad_ids,
         )
@@ -446,6 +419,7 @@ def dags_ad_insights(
         logging.info(msg)
     
         df_adset_metadata = extract_adset_metadata(
+            access_token=access_token,
             account_id=account_id,
             adset_ids=remaining_adset_ids,
         )
@@ -558,6 +532,7 @@ def dags_ad_insights(
         logging.info(msg)
     
         df_campaign_metadata = extract_campaign_metadata(
+            access_token=access_token,
             account_id=account_id,
             campaign_ids=remaining_campaign_ids,
         )
