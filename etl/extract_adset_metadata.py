@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 
 from facebook_business.api import FacebookAdsApi
+from facebook_business.session import FacebookSession
 from facebook_business.adobjects.adset import AdSet
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
@@ -71,10 +72,13 @@ def extract_adset_metadata(
         print(msg)
         logging.info(msg)
 
-        FacebookAdsApi.init(
+        session = FacebookSession(
             access_token=access_token,
             timeout=180,
         )
+
+        api = FacebookAdsApi(session)
+        FacebookAdsApi.set_default_api(api)
 
         msg = (
             "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
