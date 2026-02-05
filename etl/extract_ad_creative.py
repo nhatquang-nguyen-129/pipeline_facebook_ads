@@ -7,11 +7,13 @@ import time
 import logging
 import pandas as pd
 
+from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.ad import Ad
 from facebook_business.adobjects.adcreative import AdCreative
 from facebook_business.exceptions import FacebookRequestError
 
 def extract_ad_creative(
+    access_token: str,
     account_id: str,
     ad_ids: list[str],
 ) -> pd.DataFrame:
@@ -57,6 +59,34 @@ def extract_ad_creative(
         df.rows_input = 0
         df.rows_output = 0
         return df
+
+    # Initialize Facebook Ads SDK client
+    try:
+        msg = (
+            "🔍 [EXTRACT] Initializing Facebook Ads SDK client with account_id "
+            f"{account_id} for ad creative extraction..."
+        )
+        print(msg)
+        logging.info(msg)
+
+        FacebookAdsApi.init(
+            access_token=access_token,
+            timeout=180,
+        )
+
+        msg = (
+            "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
+            f"{account_id} for ad insights extraction."
+        )
+        print(msg)
+        logging.info(msg)
+
+    except Exception as e:
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to initialize Facebook Ads SDK client for account_id "
+            f"{account_id} for ad insights extraction due to "
+            f"{e}."
+        ) from e
 
     # Make Facebook Ads API call for ad creative
     msg = (
