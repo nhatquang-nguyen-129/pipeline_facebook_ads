@@ -177,8 +177,7 @@ def dags_ad_insights(
 
 # ETL for Facebook Ads ad metadata
     DAGS_AD_ATTEMPTS = 3
-    DAGS_AD_COOLDOWN = 60    
-    
+   
     if not total_ad_ids:
         msg = (
             "⚠️ [DAGS] No Facebook Ads ad_id appended for account_id "
