@@ -61,13 +61,12 @@ def extract_campaign_insights(
         print(msg)
         logging.info(msg)
 
-        session = FacebookSession(
+        campaign_insights_session = FacebookSession(
             access_token=access_token,
             timeout=180,
         )
 
-        api = FacebookAdsApi(session)
-        FacebookAdsApi.set_default_api(api)
+        campaign_insights_api = FacebookAdsApi(campaign_insights_session)
 
         msg = (
             "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
@@ -99,7 +98,10 @@ def extract_campaign_insights(
             else f"act_{account_id}"
         )
 
-        insights = AdAccount(account_id_prefixed).get_insights(
+        insights = AdAccount(
+            account_id_prefixed,
+            api=campaign_insights_api,
+        ).get_insights(
             fields=fields,
             params=params,
         )
