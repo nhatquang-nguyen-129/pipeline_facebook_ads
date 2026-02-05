@@ -32,7 +32,7 @@ def dags_campaign_insights(
     end_date: str,
 ):
     msg = (
-        "🔁 [DAGS] Trigger to update Facebook Ads campaign insights with account_id "
+        "🔄 [DAGS] Trigger to update Facebook Ads campaign insights with account_id "
         f"{account_id} from "
         f"{start_date} to "
         f"{end_date}..."
@@ -57,7 +57,7 @@ def dags_campaign_insights(
     
     # Extract
                 msg = (
-                    "🔁 [DAGS] Trigger to extract Facebook Ads campaign insights from account_id "
+                    "🔄 [DAGS] Trigger to extract Facebook Ads campaign insights from account_id "
                     f"{account_id} at "
                     f"{dags_split_date} for "
                     f"{attempt} attempt(s)..."
@@ -84,7 +84,7 @@ def dags_campaign_insights(
 
     # Transform
                 msg = (
-                    "🔁 [DAGS] Trigger to transform Facebook Ads campaign insights from "
+                    "🔄 [DAGS] Trigger to transform Facebook Ads campaign insights from "
                     f"{account_id} with "
                     f"{dags_split_date} for "
                     f"{len(insights)} row(s)..."
@@ -105,7 +105,7 @@ def dags_campaign_insights(
                 )
 
                 msg = (
-                    "🔁 [DAGS] Trigger to load Facebook Ads campaign insights from account_id "
+                    "🔄 [DAGS] Trigger to load Facebook Ads campaign insights from account_id "
                     f"{account_id} for "
                     f"{dags_split_date} to direction "
                     f"{_campaign_insights_direction}..."
@@ -149,7 +149,7 @@ def dags_campaign_insights(
                 wait_to_retry = 60 + (attempt - 1) * 30
                 
                 msg = (
-                    "🔁 [DAGS] Waiting "
+                    "🔄 [DAGS] Waiting "
                     f"{wait_to_retry} second(s) before retrying Facebook Ads API "
                     f"{attempt}/{DAGS_MAX_ATTEMPTS} attempt(s)..."
                 )
@@ -162,7 +162,7 @@ def dags_campaign_insights(
         
         if dags_start_date <= dags_end_date:
             msg = (
-                "🔁 [DAGS] Waiting "
+                "🔄 [DAGS] Waiting "
                 f"{DAGS_MIN_COOLDOWN} second(s) cooldown before processing next date of Facebook Ads campaign insights..."
             )
             print(msg)
@@ -254,7 +254,7 @@ def dags_campaign_insights(
 
     # Transform
     msg = (
-        "🔁 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
         f"{len(df_campaign_metadatas)} row(s)..."
     )
     print(msg)
@@ -270,7 +270,7 @@ def dags_campaign_insights(
     )
 
     msg = (
-        "🔁 [DAGS] Trigger to load Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to load Facebook Ads campaign metadata for "
         f"{len(df_campaign_metadatas)} row(s) to "
         f"{_campaign_metadata_direction}..."
     )
@@ -283,7 +283,7 @@ def dags_campaign_insights(
     )
 
 # Materialization with dbt
-    msg = ("🔁 [DAGS] Trigger to materialize Facebook Ads campaign insights with dbt...")
+    msg = ("🔄 [DAGS] Trigger to materialize Facebook Ads campaign insights with dbt...")
     print(msg)
     logging.info(msg)
 
