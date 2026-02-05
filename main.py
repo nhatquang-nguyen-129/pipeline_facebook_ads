@@ -134,11 +134,11 @@ def main():
             name=secret_account_name,
             timeout=10.0,
         )
-        facebook_account_id = secret_account_response.payload.data.decode("utf-8")
+        account_id = secret_account_response.payload.data.decode("utf-8")
         
         msg = (
             "✅ [MAIN] Successfully retrieved Facebook Ads account_id "
-            f"{facebook_account_id} from Google Secret Manager."
+            f"{account_id} from Google Secret Manager."
         )
         print(msg)
         logging.info(msg)
@@ -149,6 +149,7 @@ def main():
             f"{e}."
         )
 
+# Resolve access_token from Google Secret Manager
     try:
         secret_token_id = (
             f"{COMPANY}_secret_all_facebook_token_access_user"
@@ -181,7 +182,8 @@ def main():
 
 # Execute DAGS
     dags_facebook_ads(
-        account_id=facebook_account_id,
+        access_token=access_token,
+        account_id=account_id,
         start_date=start_date,
         end_date=end_date
     )
