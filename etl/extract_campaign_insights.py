@@ -7,10 +7,12 @@ import time
 import logging
 import pandas as pd
 
+from facebook_business.api import FacebookAdsApi
 from facebook_business.adobjects.adaccount import AdAccount
 from facebook_business.exceptions import FacebookRequestError
 
 def extract_campaign_insights(
+    access_token: str,
     account_id: str,
     start_date: str,
     end_date: str,
@@ -49,6 +51,35 @@ def extract_campaign_insights(
         "level": "campaign",
     }
 
+    # Initialize Facebook Ads SDK client
+    try:
+        msg = (
+            "🔍 [EXTRACT] Initializing Facebook Ads SDK client with account_id "
+            f"{account_id} for campaign insights extraction..."
+        )
+        print(msg)
+        logging.info(msg)
+
+        FacebookAdsApi.init(
+            access_token=access_token,
+            timeout=180,
+        )
+
+        msg = (
+            "✅ [EXTRACT] Successfully initialized Facebook Ads SDK client for account_id "
+            f"{account_id} for campaign insights extraction."
+        )
+        print(msg)
+        logging.info(msg)
+
+    except Exception as e:
+        raise RuntimeError(
+            "❌ [EXTRACT] Failed to initialize Facebook Ads SDK client for account_id "
+            f"{account_id} for campaign insights extraction due to "
+            f"{e}."
+        ) from e
+
+    # Make Facebook Ads API call for campaign insights
     try:
         msg = (
             "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
