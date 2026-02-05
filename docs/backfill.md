@@ -1,4 +1,4 @@
-# Test — Backfill for Main Entrypoin
+# Backfill for Facebook Ads Main Entrypoint
 
 - Manually fetch historical Google Ads data outside predefined `MODE` window
 - Read required environment variables `COMPANY`, `PROJECT`, `DEPARTMENT`, `ACCOUNT`
