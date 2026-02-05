@@ -132,3 +132,36 @@ dbt_facebook_ads(
 
 ## Main
 
+### Resolve execution time window
+
+- `main.py` will not start if any of the required environment variables are missing
+- Resolve `MODE` into `start_date` and `end_date` then format them as `YYYY-MM-DD`
+- Unsupported `MODE` values will immediately fail execution
+- `last3days` will be resolved into `start_date` and `end_date` which is the last 3 days **except** yesterday
+- `last7days` will be resolved into `start_date` and `end_date` which is the last 7 days **except** yesterday
+- `thismonth` will be resolved into `start_date` and `end_date` from the first day of the current month to today
+
+### Initialize Google Secret Manager client
+- Create a single `SecretManagerServiceClient` to intialize global client
+- Resolve Facebook Ads `account_id` from secret `{COMPANY}_secret_{DEPARTMENT}_facebook_account_id_{ACCOUNT}`
+- Resolve Facebook Ads `access_token` from secret `{COMPANY}_secret_all_facebook_token_access_user`
+- Secrets are always fetched from `versions/latest`
+
+### Initialize Facebook Ads SDK
+- Create a sing `FacebookAdsApi.init` to initialize global client
+- Set `timeout` to `180` for long-running API calls
+
+### Dispatch execution to DAG orchestrator
+- Call `dags_facebook_ads` with `account_id`, `start_date` and `end_date`
+- All retry logic, cooldowns, batching and ETL orchestration are handled **inside** DAGs
+- CLI usage example for main entrypoint: 
+
+```bash
+$env:PROJECT="seer-digital-ads"
+$env:COMPANY="kids"
+$env:DEPARTMENT="marketing"
+$env:ACCOUNT="main"
+$env:MODE="last7days"
+
+python main.py
+```
