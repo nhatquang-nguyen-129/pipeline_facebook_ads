@@ -161,7 +161,7 @@ $env:PROJECT="seer-digital-ads"
 $env:COMPANY="kids"
 $env:DEPARTMENT="marketing"
 $env:ACCOUNT="main"
-$env:MODE="today"
+$env:MODE="last3days"
 
 python main.py
 ```
