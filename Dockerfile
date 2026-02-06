@@ -14,8 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements/ requirements/
 
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir pip-tools \
+RUN pip install --no-cache-dir pip-tools \
     && pip-compile requirements/base.in \
         --output-file requirements/base.txt \
         --resolver=backtracking \
