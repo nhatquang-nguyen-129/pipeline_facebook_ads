@@ -23,7 +23,10 @@ if not all([
     DEPARTMENT,
     ACCOUNT,
 ]):
-    raise EnvironmentError("❌ [BACKFILL] Failed to execute Facebook Ads backfill due to missing required environment variables.")
+    
+    raise EnvironmentError(
+        "❌ [BACKFILL] Failed to execute Facebook Ads backfill due to missing required environment variables."
+    )
 
 def backfill():
     """
@@ -60,10 +63,16 @@ def backfill():
     args = parser.parse_args()
 
     try:
+        
         start_date = datetime.strptime(args.start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+        
         end_date = datetime.strptime(args.end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+    
     except ValueError:
-        raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads backfill due to start_date and end_date must be in YYYY-MM-DD format.")
+    
+        raise ValueError(
+            "❌ [BACKFILL] Failed to execute Facebook Ads backfill due to start_date and end_date must be in YYYY-MM-DD format."
+        )
 
     if start_date > end_date:
         raise ValueError("❌ [BACKFILL] Failed to execute Facebook Ads backfill due to start_date must be less than or equal to end_date.")
@@ -81,7 +90,7 @@ def backfill():
 # Initialize Google Secret Manager
     try:
         print("🔍 [BACKFILL] Initialize Google Secret Manager client...")
-        
+
         google_secret_client = secretmanager.SecretManagerServiceClient(
             client_options=ClientOptions(
                 api_endpoint="secretmanager.googleapis.com"
@@ -108,7 +117,7 @@ def backfill():
         print(
             "🔍 [BACKFILL] Retrieving Facebook Ads secret_account_id "
             f"{secret_account_name} from Google Secret Manager..."
-        )  
+        )   
 
         secret_account_response = google_secret_client.access_secret_version(
             name=secret_account_name,
@@ -120,7 +129,7 @@ def backfill():
             "✅ [BACKFILL] Successfully retrieved Facebook Ads account_id "
             f"{account_id} from Google Secret Manager."
         )
-
+    
     except Exception as e:
         raise RuntimeError(
             "❌ [BACKFILL] Failed to retrieve Facebook Ads account_id from Google Secret Manager due to "
@@ -147,12 +156,12 @@ def backfill():
         access_token = secret_token_response.payload.data.decode("utf-8")
         
         print("✅ [BACKFILL] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
-
+    
     except Exception as e:
         raise RuntimeError(
             "❌ [BACKFILL] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
-        )        
+        )         
 
 # Execute DAGS
     dags_facebook_ads(
@@ -164,7 +173,11 @@ def backfill():
 
 # Entrypoint
 if __name__ == "__main__":
+    
     try:
+    
         backfill()
+    
     except Exception:
+    
         sys.exit(1)
