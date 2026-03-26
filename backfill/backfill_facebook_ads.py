@@ -88,6 +88,7 @@ def backfill():
     )
 
 # Initialize Google Secret Manager
+# Initialize Google Secret Manager
     try:
         print("🔍 [BACKFILL] Initialize Google Secret Manager client...")
 
@@ -161,7 +162,7 @@ def backfill():
         raise RuntimeError(
             "❌ [BACKFILL] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
-        )         
+        )
 
 # Execute DAGS
     dags_facebook_ads(
