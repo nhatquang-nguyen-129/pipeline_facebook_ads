@@ -58,7 +58,7 @@ def dags_ad_insights(
         f"{end_date}..."
     )
 
-# ETL for Facebook Ads ad insights
+    # ETL for Facebook Ads ad insights
     DAGS_INSIGHTS_ATTEMPTS = 3
     
     DAGS_INSIGHTS_COOLDOWN = 60
@@ -77,7 +77,7 @@ def dags_ad_insights(
         
             try:
                 
-    # Extract
+        # Extract
                 print(
                     "🔄 [DAGS] Trigger to extract Facebook Ads ad insights from account_id "
                     f"{account_id} for "
@@ -96,7 +96,7 @@ def dags_ad_insights(
 
                     break
 
-    # Transform
+        # Transform
                 print(
                     "🔄 [DAGS] Trigger to transform Facebook Ads ad insights from "
                     f"{account_id} for "
@@ -106,7 +106,7 @@ def dags_ad_insights(
 
                 insights = transform_ad_insights(insights)
 
-    # Load
+        # Load
                 year  = pd.to_datetime(insights["date"].iloc[0]).year
                 
                 month = pd.to_datetime(insights["date"].iloc[0]).month
@@ -182,7 +182,7 @@ def dags_ad_insights(
 
             time.sleep(DAGS_INSIGHTS_COOLDOWN)
 
-# ETL for Facebook Ads ad metadata
+    # ETL for Facebook Ads ad metadata
     DAGS_AD_ATTEMPTS = 3
    
     if not total_ad_ids:
@@ -202,7 +202,7 @@ def dags_ad_insights(
 
     for attempt in range(1, DAGS_AD_ATTEMPTS + 1):
 
-    # Extract
+        # Extract
         print(
             "🔄 [DAGS] Trigger to extract Facebook Ads ad metadata for "
             f"{len(remaining_ad_ids)} ad_id(s) with "
@@ -258,17 +258,17 @@ def dags_ad_insights(
             "🔄 [DAGS] Waiting "
             f"{wait_to_retry} second(s) before retrying Facebook Ads ad metadata extraction with "
             f"{attempt}/{DAGS_AD_ATTEMPTS} attempt(s)..."
-            )
+        )
         
         time.sleep(wait_to_retry)
 
     df_ad_metadatas = pd.concat(dfs_ad_metadata, ignore_index=True)
 
-    # Transform
+        # Transform
 
-        # Nothing to transform with ad metadata
+            # Nothing to transform with ad metadata
 
-    # Load    
+        # Load    
     _ad_metadata_direction = (
         f"{PROJECT}."
         f"{COMPANY}_dataset_facebook_api_raw."
@@ -286,7 +286,7 @@ def dags_ad_insights(
         direction=_ad_metadata_direction,
     )
 
-# ETL for Facebook Ads ad creative
+    # ETL for Facebook Ads ad creative
     DAGS_CREATIVE_ATTEMPTS = 3
     
     if not total_ad_ids:
@@ -306,7 +306,7 @@ def dags_ad_insights(
     
     for attempt in range(1, DAGS_CREATIVE_ATTEMPTS + 1):
         
-    # Extract        
+        # Extract        
         print(
             "🔄 [DAGS] Trigger to extract Facebook Ads ad creative for "
             f"{len(remaining_ad_ids)} ad_id(s) with "
@@ -330,7 +330,7 @@ def dags_ad_insights(
         if not failed_ad_ids:
             
             print(
-                "✅ [DAGS] Successfully triggered to Facebook ad creative extraction with "
+                "✅ [DAGS] Successfully triggered to Facebook Ads ad creative extraction with "
                 f"{len(set(pd.concat(dfs_ad_creative)["ad_id"].dropna()))}/{len(remaining_ad_ids)} row(s)."
             )
             
@@ -360,19 +360,19 @@ def dags_ad_insights(
         
         print(
             "🔄 [DAGS] Waiting "
-            f"{wait_to_retry} second(s) before retrying Facebook Ads ad creative with "
-                f"{attempt}/{DAGS_CREATIVE_ATTEMPTS} attempt(s)..."
-            )
+            f"{wait_to_retry} second(s) before retrying Facebook Ads ad creative extraction with "
+            f"{attempt}/{DAGS_CREATIVE_ATTEMPTS} attempt(s)..."
+        )
         
         time.sleep(wait_to_retry)
 
     df_ad_creatives = pd.concat(dfs_ad_creative, ignore_index=True)
 
-    # Transform
+        # Transform
 
-        # Nothing to transform with ad creative
+            # Nothing to transform with ad creative
 
-    # Load
+        # Load
     _ad_creative_direction = (
         f"{PROJECT}."
         f"{COMPANY}_dataset_facebook_api_raw."
@@ -380,7 +380,7 @@ def dags_ad_insights(
     )
 
     print(
-        "🔄 [DAGS] Trigger to load Facebook Ads ad creative for "
+        "🔄 [DAGS] Trigger to load Facebook Ads ad creative with "
         f"{len(df_ad_creatives)} row(s) to "
         f"{_ad_creative_direction}..."
     )
@@ -390,7 +390,7 @@ def dags_ad_insights(
         direction=_ad_creative_direction,
     )
 
-# ETL for Facebook Ads adset metadata
+    # ETL for Facebook Ads adset metadata
     DAGS_ADSET_ATTEMPTS = 3
 
     total_adset_ids = set(df_ad_metadatas["adset_id"].dropna().unique())
@@ -412,7 +412,7 @@ def dags_ad_insights(
     
     for attempt in range(1, DAGS_ADSET_ATTEMPTS + 1):
 
-    # Extract        
+        # Extract
         print(
             "🔄 [DAGS] Trigger to extract Facebook Ads adset metadata for "
             f"{len(remaining_adset_ids)} adset_id(s) with "
@@ -474,15 +474,15 @@ def dags_ad_insights(
 
     df_adset_metadatas = pd.concat(dfs_adset_metadata, ignore_index=True)
 
-    # Transform
+        # Transform
     print(
-        "🔁 [DAGS] Trigger to transform Facebook Ads adset metadata for "
+        "🔁 [DAGS] Trigger to transform Facebook Ads adset metadata with "
         f"{len(df_adset_metadatas)} row(s)..."
     )
 
     df_adset_metadatas = transform_adset_metadata(df_adset_metadatas)
 
-    # Load
+        # Load
     _adset_metadata_direction = (
         f"{PROJECT}."
         f"{COMPANY}_dataset_facebook_api_raw."
@@ -490,7 +490,7 @@ def dags_ad_insights(
     )        
     
     print(
-        "🔄 [DAGS] Trigger to load Facebook Ads adset metadata for "
+        "🔄 [DAGS] Trigger to load Facebook Ads adset metadata with "
         f"{len(df_adset_metadatas)} row(s) to direction "
         f"{_adset_metadata_direction}..."
     )
@@ -500,7 +500,7 @@ def dags_ad_insights(
         direction=_adset_metadata_direction,
     )
 
-# ETL for Facebook Ads campaign metadata
+    # ETL for Facebook Ads campaign metadata
     DAGS_CAMPAIGN_ATTEMPTS = 3
 
     total_campaign_ids = set(df_ad_metadatas["campaign_id"].dropna().unique())
@@ -522,7 +522,7 @@ def dags_ad_insights(
     
     for attempt in range(1, DAGS_CAMPAIGN_ATTEMPTS + 1):
 
-    # Extract
+        # Extract
         print(
             "🔄 [DAGS] Trigger to extract Facebook Ads campaign metadata for "
             f"{len(remaining_campaign_ids)} campaign_id(s) with "
@@ -546,24 +546,28 @@ def dags_ad_insights(
         if not failed_campaign_ids:
 
             print(
-                "✅ [DAGS] Successfully triggered Facebook campaign metadata extraction for "
+                "✅ [DAGS] Successfully triggered Facebook campaign metadata extraction with "
                 f"{len(set(pd.concat(dfs_campaign_metadata)["campaign_id"].dropna()))}/{len(remaining_campaign_ids)} row(s)."
             )
 
             break
 
         if not retryable:
+            
             print(
-                "❌ [DAGS] Failed to extract Facebook Ads campaign metadata for "
+                "❌ [DAGS] Failed to trigger Facebook Ads campaign metadata extraction for "
                 f"{len(remaining_campaign_ids)} campaign_id(s) due to unexpected non-retryable error then DAG execution will be suspended."
             )
+            
             break
 
         if attempt == DAGS_CAMPAIGN_ATTEMPTS:
+            
             print(
-                "❌ [DAGS] Failed to extract Facebook Ads campaign metadata for "
+                "❌ [DAGS] Failed to trigger Facebook Ads campaign metadata extraction for "
                 f"{len(remaining_campaign_ids)} campaign_id(s) due to exceeded attempt limit then DAG execution will be suspended."
             )
+            
             break
 
         remaining_campaign_ids = failed_campaign_ids
@@ -572,23 +576,23 @@ def dags_ad_insights(
         
         print(
             "🔄 [DAGS] Waiting "
-            f"{wait_to_retry} second(s) before retrying Facebook Ads API "
-                f"{attempt}/{DAGS_CAMPAIGN_ATTEMPTS} attempt(s)..."
-            )
+            f"{wait_to_retry} second(s) before retrying Facebook Ads campaign metadata extraction with "
+            f"{attempt}/{DAGS_CAMPAIGN_ATTEMPTS} attempt(s)..."
+        )
         
         time.sleep(wait_to_retry)
 
     df_campaign_metadatas = pd.concat(dfs_campaign_metadata, ignore_index=True)
 
-    # Transform
+        # Transform
     print(
-        "🔄 [DAGS] Trigger to transform Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to transform Facebook Ads campaign metadata with "
         f"{len(df_campaign_metadatas)} row(s)..."
     )
 
     df_campaign_metadatas = transform_campaign_metadata(df_campaign_metadatas)
 
-    # Load
+        # Load
     _campaign_metadata_direction = (
         f"{PROJECT}."
         f"{COMPANY}_dataset_facebook_api_raw."
@@ -596,10 +600,9 @@ def dags_ad_insights(
     )  
 
     print(
-        "🔄 [DAGS] Trigger to load Facebook Ads campaign metadata for "
+        "🔄 [DAGS] Trigger to load Facebook Ads campaign metadata with "
         f"{len(df_campaign_metadatas)} row(s) to"
-        f"{_campaign_metadata_direction}..."
-        
+        f"{_campaign_metadata_direction}..."        
     )
 
     load_campaign_metadata(
@@ -607,8 +610,10 @@ def dags_ad_insights(
         direction=_campaign_metadata_direction,
     )
 
-# Materialization with dbt
-    print("🔄 [DAGS] Trigger to materialize Facebook Ads ad insights with dbt...")
+    # Materialization with dbt
+    print(
+        "🔄 [DAGS] Trigger to materialize Facebook Ads ad insights with dbt..."
+    )
 
     dbt_facebook_ads(
         google_cloud_project=PROJECT,
