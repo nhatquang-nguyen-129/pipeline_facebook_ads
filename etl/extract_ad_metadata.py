@@ -27,23 +27,25 @@ def extract_ad_metadata(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened ad metadata records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads ad metadata records
     """
 
     # Validate input
     if not ad_ids:
+        
         print(
-            "⚠️ [EXTRACT] No input ad_ids for Facebook Ads account_id "
-            f"{account_id} then extraction will be suspended."
+            "⚠️ [EXTRACT] Failed to extract Facebook Ads ad metadata for account_id "
+            f"{account_id} due to no input ad_ids then extraction will be suspended."
         )
 
         return pd.DataFrame()
 
-    # Initialize Facebook Ads SDK client
+    # Initialize Facebook Ads client
     try:
+        
         print(
-            "🔍 [EXTRACT] Initializing Facebook Ads client with account_id "
+            "🔍 [EXTRACT] Initializing Facebook Ads client for account_id "
             f"{account_id}..."
         )
 
@@ -60,16 +62,20 @@ def extract_ad_metadata(
         )
 
     except Exception as e:
+        
         error = RuntimeError(
             "❌ [EXTRACT] Failed to initialize Facebook Ads client for account_id "
             f"{account_id} due to "
             f"{e}."
         )
+        
         error.retryable = False
+        
         raise error from e
     
     # Make Facebook Ads API call for ad account information
     try:
+        
         print(
             "🔍 [EXTRACT] Extracting Facebook Ads ad account information for account_id "
             f"{account_id}..."
