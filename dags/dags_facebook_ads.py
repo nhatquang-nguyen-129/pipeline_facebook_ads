@@ -23,7 +23,7 @@ def dags_facebook_ads(
         1. Initialize parallel execution with worker pool
         2. Submit campaign-level and ad-level tasks concurrently
         3. Monitor task completion using asynchronous future handling
-        4. Capture execution status and surface task-level failures
+        4. Capture execution status and task failures
         5. Finalize DAG execution with total runtime reporting
     ---
     Returns:
