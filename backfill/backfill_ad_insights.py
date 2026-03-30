@@ -43,7 +43,7 @@ def backfill():
         None
     """
 
-# CLI arguments parser for manual date range
+    # CLI arguments parser for manual date range
     parser = argparse.ArgumentParser(
         description="Manual Facebook Ads ETL executor"
     )
@@ -90,7 +90,7 @@ def backfill():
         f"{PROJECT}..."
     )
 
-# Initialize Google Secret Manager
+    # Initialize Google Secret Manager
     try:
 
         print(
@@ -114,7 +114,7 @@ def backfill():
             f"{e}."
         )
         
-# Resolve account_id from Google Secret Manager
+    # Resolve account_id from Google Secret Manager
     try:
         
         secret_account_id = (
@@ -149,7 +149,7 @@ def backfill():
             f"{e}."
         )
 
-# Resolve access_token from Google Secret Manager
+    # Resolve access_token from Google Secret Manager
     try:
         
         secret_token_id = (
@@ -181,7 +181,7 @@ def backfill():
             f"{e}."
         )        
    
-# Execute DAGS
+    # Execute DAGS
     dags_ad_insights(
         access_token=access_token,
         account_id=account_id,
@@ -189,7 +189,7 @@ def backfill():
         end_date=end_date
     )
 
-# Entrypoint
+    # Entrypoint
 if __name__ == "__main__":
     
     try:
