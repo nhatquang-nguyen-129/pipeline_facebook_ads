@@ -45,7 +45,7 @@ def dags_campaign_insights(
     """     
 
     print(
-        "🔄 [DAGS] Trigger to update Facebook Ads campaign insights with account_id "
+        "🔄 [DAGS] Trigger to update Facebook Ads campaign insights for account_id "
         f"{account_id} from "
         f"{start_date} to "
         f"{end_date}..."
