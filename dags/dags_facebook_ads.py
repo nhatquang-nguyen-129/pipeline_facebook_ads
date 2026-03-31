@@ -31,7 +31,7 @@ def dags_facebook_ads(
     """
 
     print(
-        "🔄 [DAGS] Trigger to update  Facebook Ads using ThreadPoolExecutor for account_id "
+        "🔄 [DAGS] Trigger to update Facebook Ads using ThreadPoolExecutor for account_id "
         f"{account_id} from "
         f"{start_date} to "
         f"{end_date} with max_workers "
@@ -39,6 +39,7 @@ def dags_facebook_ads(
     )
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        
         futures = [
             executor.submit(
                 fn,
@@ -54,4 +55,5 @@ def dags_facebook_ads(
         ]
         
         for future in futures:
+        
             future.result()
