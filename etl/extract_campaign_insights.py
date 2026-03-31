@@ -31,28 +31,11 @@ def extract_campaign_insights(
             Flattened Facebook Ads campaign insights records
     """
 
-    # Validate input
-    fields = [
-        "account_id",
-        "campaign_id",
-        "optimization_goal",
-        "spend",
-        "impressions",
-        "clicks",
-        "actions",
-        "date_start",
-        "date_stop",
-    ]
-
-    params = {
-        "time_range": {"since": start_date, "until": end_date},
-        "level": "campaign",
-    }
-
     # Initialize Facebook Ads client
     try:
+        
         print(
-            "🔍 [EXTRACT] Initializing Facebook Ads client with account_id "
+            "🔍 [EXTRACT] Initializing Facebook Ads client for account_id "
             f"{account_id}..."
         )
 
@@ -69,16 +52,37 @@ def extract_campaign_insights(
         )
 
     except Exception as e:
+        
         error = RuntimeError(
             "❌ [EXTRACT] Failed to initialize Facebook Ads client for account_id "
             f"{account_id} due to "
             f"{e}."
         )
+        
         error.retryable = False
+        
         raise error from e
 
     # Make Facebook Ads API call for campaign insights
+    fields = [
+        "account_id",
+        "campaign_id",
+        "optimization_goal",
+        "spend",
+        "impressions",
+        "clicks",
+        "actions",
+        "date_start",
+        "date_stop",
+    ]
+
+    params = {
+        "time_range": {"since": start_date, "until": end_date},
+        "level": "campaign",
+    }    
+    
     try:
+        
         print(
             "🔍 [EXTRACT] Extracting Facebook Ads campaign insights for account_id "
             f"{account_id} from "
@@ -100,11 +104,12 @@ def extract_campaign_insights(
         )
 
         rows = [dict(row) for row in insights]
+        
         df = pd.DataFrame(rows)
 
         print(
-            "✅ [EXTRACT] Successfully extracted "
-            f"{len(df)} row(s) of Facebook Ads campaign insights for account_id "
+            "✅ [EXTRACT] Successfully extracted Facebook Ads campaign insights with "
+            f"{len(df)} row(s) for account_id "
             f"{account_id} from "
             f"{start_date} to "
             f"{end_date}."
@@ -113,20 +118,27 @@ def extract_campaign_insights(
         return df
 
     except FacebookRequestError as e:
+        
         api_error_code = None
+        
         http_status = None
 
         try:
+        
             api_error_code = e.api_error_code()
+        
             http_status = e.http_status()
+        
         except Exception:
+        
             pass
 
         # Expired token
         if api_error_code == 190:
+        
             error = RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
-                f"{account_id} due to expired or invalid access token."
+                f"{account_id} due to expired or invalid access token then manual re-authentication is required."
             )
             error.retryable = False
             raise error from e

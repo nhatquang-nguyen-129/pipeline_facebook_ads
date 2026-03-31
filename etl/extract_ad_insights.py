@@ -140,7 +140,7 @@ def extract_ad_insights(
             
             error = RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads ad insights for account_id "
-                    f"{account_id} due to expired or invalid access token then manual re-authentication is required."
+                f"{account_id} due to expired or invalid access token then manual re-authentication is required."
             )
             
             error.retryable = False
