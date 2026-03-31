@@ -19,17 +19,21 @@ def transform_adset_metadata(
         5. Enrich Dataframe
     ---
     Returns:
-        1. DataFrame:
-            Enforced adset metadata records
+        1. pandas.DataFrame:
+            Enforced Facebook Ads adset metadata records
     """
 
     print(
-        "🔄 [TRANSFORM] Transforming "
-        f"{len(df)} row(s) of Facebook Ads adset metadata..."
+        "🔄 [TRANSFORM] Transforming Facebook Ads adset metadata with "
+        f"{len(df)} row(s)..."
     )
 
     if df.empty:
-        print("⚠️ [TRANSFORM] Empty Facebook Ads adset metadata then transformation will be suspended.")
+        
+        print(
+            "⚠️ [LOADER] Failed to transform Facebook Ads adset metadata due to no input DataFrame then transformation will be suspended."
+        )
+        
         return df
 
     required_cols = {
@@ -39,6 +43,7 @@ def transform_adset_metadata(
         }
     
     missing = required_cols - set(df.columns)
+    
     if missing:
         raise ValueError (
             "❌ [TRANSFORM] Failed to transform Facebook Ads adset metadata due to missing columns "
@@ -46,6 +51,7 @@ def transform_adset_metadata(
         )
 
     df = df.copy()
+    
     df = df.assign(
         location=lambda df: df["adset_name"].fillna("").str.split("|").str[0].fillna("unknown"),
         gender=lambda df: df["adset_name"].fillna("").str.split("|").str[1].fillna("unknown"),
@@ -59,8 +65,8 @@ def transform_adset_metadata(
     )  
 
     print(
-        "✅ [TRANSFORM] Successfully transformed "
-        f"{len(df)} row(s) of Facebook Ads adset metadata."
+        "✅ [TRANSFORM] Successfully transformed Facebook Ads adset metadata with "
+        f"{len(df)} row(s)."
     )
 
     return df
