@@ -27,8 +27,8 @@ def extract_campaign_metadata(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened campaign metadata records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads campaign metadata records
     """
 
     # Validate input
