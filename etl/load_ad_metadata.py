@@ -27,12 +27,16 @@ def load_ad_metadata(
     """      
 
     if df.empty:
-        print("⚠️ [LOADER] Empty Facebook Ads ad metadata then loading will be suspended.")
+        
+        print(
+            "⚠️ [LOADER] Failed to load Facebook Ads ad metadata due to no input DataFrame then loading will be suspended."
+        )
+        
         return
 
     print(
-        "🔄 [LOADER] Triggering to load "
-        f"{len(df)} row(s) of Facebook Ads ad metadata to Google BigQuery table "
+        "🔄 [LOADER] Loading Facebook Ads ad metadata with "
+        f"{len(df)} row(s) to Google BigQuery table "
         f"{direction}..."
     )
     
