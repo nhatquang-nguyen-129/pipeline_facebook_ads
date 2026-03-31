@@ -27,8 +27,8 @@ def extract_campaign_insights(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened campaign insights records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads campaign insights records
     """
 
     # Validate input

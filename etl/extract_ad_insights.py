@@ -27,8 +27,8 @@ def extract_ad_insights(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened ad insights records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads ad insights records
     """
 
     # Initialize Facebook Ads client
