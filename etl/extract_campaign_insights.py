@@ -140,7 +140,9 @@ def extract_campaign_insights(
                 "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
                 f"{account_id} due to expired or invalid access token then manual re-authentication is required."
             )
+            
             error.retryable = False
+            
             raise error from e
 
         # Retryable API error
@@ -154,6 +156,7 @@ def extract_campaign_insights(
                 80000,
             }
         ):
+            
             error = RuntimeError(
                 "⚠️ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
                 f"{account_id} from "
@@ -161,7 +164,9 @@ def extract_campaign_insights(
                 f"{end_date} due to API error "
                 f"{e} then this request is eligible to retry."
             )
+            
             error.retryable = True
+            
             raise error from e
 
         # Non-retryable API error
@@ -172,11 +177,14 @@ def extract_campaign_insights(
             f"{end_date} due to API error "
             f"{e} then this request is not eligible to retry."
         )
+        
         error.retryable = False
+        
         raise error from e
 
         # Unknown non-retryable error
     except Exception as e:
+        
         error = RuntimeError(
             "❌ [EXTRACT] Failed to extract Facebook Ads campaign insights for account_id "
             f"{account_id} from "
@@ -184,5 +192,7 @@ def extract_campaign_insights(
             f"{end_date} due to "
             f"{e}."
         )
+        
         error.retryable = False
+        
         raise error from e
