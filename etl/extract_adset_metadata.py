@@ -27,8 +27,8 @@ def extract_adset_metadata(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened adset metadata records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads adset metadata records
     """
 
     # Validate input
