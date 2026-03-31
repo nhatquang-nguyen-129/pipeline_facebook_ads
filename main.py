@@ -25,24 +25,28 @@ if not all([
     ACCOUNT,
     MODE
 ]):
-    raise EnvironmentError("❌ [MAIN] Failed to execute Facebook Ads main entrypoint due to missing required environment variables.")
+    
+    raise EnvironmentError(
+        "❌ [MAIN] Failed to execute Facebook Ads main entrypoint due to missing required environment variables."
+    )
 
 def main():
     """
     Main Facebook Ads entrypoint
-    ---------
+    ---
     Principles:
         1. Resolve execution time window from MODE
         2. Read & validate OS environment variables
         3. Load secrets from GCP Secret Manager
         4. Resolve account_id and access_token
         5. Dispatch execution to DAG orchestrator
+    ---
     Returns:
         None
     """
     
     print(
-        "🔄 [MAIN] Triggering to update Facebook Ads for "
+        "🔄 [MAIN] Triggering to execute Facebook Ads main entrypoint for "
         f"{ACCOUNT} account of "
         f"{DEPARTMENT} department in "
         f"{COMPANY} company with "
@@ -50,31 +54,43 @@ def main():
         f"{PROJECT}..."
     )
 
-# Resolve input time range
+    # Resolve input time range
     ICT = ZoneInfo("Asia/Ho_Chi_Minh")
+    
     today = datetime.now(ICT)
     
     if MODE == "today":
+    
         start_date = end_date = today.strftime("%Y-%m-%d")
 
     elif MODE == "last3days":
+    
         start_date = (today - timedelta(days=3)).strftime("%Y-%m-%d")
+    
         end_date = (today - timedelta(days=1)).strftime("%Y-%m-%d")
 
     elif MODE == "last7days":
+
         start_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
+
         end_date = (today - timedelta(days=1)).strftime("%Y-%m-%d")
 
     elif MODE == "thismonth":
+
         start_date = today.replace(day=1).strftime("%Y-%m-%d")
+
         end_date = today.strftime("%Y-%m-%d")
 
     elif MODE == "lastmonth":
+
         last_month_end = today.replace(day=1) - timedelta(days=1)
+
         start_date = last_month_end.replace(day=1).strftime("%Y-%m-%d")
+
         end_date = last_month_end.strftime("%Y-%m-%d")
 
     else:
+
         raise ValueError(
             "⚠️ [MAIN] Failed to trigger Facebook Ads main entrypoint due to unsupported mode "
             f"{MODE}."
@@ -87,26 +103,33 @@ def main():
         f"{end_date}."
     )
 
-# Initialize Google Secret Manager
+    # Initialize Google Secret Manager
     try:
-        print("🔍 [MAIN] Initialize Google Secret Manager client...")
         
+        print(
+            "🔍 [MAIN] Initialize Google Secret Manager client..."
+        )
+
         google_secret_client = secretmanager.SecretManagerServiceClient(
             client_options=ClientOptions(
                 api_endpoint="secretmanager.googleapis.com"
             )
         )
 
-        print("✅ [MAIN] Successfully initialized Google Secret Manager client.")
+        print(
+            "✅ [MAIN] Successfully initialized Google Secret Manager client."
+        )
     
     except Exception as e:
+        
         raise RuntimeError(
             "❌ [MAIN] Failed to initialize Google Secret Manager client due to."
             f"{e}."
         )
         
-# Resolve account_id from Google Secret Manager
+    # Resolve account_id from Google Secret Manager
     try:
+    
         secret_account_id = (
             f"{COMPANY}_secret_{DEPARTMENT}_facebook_account_id_{ACCOUNT}"
         )
@@ -123,6 +146,7 @@ def main():
             name=secret_account_name,
             timeout=10.0,
         )
+    
         account_id = secret_account_response.payload.data.decode("utf-8")
         
         print(
@@ -131,16 +155,19 @@ def main():
         )
     
     except Exception as e:
+    
         raise RuntimeError(
             "❌ [MAIN] Failed to retrieve Facebook Ads account_id from Google Secret Manager due to "
             f"{e}."
         )
 
-# Resolve access_token from Google Secret Manager
+    # Resolve access_token from Google Secret Manager
     try:
+    
         secret_token_id = (
             f"{COMPANY}_secret_all_facebook_token_access_user"
         )
+    
         secret_token_name = (
             f"projects/{PROJECT}/secrets/{secret_token_id}/versions/latest"
         )
@@ -153,9 +180,12 @@ def main():
         secret_token_response = google_secret_client.access_secret_version(
             name=secret_token_name
         )
+    
         access_token = secret_token_response.payload.data.decode("utf-8")
         
-        print("✅ [MAIN] Successfully retrieved Facebook Ads access token from Google Secret Manager.")
+        print(
+            "✅ [MAIN] Successfully retrieved Facebook Ads access token from Google Secret Manager."
+        )
     
     except Exception as e:
         raise RuntimeError(
@@ -163,7 +193,7 @@ def main():
             f"{e}."
         )        
 
-# Execute DAGS
+    # Execute DAGS
     dags_facebook_ads(
         access_token=access_token,
         account_id=account_id,
@@ -171,9 +201,13 @@ def main():
         end_date=end_date
     )
 
-# Entrypoint
+    # Entrypoint
 if __name__ == "__main__":
+    
     try:
+    
         main()
+    
     except Exception:
+    
         sys.exit(1)
