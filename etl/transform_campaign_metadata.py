@@ -31,7 +31,7 @@ def transform_campaign_metadata(
     if df.empty:
         
         print(
-            "⚠️ [LOADER] Failed to transform Facebook Ads campaign metadata due to no input DataFrame then transformation will be suspended."
+            "⚠️ [TRANSFORM] Failed to transform Facebook Ads campaign metadata due to no input DataFrame then transformation will be suspended."
         )
         
         return df
