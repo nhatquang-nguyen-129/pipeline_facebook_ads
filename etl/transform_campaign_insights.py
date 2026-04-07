@@ -22,31 +22,39 @@ def transform_campaign_insights(
         5. Enforce numeric schema
     ---
     Returns:
-        1. DataFrame:
-            Enforced campaign insights records
+        1. pandas.DataFrame:
+            Enforced Facebook Ads campaign insights records
     """
 
     print(
-        "🔄 [TRANSFORM] Transforming "
-        f"{len(df)} row(s) of Facebook Ads campaign insights..."
+        "🔄 [TRANSFORM] Transforming Facebook Ads campaign insights with "
+        f"{len(df)} row(s)..."
     )
 
     if df.empty:
-        print("⚠️ [TRANSFORM] Empty Facebook Ads campaign insights then transformation will be suspended.")
+        
+        print(
+            "⚠️ [TRANSFORM] Failed to transform Facebook Ads campaign insights due to no input DataFrame then transformation will be suspended."
+        )
+        
         return df
 
+    # Validate columns
     required_cols = {
         "date_start",
         "date_stop"
     }
 
     missing = required_cols - set(df.columns)
+
     if missing:
+
         raise ValueError(
             "❌ [TRANSFORM] Failed to transform Facebook Ads campaign insights due to missing columns "
             f"{missing} then transformation will be suspended."
         )
 
+    # Parse action columns
     _MAPPING_GOAL_ACTION = {
         "REACH": "reach",
         "IMPRESSIONS": "impressions",
@@ -69,86 +77,133 @@ def transform_campaign_insights(
         "QUALITY_LEAD": "lead",
     }
 
-    # Parse action columns
     parsed_actions = []
 
     for x in df.get("actions", []):
+        
         if isinstance(x, list):
+        
             parsed_actions.append(x)
+        
         elif x is None or (isinstance(x, float) and np.isnan(x)):
+        
             parsed_actions.append([])
+        
         elif isinstance(x, str):
+        
             cleaned = x.strip().lower()
+        
             if cleaned in ["", "none", "null"]:
+        
                 parsed_actions.append([])
+        
             else:
+        
                 try:
+        
                     normalized = re.sub(
                         r"(?<!\")'([^']*?)':",
                         r'"\1":',
                         str(x).replace("'", '"').strip()
                     )
+        
                     parsed = json.loads(normalized)
+        
                     parsed_actions.append(parsed if isinstance(parsed, list) else [])
+        
                 except Exception:
+        
                     parsed_actions.append([])
+        
         else:
+        
             parsed_actions.append([])
 
     df["actions"] = parsed_actions
 
     # Parse result columns
     results_value = []
+    
     results_type = []
 
     for _, row in df.iterrows():
+    
         optimization_goal = row.get("optimization_goal")
+    
         actions = row.get("actions", [])
 
         if not isinstance(actions, list):
+    
             actions = []
 
         value = None
+    
         rtype = None
 
         if optimization_goal in _MAPPING_GOAL_ACTION:
+    
             mapped_action = _MAPPING_GOAL_ACTION[optimization_goal]
 
             if mapped_action in {"reach", "impressions"}:
+    
                 value = pd.to_numeric(row.get("impressions", 0), errors="coerce")
+    
                 rtype = "impressions"
+    
             else:
+    
                 for act in actions:
+    
                     if not isinstance(act, dict):
+    
                         continue
+    
                     if act.get("action_type") == mapped_action:
+    
                         value = pd.to_numeric(act.get("value", 0), errors="coerce")
+    
                         rtype = (
                             "follows_or_likes"
                             if mapped_action == "like"
                             else mapped_action
                         )
+    
                         break
 
         if value is None:
+    
             for act in actions:
+    
                 if not isinstance(act, dict):
+    
                     continue
+    
                 if act.get("action_type") == "onsite_conversion.lead_grouped":
+    
                     value = pd.to_numeric(act.get("value", 0), errors="coerce")
+    
                     rtype = "onsite_conversion.lead_grouped"
+    
                     break
 
         if value is None:
+    
             for act in actions:
+    
                 if not isinstance(act, dict):
+    
                     continue
+    
                 if act.get("action_type") == "lead":
+    
                     value = pd.to_numeric(act.get("value", 0), errors="coerce")
+    
                     rtype = "lead"
+    
                     break
 
         results_value.append(value)
+
         results_type.append(rtype)
 
     df["result"] = (
@@ -163,24 +218,35 @@ def transform_campaign_insights(
 
     # Parse performance columns
     messaging_values = []
+
     purchase_values = []
 
     for actions in df["actions"]:
+
         msg_val = 0
+
         pur_val = 0
 
         for act in actions:
+
             if not isinstance(act, dict):
+
                 continue
+
             if act.get("action_type") == "onsite_conversion.messaging_conversation_started_7d":
+
                 msg_val = pd.to_numeric(act.get("value", 0), errors="coerce")
+
             elif act.get("action_type") == "purchase":
+
                 pur_val = pd.to_numeric(act.get("value", 0), errors="coerce")
 
         messaging_values.append(int(msg_val) if not pd.isna(msg_val) else 0)
+
         purchase_values.append(int(pur_val) if not pd.isna(pur_val) else 0)
 
     df["messaging_conversations_started"] = messaging_values
+
     df["purchase"] = purchase_values
 
     # Normalize numeric metrics
@@ -189,14 +255,20 @@ def transform_campaign_insights(
         "clicks", 
         "spend"
     ]:
+
         if col in df.columns:
+
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
     # Normalize date dimension
     if "date_start" in df.columns:
+
         dt = pd.to_datetime(df["date_start"], errors="coerce", utc=True)
+
         df["date"] = dt.dt.floor("D")
+
         df["year"] = dt.dt.year
+
         df["month"] = dt.dt.strftime("%Y-%m")
 
     # Drop raw columns
@@ -211,8 +283,8 @@ def transform_campaign_insights(
     )
 
     print(
-        "✅ [TRANSFORM] Successfully transformed "
-        f"{len(df)} row(s) of Facebook Ads campaign insights."
+        "✅ [TRANSFORM] Successfully transformed Facebook Ads campaign insights with "
+        f"{len(df)} row(s)."
     )
 
     return df

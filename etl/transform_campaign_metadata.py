@@ -19,17 +19,21 @@ def transform_campaign_metadata(
         5. Enrich Dataframe
     ---
     Returns:
-        1. DataFrame:
-            Enforced campaign metadata records
+        1. pandas.DataFrame:
+            Enforced Facebook Ads campaign metadata records
     """
 
     print(
-        "🔄 [TRANSFORM] Transforming "
-        f"{len(df)} row(s) of Facebook Ads campaign metadata..."
+        "🔄 [TRANSFORM] Transforming Facebook Ads campaign metadata with "
+        f"{len(df)} row(s)..."
     )
 
     if df.empty:
-        print("⚠️ [TRANSFORM] Empty Facebook Ads campaign metadata then transformation will be suspended.")
+        
+        print(
+            "⚠️ [TRANSFORM] Failed to transform Facebook Ads campaign metadata due to no input DataFrame then transformation will be suspended."
+        )
+        
         return df
 
     required_cols = {
@@ -39,14 +43,18 @@ def transform_campaign_metadata(
         }
     
     missing = required_cols - set(df.columns)
+    
     if missing:
+    
         raise ValueError (
             "❌ [TRANSFORM] Failed to transform Facebook Ads campaign metadata due to missing columns "
             f"{missing} then transformation will be suspended."
         )
 
     df = df.copy()
+    
     df["platform"] = "Facebook"
+    
     df = df.assign(
         objective=df["campaign_name"].fillna("").str.split("|").str[0].fillna("unknown"),
         budget_group=df["campaign_name"].fillna("").str.split("|").str[1].fillna("unknown"),        
@@ -58,8 +66,8 @@ def transform_campaign_metadata(
     )
 
     print(
-        "✅ [TRANSFORM] Successfully transformed "
-        f"{len(df)} row(s) of Facebook Ads campaign metadata."
+        "✅ [TRANSFORM] Successfully transformed Facebook Ads campaign metadata with "
+        f"{len(df)} row(s)."
     )
 
     return df

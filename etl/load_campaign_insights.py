@@ -27,14 +27,18 @@ def load_campaign_insights(
     """    
 
     if df.empty:
-        print("⚠️ [LOADER] Empty Facebook Ads campaign insights then loading will be suspended.")
+        
+        print(
+            "⚠️ [LOADER] Failed to load Facebook Ads campaign insights due to no input DataFrame then loading will be suspended."
+        )
+        
         return
 
     print(
-        "🔄 [LOADER] Triggering to load "
-        f"{len(df)} row(s) of Facebook Ads campaign insights to Google BigQuery table "
+        "🔄 [LOADER] Loading Facebook Ads campaign insights with "
+        f"{len(df)} row(s) to Google BigQuery table "
         f"{direction}..."
-        )
+    )
     
     loader = internalGoogleBigqueryLoader()
 

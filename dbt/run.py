@@ -39,6 +39,7 @@ def dbt_facebook_ads(
     )
 
     try:
+        
         result = subprocess.run(
             cmd,
             cwd="dbt",
@@ -51,6 +52,7 @@ def dbt_facebook_ads(
         print(result.stdout)
 
         if result.stderr:
+        
             print(result.stderr)
 
         print(
@@ -60,6 +62,7 @@ def dbt_facebook_ads(
         )
 
     except subprocess.CalledProcessError as e:
+        
         raise RuntimeError(
             "❌ [DBT] Failed to execute dbt build for Facebook Ads "
             f"{select} insights to Google Cloud Project "

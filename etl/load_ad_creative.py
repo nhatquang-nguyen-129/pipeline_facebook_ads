@@ -27,12 +27,16 @@ def load_ad_creative(
     """      
 
     if df.empty:
-        print("⚠️ [LOADER] Empty Facebook Ads ad creative then loading will be suspended.")
+        
+        print(
+            "⚠️ [LOADER] Failed to load Facebook Ads ad creative due to no input DataFrame then loading will be suspended."
+        )
+        
         return
 
     print(
-        "🔄 [LOADER] Triggering to load "
-        f"{len(df)} row(s) of Facebook Ads ad creative to Google BigQuery table "
+        "🔄 [LOADER] Loading Facebook Ads ad creative with "
+        f"{len(df)} row(s) to Google BigQuery table "
         f"{direction}..."
     )
     

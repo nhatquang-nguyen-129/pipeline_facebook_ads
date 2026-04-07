@@ -26,7 +26,7 @@
 
 - The extractor converts extracted records into `pandas.DataFrame`
 
-- The extractor propagates structured error metadata using error.retryable flag to support orchestration-level retry logic
+- The extractor propagates structured error metadata using `error.retryable` flag to support orchestration-level retry logic
 
 - The extractor normalizes account identifiers by enforcing `act_{account_id}` prefix before API invocation
 

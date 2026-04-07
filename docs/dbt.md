@@ -4,7 +4,7 @@
 
 - Use **dbt** to build Facebook Ads analytics-ready **materialized tables** in **Google BigQuery**
 
-- Used **dbt** only for **SQL transformations** and all ELT processes are handled upstream
+- Used **dbt** only for **SQL transformations** and all ETL processes are handled upstream
 
 - Join Facebook Ads campaign insights fact tables with campaign metadata dim table
 

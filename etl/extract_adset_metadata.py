@@ -27,23 +27,25 @@ def extract_adset_metadata(
         5. Enforce List[dict] to DataFrame
     ---
     Returns:
-        1. DataFrame:
-            Flattened adset metadata records
+        1. pandas.DataFrame:
+            Flattened Facebook Ads adset metadata records
     """
 
     # Validate input
     if not adset_ids:
+        
         print(
-            "⚠️ [EXTRACT] No input adset_ids for Facebook Ads account_id "
-            f"{account_id} then extraction will be suspended."
+            "⚠️ [EXTRACT] Failed to extract Facebook Ads adset metadata for account_id "
+            f"{account_id} due to no input adset_ids then extraction will be suspended."
         )
 
         return pd.DataFrame()
 
-    # Initialize Facebook Ads SDK client
+    # Initialize Facebook Ads client
     try:
+
         print(
-            "🔍 [EXTRACT] Initializing Facebook Ads client with account_id "
+            "🔍 [EXTRACT] Initializing Facebook Ads client for account_id "
             f"{account_id}..."
         )
 
@@ -60,18 +62,22 @@ def extract_adset_metadata(
         )
 
     except Exception as e:
+        
         error = RuntimeError(
             "❌ [EXTRACT] Failed to initialize Facebook Ads client for account_id "
             f"{account_id} due to "
             f"{e}."
         )
+        
         error.retryable = False
+        
         raise error from e
     
     # Make Facebook Ads API call for ad account information
     try:
+        
         print(
-            "🔍 [EXTRACT] Extracting Facebook Ads ad account information for account_id "
+            "🔍 [EXTRACT] Extracting Facebook Ads account_name for account_id "
             f"{account_id}..."
         )
 
@@ -94,22 +100,31 @@ def extract_adset_metadata(
         )
 
     except FacebookRequestError as e:
+        
         api_error_code = None
+        
         http_status = None
 
         try:
+        
             api_error_code = e.api_error_code()
+        
             http_status = e.http_status()
+        
         except Exception:
+        
             pass
 
         # Expired token
         if api_error_code == 190:
+            
             error = RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
-                f"{account_id} due to expired or invalid access token."
+                f"{account_id} due to expired or invalid access token then manual re-authentication is required."
             )
+            
             error.retryable = False
+            
             raise error from e
 
         # Retryable API error
@@ -123,12 +138,15 @@ def extract_adset_metadata(
                 80000
             }
         ):
+            
             error = RuntimeError(
                 "⚠️ [EXTRACT] Failed to extract Facebook Ads account_name for account_id "
                 f"{account_id} due to API error "
                 f"{e} then this request is eligible to retry."
             )
+            
             error.retryable = True
+            
             raise error from e
 
         # Non-retryable API error
@@ -137,7 +155,9 @@ def extract_adset_metadata(
             f"{account_id} due to API error "
             f"{e} then this request is not eligible to retry."
         )
+        
         error.retryable = False
+        
         raise error from e
 
         # Unknown non-retryable error
@@ -147,7 +167,9 @@ def extract_adset_metadata(
             f"{account_id} due to "
             f"{e}."
         )
+        
         error.retryable = False
+        
         raise error from e
 
     # Make Facebook Ads API call for adset metadata
@@ -160,7 +182,9 @@ def extract_adset_metadata(
     )
 
     for adset_id in adset_ids:
+
         try:
+
             adset = AdSet(
                 adset_id,
                 api=adset_metadata_api,
@@ -184,22 +208,30 @@ def extract_adset_metadata(
             )
 
         except FacebookRequestError as e:
+
             api_error_code = None
+
             http_status = None
 
             try:
+
                 api_error_code = e.api_error_code()
+
                 http_status = e.http_status()
             except Exception:
+
                 pass
 
         # Expired token
             if api_error_code == 190:
+                
                 error = RuntimeError(
                     "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for account_id "
-                    f"{account_id} due to expired or invalid access token."
+                    f"{account_id} due to expired or invalid access token then manual re-authentication is required."
                 )
+                
                 error.retryable = False
+
                 raise error from e
 
         # Retryable API error
@@ -213,12 +245,15 @@ def extract_adset_metadata(
                     80000,
                 }
             ):
+                
                 error = RuntimeError(
                     "⚠️ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
                     f"{adset_id} due to API error "
                     f"{e} then this request is eligible to retry."
                 )
+                
                 error.retryable = True
+
                 raise error from e
 
         # Non-retryable API error
@@ -227,24 +262,30 @@ def extract_adset_metadata(
                 f"{adset_id} due to API error "
                 f"{e} then this request is not eligible to retry."
             )
+            
             error.retryable = False
+            
             raise error from e
 
         # Unknown non-retryable error
         except Exception as e:
+            
             error = RuntimeError(
                 "❌ [EXTRACT] Failed to extract Facebook Ads adset metadata for adset_id "
                 f"{adset_id} due to "
                 f"{e}."
             )
+            
             error.retryable = False
+            
             raise error from e
 
     df = pd.DataFrame(rows)
 
     print(
-        "✅ [EXTRACT] Successfully extracted "
-        f"{len(df)}/{len(adset_ids)} row(s) of Facebook Ads adset metadata."
+        "✅ [EXTRACT] Successfully extracted Facebook Ads adset metadata for account_id "
+        f"{account_id} with "
+        f"{len(df)}/{len(adset_ids)} row(s)."
     )
 
     return df
