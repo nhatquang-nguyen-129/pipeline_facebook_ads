@@ -6,6 +6,7 @@ sys.path.append(str(ROOT_FOLDER_LOCATION))
 
 import argparse
 from datetime import datetime
+import traceback
 
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
@@ -197,6 +198,10 @@ if __name__ == "__main__":
     
         backfill()
     
-    except Exception:
-    
+    except Exception as e:
+        
+        print(f"{e}")
+        
+        traceback.print_exc()
+        
         sys.exit(1)
