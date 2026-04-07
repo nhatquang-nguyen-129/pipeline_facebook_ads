@@ -34,7 +34,7 @@ def transform_campaign_insights(
     if df.empty:
         
         print(
-            "⚠️ [LOADER] Failed to transform Facebook Ads campaign insights due to no input DataFrame then transformation will be suspended."
+            "⚠️ [TRANSFORM] Failed to transform Facebook Ads campaign insights due to no input DataFrame then transformation will be suspended."
         )
         
         return df
