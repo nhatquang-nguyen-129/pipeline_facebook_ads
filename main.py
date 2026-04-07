@@ -4,8 +4,12 @@ from pathlib import Path
 ROOT_FOLDER_LOCATION = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT_FOLDER_LOCATION))
 
-from datetime import datetime, timedelta
+from datetime import (
+    datetime, 
+    timedelta
+)
 from zoneinfo import ZoneInfo
+import traceback
 
 from google.cloud import secretmanager
 from google.api_core.client_options import ClientOptions
@@ -188,6 +192,7 @@ def main():
         )
     
     except Exception as e:
+        
         raise RuntimeError(
             "❌ [MAIN] Failed to retrieve Facebook Ads access token from Google Secret Manager due to "
             f"{e}."
@@ -208,6 +213,10 @@ if __name__ == "__main__":
     
         main()
     
-    except Exception:
-    
+    except Exception as e:
+        
+        print(f"{e}")
+        
+        traceback.print_exc()
+        
         sys.exit(1)
