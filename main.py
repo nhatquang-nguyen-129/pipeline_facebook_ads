@@ -132,14 +132,15 @@ def main():
         )
         
     # Resolve account_id from Google Secret Manager
-    try:
+    secret_account_id = (
+        f"{COMPANY}_secret_{DEPARTMENT}_facebook_account_id_{ACCOUNT}"
+    )
     
-        secret_account_id = (
-            f"{COMPANY}_secret_{DEPARTMENT}_facebook_account_id_{ACCOUNT}"
-        )
-        secret_account_name = (
-            f"projects/{PROJECT}/secrets/{secret_account_id}/versions/latest"
-        )
+    secret_account_name = (
+        f"projects/{PROJECT}/secrets/{secret_account_id}/versions/latest"
+    )
+
+    try:
         
         print(
             "🔍 [MAIN] Retrieving Facebook Ads secret_account_id "
@@ -166,15 +167,15 @@ def main():
         )
 
     # Resolve access_token from Google Secret Manager
+    secret_token_id = (
+        f"{COMPANY}_secret_all_facebook_token_access_user"
+    )
+
+    secret_token_name = (
+        f"projects/{PROJECT}/secrets/{secret_token_id}/versions/latest"
+    )
+
     try:
-    
-        secret_token_id = (
-            f"{COMPANY}_secret_all_facebook_token_access_user"
-        )
-    
-        secret_token_name = (
-            f"projects/{PROJECT}/secrets/{secret_token_id}/versions/latest"
-        )
         
         print(
             "🔍 [MAIN] Retrieving Facebook Ads access token with secret_token_name "
