@@ -104,6 +104,10 @@ def dags_campaign_insights(
         
                 dags_split_month = pd.to_datetime(insights["date"].dropna().iloc[0]).month
 
+                daily_campaign_ids = set(insights["campaign_id"].unique())
+                
+                total_campaign_ids.update(daily_campaign_ids)
+
                 _campaign_insights_direction = (
                     f"{PROJECT}."
                     f"{COMPANY}_dataset_facebook_api_raw."
@@ -116,10 +120,6 @@ def dags_campaign_insights(
                     f"{dags_split_date} to direction "
                     f"{_campaign_insights_direction}..."
                 )
-
-                daily_campaign_ids = set(insights["campaign_id"].unique())
-                
-                total_campaign_ids.update(daily_campaign_ids)
 
                 load_campaign_insights(
                     df=insights,
@@ -143,7 +143,7 @@ def dags_campaign_insights(
                     
                     raise RuntimeError(
                         f"❌ [DAGS] Failed to trigger Facebook Ads campaign insights extraction for "
-                        f"{dags_split_date} due to unexpected error then DAG execution will be suspended."
+                        f"{dags_split_date} due to non-retryable error then DAG execution will be suspended."
                     ) from e
 
                 if attempt == DAGS_INSIGHTS_ATTEMPTS:
@@ -229,7 +229,7 @@ def dags_campaign_insights(
             
             print(
                 "❌ [DAGS] Failed to trigger Facebook Ads campaign metadata extraction for "
-                f"{len(remaining_campaign_ids)} campaign_id(s) due to unexpected non-retryable error then DAG execution will be suspended."
+                f"{len(remaining_campaign_ids)} campaign_id(s) due to non-retryable error then DAG execution will be suspended."
             )
             
             break
