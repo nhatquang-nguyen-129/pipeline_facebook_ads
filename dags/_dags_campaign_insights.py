@@ -297,5 +297,5 @@ def dags_campaign_insights(
 
     dbt_facebook_ads(
         google_cloud_project=PROJECT,
-        select="tag:mart,tag:campaign"
+        select="tag:campaign"
     )
