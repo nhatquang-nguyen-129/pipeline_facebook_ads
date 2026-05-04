@@ -50,7 +50,7 @@ def main():
     """
     
     print(
-        "🔄 [MAIN] Triggering to execute Facebook Ads main entrypoint for "
+        "🔄 [MAIN] Triggering to execute Facebook Ads main entrypoint from "
         f"{ACCOUNT} account of "
         f"{DEPARTMENT} department in "
         f"{COMPANY} company with "
