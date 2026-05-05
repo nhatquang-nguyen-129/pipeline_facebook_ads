@@ -18,7 +18,7 @@
 
 ### Runtime Contract
 
- - The following environment variables `COMPANY`, `PROJECT`, `DEPARTMENT` and `ACCOUNT` must be provided
+- The following environment variables `COMPANY`, `PROJECT`, `DEPARTMENT` and `ACCOUNT` must be provided
 
 - The DAGS execution time logic is controlled externally by `main.py` with predefined runtime modes
 
