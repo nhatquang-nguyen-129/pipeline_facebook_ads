@@ -345,12 +345,7 @@ class internalGoogleBigqueryLoader:
                     f"{col} with dtype "
                     f"{dtype} due to "
                     f"{e}."
-                )
-
-        print(
-            "✅ [PLUGIN] Successfully inferred DataFrame schema for "
-            f"{len(df)} row(s)."
-        )
+                ) from e
 
         return schema
 
@@ -399,7 +394,15 @@ class internalGoogleBigqueryLoader:
         
         try:
 
-            schema = self._infer_df_schema(df)
+            try:
+                
+                schema = self._infer_df_schema(df)
+            
+            except Exception as e:
+            
+                raise RuntimeError(
+                    "❌ [PLUGIN] Failed to create Google BigQuery table due to schema inference failure."
+                ) from e
 
             print(
                 "🔍 [PLUGIN] Creating Google BigQuery table "
