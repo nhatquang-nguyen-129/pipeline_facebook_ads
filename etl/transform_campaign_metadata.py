@@ -60,9 +60,10 @@ def transform_campaign_metadata(
         budget_group=df["campaign_name"].fillna("").str.split("|").str[1].fillna("unknown"),        
         region=df["campaign_name"].fillna("").str.split("|").str[2].fillna("unknown"),
         category_level_1=df["campaign_name"].fillna("").str.split("|").str[3].fillna("unknown"),
-        track=df["campaign_name"].fillna("").str.split("|").str[6].fillna("unknown"),
-        pillar=df["campaign_name"].fillna("").str.split("|").str[7].fillna("unknown"),
-        group=df["campaign_name"].fillna("").str.split("|").str[8].fillna("unknown"),
+        optimization=df["campaign_name"].fillna("").str.split("|").str[6].fillna("unknown"),
+        track=df["campaign_name"].fillna("").str.split("|").str[7].fillna("unknown"),
+        pillar=df["campaign_name"].fillna("").str.split("|").str[8].fillna("unknown"),
+        group=df["campaign_name"].fillna("").str.split("|").str[9].fillna("unknown"),
     )
 
     print(
