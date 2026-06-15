@@ -16,7 +16,7 @@
 
 ## Local setup
 
-### Install Google Cloud SDK
+### Local setup for Windows
 
 - Download and install Google Cloud SDK from official source
 ```bash
@@ -27,10 +27,6 @@ https://cloud.google.com/sdk
 ```bash
 gcloud --version
 ```
-
----
-
-### Login to Google Cloud using Application Default Credentials
 
 - Login to Google Cloud on local environment
 ```bash
@@ -52,6 +48,36 @@ gcloud auth application-default set-quota-project YOUR_GOOGLE_CLOUD_PROJECT_ID
 gcloud config get-value project
 ```
 ---
+
+### Local setup for MacOS
+
+- Install Homebrew from official source
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+- Add Homebrew to your system path once the installation finishes if you're using Apple Silicon Mac with M chip
+```bash
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+```
+
+- Verify Homebrew version
+```bash
+brew --version
+```
+
+- Download and install Google Cloud SDK from official source
+```bash
+brew install --cask google-cloud-sdk
+```
+
+- Verify installed Google Cloud SDK version
+```bash
+gcloud --version
+```
+
+
 
 ## Cloud Run setup
 
