@@ -8,7 +8,7 @@
 
 ## Install required libraries
 
-### Install required libraries on Windows
+### Windows
 
 - Multiple Python versions can and should coexist on the same machine, especially for local development.
 
@@ -19,7 +19,7 @@
 & "C:\Users\ADMIN\AppData\Local\Programs\Python\Python313\python.exe" -m venv venv
 ```
 
-- Check available Python interpreter if there is any uncertainty by press `Ctrl + Shift + P` then select `Python: Select Interpreter`
+- Verify Python Interpreter in VS Code by opening the Command Palette `Command + Shift + P` then select `Python: Select Interpreter`
 
 - Activate Python virtual environment and check `(venv)` in the terminal
 ```bash
@@ -33,7 +33,7 @@ python --version
 
 ---
 
-### Install required libraries on MacOS
+### MacOS
 
 - Multiple Python versions can and should coexist on the same machine, especially for local development.
 
@@ -64,7 +64,7 @@ python3.13 -m venv venv
 ls venv
 ```
 
-- Activate the virtual environment:
+- Activate the virtual environment and check `(venv)` in the terminal
 ```bash
 source venv/bin/activate
 ```
@@ -74,7 +74,7 @@ source venv/bin/activate
 which python
 ```
 
-- Verify Python Interpreter in VS Code by opening the Command Palette Command + Shift + P then select Python: Select Interpreter and choose 
+- Verify Python Interpreter in VS Code by opening the Command Palette `Command + Shift + P` then select `Python: Select Interpreter` and choose 
 ```bash
 ./venv/bin/python
 ```
