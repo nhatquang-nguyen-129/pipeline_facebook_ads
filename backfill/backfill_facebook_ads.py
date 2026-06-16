@@ -193,15 +193,17 @@ def backfill():
 
     # Entrypoint
 if __name__ == "__main__":
-    
+
     try:
-    
+
         backfill()
-    
-    except Exception as e:
-        
-        print(f"{e}")
-        
+
+    except Exception:
+
+        print(
+            "❌ [MAIN] Failed to execute Facebook Ads backfill due to..."
+        )
+
         traceback.print_exc()
-        
+
         sys.exit(1)
