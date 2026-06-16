@@ -26,6 +26,7 @@ def transform_campaign_insights(
             Enforced Facebook Ads campaign insights records
     """
 
+    # Validate input
     print(
         "🔄 [TRANSFORM] Validating column(s) for "
         f"{len(df)} row(s) of Facebook Ads campaign insights..."
