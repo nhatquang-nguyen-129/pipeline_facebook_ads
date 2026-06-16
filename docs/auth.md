@@ -28,7 +28,7 @@ https://cloud.google.com/sdk
 gcloud --version
 ```
 
-- Login to Google Cloud on local environment
+- Login to Google Cloud on your Windows local environment
 ```bash
 gcloud auth login
 ```
@@ -51,12 +51,12 @@ gcloud config get-value project
 
 ### Local setup for MacOS
 
-- Install Homebrew from official source
+- Install **Homebrew** from official source
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-- Add Homebrew to your system path once the installation finishes if you're using Apple Silicon Mac with M chip
+- Add **Homebrew** to your system path once the installation finishes if you're using **Apple Silicon Mac with M chip**
 ```bash
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -77,7 +77,25 @@ brew install --cask google-cloud-sdk
 gcloud --version
 ```
 
+- Login to Google Cloud on your MacOS local environment
+```bash
+gcloud auth login
+```
 
+- Check all Google Cloud projects attached to ADC
+```bash
+gcloud projects list
+```
+
+- Set default Google Cloud project for Google BigQuery and quota billing
+```bash
+gcloud auth application-default set-quota-project YOUR_GOOGLE_CLOUD_PROJECT_ID
+```
+
+- Check Google Cloud quota project attached to ADC
+```bash
+gcloud config get-value project
+```
 
 ## Cloud Run setup
 
