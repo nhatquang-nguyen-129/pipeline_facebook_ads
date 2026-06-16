@@ -33,7 +33,17 @@ gcloud --version
 gcloud auth login
 ```
 
-- Check all Google Cloud projects attached to ADC
+- Login and create **Application Default Credentials** (ADC) used by Google BigQueryAirflow/dbt/Terraform or any other Google Cloud client libraries
+```bash
+gcloud auth application-default login
+```
+
+- Verify authenticated Google accounts
+```bash
+gcloud auth list
+```
+
+- Check all accessible Google Cloud projects attached to the current ADC
 ```bash
 gcloud projects list
 ```
@@ -47,6 +57,12 @@ gcloud auth application-default set-quota-project YOUR_GOOGLE_CLOUD_PROJECT_ID
 ```bash
 gcloud config get-value project
 ```
+
+- Verify ADC is working
+```bash
+gcloud auth application-default print-access-token
+```
+
 ---
 
 ### Local setup for MacOS
@@ -56,7 +72,7 @@ gcloud config get-value project
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-- Add **Homebrew** to your system path once the installation finishes if you're using **Apple Silicon Mac with M chip**
+- Add **Homebrew** to your system path once the installation finishes if you're using an **Apple Silicon Mac with M chip**
 ```bash
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
