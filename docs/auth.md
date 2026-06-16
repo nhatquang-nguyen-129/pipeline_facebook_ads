@@ -93,12 +93,17 @@ brew install --cask google-cloud-sdk
 gcloud --version
 ```
 
-- Login to Google Cloud on your MacOS local environment
+- Login and create **Application Default Credentials** (ADC) used by Google BigQueryAirflow/dbt/Terraform or any other Google Cloud client libraries
 ```bash
-gcloud auth login
+gcloud auth application-default login
 ```
 
-- Check all Google Cloud projects attached to ADC
+- Verify authenticated Google accounts
+```bash
+gcloud auth list
+```
+
+- Check all accessible Google Cloud projects attached to the current ADC
 ```bash
 gcloud projects list
 ```
@@ -111,6 +116,11 @@ gcloud auth application-default set-quota-project YOUR_GOOGLE_CLOUD_PROJECT_ID
 - Check Google Cloud quota project attached to ADC
 ```bash
 gcloud config get-value project
+```
+
+- Verify ADC is working
+```bash
+gcloud auth application-default print-access-token
 ```
 
 ## Cloud Run setup
