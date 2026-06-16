@@ -200,7 +200,7 @@ if __name__ == "__main__":
     except Exception:
 
         print(
-            "❌ [MAIN] Failed to execute Facebook Ads ad insights backfill due to..."
+            "❌ [BACKFILL] Failed to execute Facebook Ads ad insights backfill due to..."
         )
 
         traceback.print_exc()
