@@ -191,7 +191,7 @@ export ACCOUNT="your-account"
 dbt build \
   --project-dir dbt \
   --profiles-dir dbt \
-  --select tag:campaign
+  --select tag:ad
 ```
 
 ---
